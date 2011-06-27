@@ -6,9 +6,20 @@
 //                             "file:${userHome}/.grails/${appName}-config.properties",
 //                             "file:${userHome}/.grails/${appName}-config.groovy"]
 
-// if(System.properties["${appName}.config.location"]) {
-//    grails.config.locations << "file:" + System.properties["${appName}.config.location"]
-// }
+grails.config.locations = [
+	// the default configuration properties
+	"classpath:default.properties",
+	"file:${ basedir }/grails-app/conf/default.properties", /*<- "run-app" mode */
+
+	// the external configuration to override the default
+	// configuration (e.g. ~/.dbnp/ci-gscf.properties)
+	"file:${userHome}/.dbnp/${grails.util.GrailsUtil.environment}-${appName}.properties",
+]
+
+ if(System.properties["${appName}.config.location"]) {
+    grails.config.locations << "file:" + System.properties["${appName}.config.location"]
+ }
+
 
 grails.project.groupId = appName // change this to alter the default package name and Maven publishing destination
 grails.mime.file.extensions = true // enables the parsing of file extensions from URLs into the request format

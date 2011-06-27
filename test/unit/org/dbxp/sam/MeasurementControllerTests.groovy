@@ -1,8 +1,8 @@
-package sam_2
+package org.dbxp.sam
 
 import grails.test.*
 
-class FeatureTests extends GrailsUnitTestCase {
+class MeasurementControllerTests extends ControllerUnitTestCase {
     protected void setUp() {
         super.setUp()
     }

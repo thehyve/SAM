@@ -1,4 +1,4 @@
-package sam_2
+package org.dbxp.sam
 
 class Feature {
 
