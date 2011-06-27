@@ -30,3 +30,4 @@ grails.project.dependency.resolution = {
     }
 }
 grails.plugin.location.'dbxpModuleBase' = '../dbxpModuleBase'
+grails.server.port.http = "8191"  // The modern way of setting the server port

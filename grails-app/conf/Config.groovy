@@ -57,7 +57,20 @@ environments {
         grails.serverURL = "http://www.changeme.com"
     }
     development {
-        grails.serverURL = "http://localhost:8080/${appName}"
+        // Base URL of GSCF instance
+       gscf.baseURL = "http://194.171.10.86:8080/gscf-0.8.3-www"
+
+        // Server URL of the module
+        grails.serverURL = "http://194.171.10.66:8191/${appName}"
+
+        // Consumer ID of this module that is used in communication with GSCF
+        module.consumerID = "http://194.171.10.66:8191/${appName}"
+
+        // See BaseFilters.groovy
+        module.defaultAuthenticationRequired = true
+
+        // Make sure synchronization is performed
+        module.synchronization.perform = true
     }
     test {
         grails.serverURL = "http://localhost:8080/${appName}"
@@ -87,4 +100,8 @@ log4j = {
            'net.sf.ehcache.hibernate'
 
     warn   'org.mortbay.log'
+
+    info    "grails.app",
+            'org.codehaus.groovy.grails.plugins' // plugins
+            "dbxp.moduleBase"
 }
