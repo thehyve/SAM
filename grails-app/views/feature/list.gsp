@@ -1,4 +1,4 @@
-<%@ page import="sam_2.Feature" %>
+<%@ page import="org.dbnp.gdt.Template; org.dbxp.sam.Feature" %>
 <html>
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
@@ -53,6 +53,29 @@
     <div class="paginateButtons">
         <g:paginate total="${featureInstanceTotal}"/>
     </div>
+
+    <dif id="list">
+        <hr>
+        <%
+
+            def derp = Feature.giveDomainFields()
+            println "Feature mandatory template fields: " + derp
+        %>
+        <hr>
+        <%
+            def derp2 = Template.list()
+            if(derp2.size()==0){
+                def template = new Template(['name':'test','description':'Template for testing purposes']);
+                    if (template.validate() && template.save(flush: true)) {
+                        println "Template succesfully saved, check again";
+                    } else {
+                        println 'Template could not be created because errors occurred.';
+                    }
+            }
+            println "Feature templates: " + derp2
+        %>
+        <hr>
+    </dif>
 </div>
 </body>
 </html>

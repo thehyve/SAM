@@ -43,12 +43,13 @@ class FeatureGroupController {
 
     def edit = {
         def featureGroupInstance = FeatureGroup.get(params.id)
+        def features = Feature.list()
         if (!featureGroupInstance) {
             flash.message = "${message(code: 'default.not.found.message', args: [message(code: 'featureGroup.label', default: 'FeatureGroup'), params.id])}"
             redirect(action: "list")
         }
         else {
-            return [featureGroupInstance: featureGroupInstance]
+            return [featureGroupInstance: featureGroupInstance, features:features]
         }
     }
 

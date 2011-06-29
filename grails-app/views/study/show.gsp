@@ -18,6 +18,12 @@
             <g:if test="${flash.message}">
             <div class="message">${flash.message}</div>
             </g:if>
+
+            <form method="post" enctype="multipart/form-data" action="">
+                <input id="file" type="file" id="fileUpload" name="fileUpload"/>
+                <g:actionSubmit class="upload" value="Upload" action="upload" />
+            </form>
+
             <div class="dialog">
                 <table>
                     <tbody>

@@ -1,4 +1,4 @@
-<%@ page import="sam_2.Feature" %>
+<%@ page import="org.dbxp.sam.Feature" %>
 <html>
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
@@ -64,6 +64,9 @@
 
             </tbody>
         </table>
+        <hr>
+        <% println "Template:"+featureInstance.template %>
+        <hr>
     </div>
 
     <div class="buttons">

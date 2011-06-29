@@ -1,4 +1,4 @@
-<%@ page import="sam_2.FeatureGroup" %>
+<%@ page import="sam_2.FeatureGroup" a%>
 <html>
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
@@ -49,7 +49,7 @@
                     </td>
                     <td valign="top"
                         class="value ${hasErrors(bean: featureGroupInstance, field: 'features', 'errors')}">
-                        <g:select name="features" from="${sam_2.Feature.list()}" multiple="yes" optionKey="id" size="5"
+                        <g:select name="features" from="${features}" multiple="yes" optionKey="id" size="5"
                                   value="${featureGroupInstance?.features*.id}"/>
                     </td>
                 </tr>

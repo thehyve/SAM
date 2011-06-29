@@ -13,6 +13,7 @@ grails.project.dependency.resolution = {
         grailsPlugins()
         grailsHome()
         grailsCentral()
+        mavenRepo "http://nexus.nmcdsp.org/content/repositories/releases"
 
         // uncomment the below to enable remote dependency resolution
         // from public Maven repositories
@@ -23,11 +24,16 @@ grails.project.dependency.resolution = {
         //mavenRepo "http://download.java.net/maven/2/"
         //mavenRepo "http://repository.jboss.com/maven2/"
     }
+    plugins {
+        build "org.dbnp.gdt"
+    }
     dependencies {
         // specify dependencies here under either 'build', 'compile', 'runtime', 'test' or 'provided' scopes eg.
 
         // runtime 'mysql:mysql-connector-java:5.1.13'
     }
 }
+
 grails.plugin.location.'dbxpModuleBase' = '../dbxpModuleBase'
+
 grails.server.port.http = "8191"  // The modern way of setting the server port
