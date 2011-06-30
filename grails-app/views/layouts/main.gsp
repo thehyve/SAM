@@ -4,10 +4,9 @@
 	    <script type="text/javascript">var baseUrl = '${resource(dir: '')}';</script>
 
         <g:javascript library="jquery" plugin="jquery"/>
-
+		<jqui:resources themeCss="${createLinkTo(dir: 'css/cupertino', file: 'jquery-ui-1.8.13.custom.css')}" />
+		
         <script type="text/javascript" src="${resource(dir: 'js', file: 'SelectAddMore.js', plugin: 'gdt')}"></script>
-        <script type="text/javascript" src="${resource(dir: 'js', file: 'jquery-ui-1.8.13.custom.min.js' )}"></script>
-		<link rel="stylesheet" href="${createLinkTo(dir: 'css/cupertino', file: 'jquery-ui-1.8.13.custom.css')}"/>
         <link rel="stylesheet" href="${resource(dir: 'css', file: 'templateEditor.css', plugin: 'gdt')}"/>
 
         <title><g:layoutTitle default="Grails" /></title>

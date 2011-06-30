@@ -9,7 +9,7 @@
         <title><g:message code="default.edit.label" args="[entityName]"/></title>
         <script>
             $(document).ready(function() {
-                $('#test-div').html("Available feature templates: "+${Feature.list().template});
+                $('#test-div').html("Available feature templates: ${Feature.list().template}");
                 //alert("Did it werk? Also, "+$('#test-div').html());
                 new SelectAddMore().init({
                     rel	 : 'template',
@@ -17,7 +17,7 @@
                     vars	: 'entity,ontologies',
                     label   : 'add / modify..',
                     style   : 'modify',
-                    onClose : function(scope) {}it.escapedName()
+                    onClose : function(scope) {}
                 });
             });
         </script>
