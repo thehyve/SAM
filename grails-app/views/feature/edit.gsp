@@ -4,24 +4,9 @@
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
         <meta name="layout" content="main"/>
-        <g:javascript library="jquery" plugin="jquery"/>
-	    <script type="text/javascript">var baseUrl = '${resource(dir: '')}';</script>
+
         <g:set var="entityName" value="${message(code: 'feature.label', default: 'Feature')}"/>
         <title><g:message code="default.edit.label" args="[entityName]"/></title>
-        <g:if env="development">
-            <script type="text/javascript" src="${resource(dir: 'js', file: 'SelectAddMore.js', plugin: 'gdt')}"></script>
-            <%-- <script type="text/javascript" src="${resource(dir: 'js', file: 'studywizard.js' )}"></script> --%>
-            <%-- <script type="text/javascript" src="${resource(dir: 'js', file: 'jquery-1.6.1.js' )}"></script> --%>
-            <script type="text/javascript" src="${resource(dir: 'js', file: 'jquery-ui-1.8.13.custom.min.js' )}"></script>
-            <link rel="stylesheet" href="${resource(dir: 'css', file: 'templateEditor.css')}"/>
-        </g:if>
-        <g:else>
-            <script type="text/javascript" src="${resource(dir: 'js', file: 'SelectAddMore.min.js', plugin: 'gdt')}"></script>
-            <%-- <script type="text/javascript" src="${resource(dir: 'js', file: 'studywizard.min.js' )}"></script> --%>
-            <%-- <script type="text/javascript" src="${resource(dir: 'js', file: 'jquery-1.6.1.js' )}"></script> --%>
-            <script type="text/javascript" src="${resource(dir: 'js', file: 'jquery-ui-1.8.13.custom.min.js' )}"></script>
-            <link rel="stylesheet" href="${resource(dir: 'css', file: 'templateEditor.min.css')}"/>
-        </g:else>
         <script>
             $(document).ready(function() {
                 $('#test-div').html("Available feature templates: "+${Feature.list().template});
@@ -32,7 +17,7 @@
                     vars	: 'entity,ontologies',
                     label   : 'add / modify..',
                     style   : 'modify',
-                    onClose : function(scope) {}
+                    onClose : function(scope) {}it.escapedName()
                 });
             });
         </script>
@@ -56,7 +41,7 @@
             <g:hasErrors bean="${featureInstance}">
                 <div class="errors">
                     <g:renderErrors bean="${featureInstance}" as="list"/>
-                </div>
+                </div>it.escapedName()
             </g:hasErrors>
             <g:form method="post">
                 <g:hiddenField name="id" value="${featureInstance?.id}"/>
@@ -99,12 +84,9 @@
                                     Template, first try
                                 </td>
                                 <td valign="top" class="value ${hasErrors(bean: featureInstance, field: 'template', 'errors')}">
-                                    <%-- <g:templateElement name="template" rel="template" description="with template" value="${featureInstance?.template}" error="template" entity="${Feature}" ontologies="${Feature.giveDomainFields()}" addDummy="true">
+                                    <af:templateElement name="template" rel="template" description="with template" value="${featureInstance?.template}" error="template" entity="${Feature}" ontologies="${featureInstance.giveDomainFields()}" addDummy="true">
                                         The template to use for this feature.
-                                    </g:templateElement> --%>
-                                    <g:templateElement name="template" rel="template" description="with template" value="${featureInstance?.template}" error="template" entity="${Feature}" ontologies="${featureInstance.giveDomainFields()}" addDummy="true">
-                                        The template to use for this feature.
-                                    </g:templateElement>
+                                    </af:templateElement>
                                 </td>
                             </tr>
                         </tbody>

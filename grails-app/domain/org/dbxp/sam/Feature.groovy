@@ -15,6 +15,16 @@ class Feature extends TemplateEntity {
         name(unique:true, blank:false)
     }
 
+	/**
+	 * Changes the template for this feature. If no template with the given name 
+	 * exists, the template is set to null.
+	 * @param templateName	Name of the new template
+	 * @return	True if the change is successful, false otherwise
+	 */
+	public boolean changeTemplate( String templateName ) {
+		this.template = Template.findAllByName( templateName ).find { it.entity == this.class }
+	}
+	
     /**
 	 * return the domain fields for this domain class
 	 * @return List

@@ -7,7 +7,7 @@ class FeatureController {
     def index = {
         redirect(action: "list", params: params)
     }
-
+	
     def list = {
         params.max = Math.min(params.max ? params.int('max') : 10, 100)
         [featureInstanceList: Feature.list(params), featureInstanceTotal: Feature.count()]
@@ -64,6 +64,16 @@ class FeatureController {
                     return
                 }
             }
+			
+			// did the study template change?
+			if( params.template && params.template != featureInstance.template?.name ) {
+				featureInstance.changeTemplate( params.template );
+			} 
+			
+			// Remove the template parameter, since it is a string and that troubles the 
+			// setting of properties.
+			params.remove( 'template' ) 
+			
             featureInstance.properties = params
             if (!featureInstance.hasErrors() && featureInstance.save(flush: true)) {
                 flash.message = "${message(code: 'default.updated.message', args: [message(code: 'feature.label', default: 'Feature'), featureInstance.id])}"
