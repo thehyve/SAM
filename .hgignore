@@ -1,1 +1,6 @@
 glob:target/
+
+syntax: regexp
+^\.classpath$
+syntax: regexp
+^\.project$
