@@ -26,47 +26,57 @@
         <table>
             <tbody>
 
-            <tr class="prop">
-                <td valign="top" class="name"><g:message code="feature.id.label" default="Id"/></td>
+                <tr class="prop">
+                    <td valign="top" class="name"><g:message code="feature.id.label" default="Id"/></td>
 
-                <td valign="top" class="value">${fieldValue(bean: featureInstance, field: "id")}</td>
+                    <td valign="top" class="value">${fieldValue(bean: featureInstance, field: "id")}</td>
 
-            </tr>
+                </tr>
 
-            <tr class="prop">
-                <td valign="top" class="name"><g:message code="feature.name.label" default="Name"/></td>
+                <tr class="prop">
+                    <td valign="top" class="name"><g:message code="feature.name.label" default="Name"/></td>
 
-                <td valign="top" class="value">${fieldValue(bean: featureInstance, field: "name")}</td>
+                    <td valign="top" class="value">${fieldValue(bean: featureInstance, field: "name")}</td>
 
-            </tr>
+                </tr>
 
-            <tr class="prop">
-                <td valign="top" class="name"><g:message code="feature.featureGroups.label"
-                                                         default="Feature Groups"/></td>
+                <tr class="prop">
+                    <td valign="top" class="name"><g:message code="feature.featureGroups.label"
+                                                             default="Feature Groups"/></td>
 
-                <td valign="top" style="text-align: left;" class="value">
-                    <ul>
-                        <g:each in="${featureInstance.featureGroups}" var="f">
-                            <li><g:link controller="featureGroup" action="show"
-                                        id="${f.id}">${f?.encodeAsHTML()}</g:link></li>
-                        </g:each>
-                    </ul>
-                </td>
+                    <td valign="top" style="text-align: left;" class="value">
+                        <ul>
+                            <g:each in="${featureInstance.featureGroups}" var="f">
+                                <li><g:link controller="featureGroup" action="show"
+                                            id="${f.id}">${f?.encodeAsHTML()}</g:link></li>
+                            </g:each>
+                        </ul>
+                    </td>
 
-            </tr>
+                </tr>
 
-            <tr class="prop">
-                <td valign="top" class="name"><g:message code="feature.unit.label" default="Unit"/></td>
+                <tr class="prop">
+                    <td valign="top" class="name"><g:message code="feature.unit.label" default="Unit"/></td>
 
-                <td valign="top" class="value">${fieldValue(bean: featureInstance, field: "unit")}</td>
+                    <td valign="top" class="value">${fieldValue(bean: featureInstance, field: "unit")}</td>
 
-            </tr>
+                </tr>
+
+                <g:if test="${featureInstance.template!=null}">
+                    <g:each in="${featureInstance.giveFields()}" var="field">
+                        <tr class="prop">
+                            <td valign="top">
+                                ${field}
+                            </td>
+                            <td valign="top" >
+                                ${featureInstance.getFieldValue(field.toString())}
+                            </td>
+                        </tr>
+                    </g:each>
+                </g:if>
 
             </tbody>
         </table>
-        <hr>
-        <% println "Template:"+featureInstance.template %>
-        <hr>
     </div>
 
     <div class="buttons">
@@ -80,5 +90,8 @@
         </g:form>
     </div>
 </div>
+
+    ${params}
+
 </body>
 </html>

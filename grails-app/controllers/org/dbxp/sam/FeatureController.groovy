@@ -1,5 +1,9 @@
 package org.dbxp.sam
 
+import grails.converters.JSON
+import org.dbnp.gdt.Template
+import grails.converters.deep.JSON
+
 class FeatureController {
 
     static allowedMethods = [save: "POST", update: "POST", delete: "POST"]
@@ -43,6 +47,7 @@ class FeatureController {
 
     def edit = {
         def featureInstance = Feature.get(params.id)
+        session.featureInstance = featureInstance
         if (!featureInstance) {
             flash.message = "${message(code: 'default.not.found.message', args: [message(code: 'feature.label', default: 'Feature'), params.id])}"
             redirect(action: "list")
@@ -68,8 +73,17 @@ class FeatureController {
 			// did the study template change?
 			if( params.template && params.template != featureInstance.template?.name ) {
 				featureInstance.changeTemplate( params.template );
-			} 
-			
+			}
+
+            // does the study have a template set?
+            if (featureInstance.template) {
+                // yes, iterate through template fields
+                featureInstance.giveFields().each() {
+                    // and set their values
+                    featureInstance.setFieldValue(it.name, params.get(it.getName()))
+                }
+            }
+
 			// Remove the template parameter, since it is a string and that troubles the 
 			// setting of properties.
 			params.remove( 'template' ) 
@@ -106,5 +120,44 @@ class FeatureController {
             flash.message = "${message(code: 'default.not.found.message', args: [message(code: 'feature.label', default: 'Feature'), params.id])}"
             redirect(action: "list")
         }
+    }
+
+    def ajaxGetFields = {
+		/*def templateInstances = Template.list()
+        def templateInstance
+        templateInstances.each{
+            println "ajaxGetFields! "+it
+            if(it.name==params.tmp){
+                templateInstance = it
+            }
+        }
+        println "ajaxGetFields! "+templateInstance?.name
+		render templateInstance?.fields as JSON*/
+        def featureInstance = Feature.get(params.id)
+        def result = []
+        featureInstance?.giveFields().each {
+            result << [it.toString() + " : " + featureInstance.getFieldValue(it.toString())]
+        }
+        println "ajaxGetFields : id="+params.id+" result="+result;
+	    render result as JSON
+	}
+
+    def refreshEdit = {
+        if(params.template && session.featureInstance.template?.name != params.get('template')) {
+            // set the template
+            session.featureInstance.template = Template.findByName(params.template)
+        }
+
+        // does the study have a template set?
+        if (session.featureInstance.template && session.featureInstance.template instanceof Template) {
+            // yes, iterate through template fields
+            session.featureInstance.giveFields().each() {
+                // and set their values
+                session.featureInstance.setFieldValue(it.name, params.get(it.escapedName()))
+            }
+        }
+
+        println "t:"+params.template
+        render(view: "edit", model: [featureInstance: session.featureInstance])
     }
 }
