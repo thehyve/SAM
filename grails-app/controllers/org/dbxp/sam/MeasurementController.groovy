@@ -97,4 +97,59 @@ class MeasurementController {
             redirect(action: "list")
         }
     }
+	
+	def importData = {
+		redirect( action: 'importDataFlow' )
+	}
+	
+	def importDataFlow = {
+		chooseAssay {
+			// Step 1: choose study and assay (update assay dropdown based on the study selected)
+			on("next") {
+				flow.study = params.study
+				flow.assay = params.assay
+			}.to "uploadData"
+		}
+		uploadData {
+			// Step 2: upload data and give the user a preview. The user then chooses which layout he wants
+			// to use.
+			on("next") {
+				// Save data of this step
+				flow.input = [ "file": params.inputfile, "text": params.text ]
+				flow.layout = params.layout
+			}.to "selectColumns"
+			on("previous") {
+				// Save data of this step
+				flow.input = [ "file": params.inputfile, "text": params.text ]
+				flow.layout = params.layout
+			}.to "chooseAssay"
+		}
+		selectColumns {
+			// Step 3: Choose which features in the database match which column in the uploaded file
+			on("next") {
+				// Save data of this step
+				flow.matching = params.matches
+			}.to "checkInput"
+			on("previous") {
+				// Save data of this step
+				flow.matching = params.matches
+			}.to "uploadData"
+		}
+		checkInput {
+			on("save").to "saveData"
+			on("previous").to "selectColumns"
+		}
+		saveData {
+			action {
+				// Save data into the database 
+			}
+			on("success").to "finishScreen"
+			on("error").to "errorSaving"
+		}
+		errorSaving {
+			on( "previous" ).to "selectColumns"
+		}
+		finishScreen()
+	}
+	
 }
