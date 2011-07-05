@@ -31,6 +31,8 @@
 
                 <g:sortableColumn property="unit" title="${message(code: 'feature.unit.label', default: 'Unit')}"/>
 
+                <g:sortableColumn property="template" title="${message(code: 'feature.template.label', default: 'Template')}"/>
+
             </tr>
             </thead>
             <tbody>
@@ -44,6 +46,8 @@
 
                     <td>${fieldValue(bean: featureInstance, field: "unit")}</td>
 
+                    <td>${fieldValue(bean: featureInstance, field: "template")}</td>
+
                 </tr>
             </g:each>
             </tbody>
@@ -53,29 +57,6 @@
     <div class="paginateButtons">
         <g:paginate total="${featureInstanceTotal}"/>
     </div>
-
-    <dif id="list">
-        <hr>
-        <%
-
-            def derp = Feature.giveDomainFields()
-            println "Feature mandatory template fields: " + derp
-        %>
-        <hr>
-        <%
-            def derp2 = Template.list()
-            if(derp2.size()==0){
-                def template = new Template(['name':'test','description':'Template for testing purposes']);
-                    if (template.validate() && template.save(flush: true)) {
-                        println "Template succesfully saved, check again";
-                    } else {
-                        println 'Template could not be created because errors occurred.';
-                    }
-            }
-            println "Feature templates: " + derp2
-        %>
-        <hr>
-    </dif>
 </div>
 </body>
 </html>
