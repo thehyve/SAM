@@ -75,12 +75,19 @@ class FeatureController {
 				featureInstance.changeTemplate( params.template );
 			}
 
+            println params
             // does the study have a template set?
             if (featureInstance.template) {
                 // yes, iterate through template fields
                 featureInstance.giveFields().each() {
                     // and set their values
-                    featureInstance.setFieldValue(it.name, params.get(it.getName()))
+                    if(params.get(it.getName())!=null){
+                        featureInstance.setFieldValue(it.name, params.get(it.getName()))
+                        println "Field: "+it+","+params.get(it.getName())
+                    } else {
+                        featureInstance.setFieldValue(it.name, params.get(it.getName().toLowerCase()))
+                        println "Field: "+it+","+params.get(it.getName().toLowerCase())
+                    }
                 }
             }
 
