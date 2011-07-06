@@ -13,6 +13,11 @@ class FeatureGroupController {
         [featureGroupInstanceList: FeatureGroup.list(params), featureGroupInstanceTotal: FeatureGroup.count()]
     }
 
+    def list_test = {
+        //params.max = Math.min(params.max ? params.int('max') : 10, 100)
+        [featureGroupInstanceList: FeatureGroup.list(params), featureGroupInstanceTotal: FeatureGroup.count()]
+    }
+
     def create = {
         def featureGroupInstance = new FeatureGroup()
         featureGroupInstance.properties = params
@@ -95,6 +100,48 @@ class FeatureGroupController {
         }
         else {
             flash.message = "${message(code: 'default.not.found.message', args: [message(code: 'featureGroup.label', default: 'FeatureGroup'), params.id])}"
+            redirect(action: "list")
+        }
+    }
+
+    def deleteMultiple = {
+        def toDeleteList = []
+
+        if(params?.fgMassDelete!=null){
+            if(params.fgMassDelete.class!="".class){
+                toDeleteList = params.fgMassDelete
+            } else {
+                toDeleteList.push(params.fgMassDelete)
+            }
+        }
+
+        if(toDeleteList.size()>0){
+            def hasBeenDeletedList = []
+
+            toDeleteList.each {
+                try{
+                    def featureGroupInstance = FeatureGroup.get(it)
+                    def name = featureGroupInstance.name
+                    featureGroupInstance.delete(flush: true)
+                    hasBeenDeletedList.push(name);
+                    flash.message = "The following feature groups were succesfully deleted: "+hasBeenDeletedList.toString()
+                    redirect(action: "list")
+                } catch(Exception e){
+                    flash.message = "Something went wrong when trying to delete "
+                    if(toDeleteList.size()==1){
+                        flash.message += " the feature group.<br>"+e
+                    } else {
+                        if(hasBeenDeletedList.size()==0){
+                            flash.message += " the feature groups.<br>"+e
+                        } else {
+                            flash.message += " the feature groups.<br>The following features groups were succesfully deleted: "+hasBeenDeletedList.toString()+"<br>"+e
+                        }
+                    }
+                    redirect(action: "list")
+                }
+            }
+        } else {
+            flash.message = "No feature groups were marked when the delete button was clicked, so no feature groups were deleted."
             redirect(action: "list")
         }
     }

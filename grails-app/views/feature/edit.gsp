@@ -5,7 +5,6 @@
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
         <meta name="layout" content="main"/>
         <g:set var="entityName" value="${message(code: 'feature.label', default: 'Feature')}"/>
-        <link rel="stylesheet" href="${resource(dir: 'css', file: 'sam.css')}"/>
         <title><g:message code="default.edit.label" args="[entityName]"/></title>
         <script type="text/javascript">
             $(document).ready(function() {
@@ -70,7 +69,7 @@
                         <tbody>
                             <tr class="prop">
                                 <td valign="top" class="name">
-                                    <label for="featureGroups"><g:message code="feature.featureGroups.label" default="Feature Groups"/></label>
+                                    Feature Groups
                                 </td>
                                 <td valign="top" class="value" id="featureGroups_list">
                                     <g:each in="${org.dbxp.sam.FeaturesAndGroups.findAllByFeature(featureInstance)}" var="f">
@@ -105,7 +104,7 @@
                                                 <a name="confirmNewFeatureGroup" class="buttons button input delete" onclick="confNewFeatGrp();">
                                                     Confirm
                                                 </a>
-                                            </simpleButton>
+                                            </span>
                                             <%-- <input type="submit" name="confirmNewFeatureGroup" onclick="confNewFeatGrp();"/> --%>
                                         </span>
                                     </span>

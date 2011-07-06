@@ -167,7 +167,7 @@ class FeatureController {
                 }
             }
         } catch (Exception e){
-            flash.message = "An error occurred while updating this feature's template. Please try again."
+            flash.message = "An error occurred while updating this feature's template. Please try again.<br>${e}"
         }
     }
 
@@ -231,6 +231,50 @@ class FeatureController {
             // In case all went well
             session.featureInstance = featureInstance // Update the session's instance
             render(view: "edit", model: [featureInstance: featureInstance, id: featureID])
+        }
+    }
+
+    def deleteMultiple = {
+        def toDeleteList = []
+
+        if(params?.fMassDelete!=null){
+            if(params.fMassDelete.class!="".class){
+                toDeleteList = params.fMassDelete
+            } else {
+                toDeleteList.push(params.fMassDelete)
+            }
+        }
+
+        if(toDeleteList.size()>0){
+            def hasBeenDeletedList = []
+
+            toDeleteList.each {
+                try{
+                    def featureInstance = Feature.get(it)
+                    def name = featureInstance.name
+                    print name
+                    featureInstance.delete(flush: true)
+                    hasBeenDeletedList.push(name);
+                    flash.message = "The following features were succesfully deleted: "+hasBeenDeletedList.toString()
+                    redirect(action: "list")
+                } catch(Exception e){
+                    print " has not been deleted\n"
+                    flash.message = "Something went wrong when trying to delete "
+                    if(toDeleteList.size()==1){
+                        flash.message += " the feature.<br>"+e
+                    } else {
+                        if(hasBeenDeletedList.size()==0){
+                            flash.message += " the features.<br>"+e
+                        } else {
+                            flash.message += " the features.<br>The following features were succesfully deleted: "+hasBeenDeletedList.toString()+"<br>"+e
+                        }
+                    }
+                    redirect(action: "list")
+                }
+            }
+        } else {
+            flash.message = "No features were marked when the delete button was clicked, so no features were deleted."
+            redirect(action: "list")
         }
     }
 }

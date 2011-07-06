@@ -1,13 +1,13 @@
-<%@ page import="org.dbxp.sam.FeaturesAndGroups; org.dbnp.gdt.Template; org.dbxp.sam.Feature" %>
+<%@ page import="org.dbxp.sam.FeatureGroup" %>
 <html>
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
         <meta name="layout" content="main"/>
-        <g:set var="entityName" value="${message(code: 'feature.label', default: 'Feature')}"/>
+        <g:set var="entityName" value="${message(code: 'featureGroup.label', default: 'FeatureGroup')}"/>
         <title><g:message code="default.list.label" args="[entityName]"/></title>
         <script type="text/javascript">
             $(document).ready(function() {
-                $('#fList').dataTable();
+                $('#fgList').dataTable();
             } );
 
             function deleteItems(){
@@ -29,45 +29,47 @@
             }
         </script>
     </head>
-
     <body>
         <div class="body">
             <h1><g:message code="default.list.label" args="[entityName]"/></h1>
             <g:form name="deleteMultiple" action="deleteMultiple">
                 <div class="list">
-                    <table id="fList">
+                    <table id="fgList">
                         <thead>
                         <tr>
+                            <th>${message(code: 'featureGroup.name.label', default: 'Name')}</th>
 
-                            <th>${message(code: 'feature.name.label', default: 'Name')}</th>
-
-                            <th>${message(code: 'feature.unit.label', default: 'Unit')}</th>
-
-                            <th><g:link action="list" controller="featureGroup">Groups</g:link></th>
+                            <th>In use</th>
 
                             <th>Mark for deletion</th>
-
                         </tr>
                         </thead>
                         <tbody>
-                        <g:each in="${featureInstanceList}" status="i" var="featureInstance">
+                        <g:each in="${featureGroupInstanceList}" status="i" var="featureGroupInstance">
                             <tr class="${(i % 2) == 0 ? 'odd' : 'even'}">
 
                                 <td><g:link action="show"
-                                            id="${featureInstance.id}">${fieldValue(bean: featureInstance, field: "name")}</g:link></td>
-
-                                <td>${fieldValue(bean: featureInstance, field: "unit")}</td>
+                                            id="${featureGroupInstance.id}">${fieldValue(bean: featureGroupInstance, field: "name")}</g:link></td>
 
                                 <td>
-                                    <g:each in="${FeaturesAndGroups.findAllByFeature(featureInstance)}" var="g">
-                                        <li><g:link action="show" controller="featuresAndGroups"
-                                            id="${g.id}">${fieldValue(bean: g.featureGroup, field: "name")}</g:link>
-                                        </li>
-                                    </g:each>
+                                    <%
+                                        def a = org.dbxp.sam.FeaturesAndGroups.findAllByFeatureGroup(featureGroupInstance)
+                                        def b = ""
+                                        if(a!=null && a.size()>0){
+                                            if(a.size()>1){
+                                                b = "Yes, used by "+a.size()+" features"
+                                            } else {
+                                                b = "Yes, used by one feature"
+                                            }
+                                        } else {
+                                            b = "No, not in use"
+                                        }
+                                    %>
+                                    ${b}
                                 </td>
 
                                 <td>
-                                    <input type="checkbox" name="fMassDelete" value="${featureInstance.id}"/>
+                                    <input type="checkbox" name="fgMassDelete" value="${featureGroupInstance.id}"/>
                                 </td>
 
                             </tr>
@@ -75,6 +77,7 @@
                         </tbody>
                     </table>
                 </div>
+                <br>
                 <div class="samNav">
                     <span class="addItem"><g:link class="create" action="create"><g:message code="default.new.label" args="[entityName]"/></g:link></span>
                     <span class="simpleButton deleteItem">
