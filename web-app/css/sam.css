@@ -1,0 +1,28 @@
+.simpleButton {
+    cursor: pointer;
+    padding: 0px 0px;
+    margin: 3px 3px;
+
+    /*
+    // The following are all possibly interesting ones, based on styles that the taglib-made buttons inherit
+    background: url("../plugins/famfamfam-1.0.1/images/icons/delete.png") no-repeat scroll 5px 50% transparent;
+    padding-left: 28px;
+    background: none repeat scroll 0 0 #FFFFFF;
+    border: 0 none;
+    color: #333333;
+    font-family: Verdana,Arial,Helvetica,sans-serif;
+    font-size: 10px;
+    font-weight: bold;
+    margin-left: 3px;
+    margin-right: 3px;
+    overflow: visible;
+    padding: 2px 6px;
+    font-size: 10px;
+    font: 11px/12px verdana,arial,helvetica,sans-serif;
+    text-align: left;
+    font-family: Verdana,Arial,Helvetica,sans-serif;
+    text-align: left;
+    font: 11px normal Arial,Helvetica,sans-serif;
+    text-align: center;
+    */
+}

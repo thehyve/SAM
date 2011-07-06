@@ -4,7 +4,7 @@
 	    <head>
 	        <title><g:layoutTitle default="" /> | Simple Assay Module | dbXP</title>
 	        <g:layoutHead />
-	        
+            <script type="text/javascript" src="${resource(dir: 'js', file: 'SelectAddMore.js', plugin: 'gdt')}"></script>
 	    </head>
 	    <body>
 			<content tag="topnav">
@@ -16,6 +16,7 @@
 						<li><g:link controller="feature">List</g:link></li>
 						<li><g:link controller="feature" action="create">Create</g:link></li>
 						<li><g:link controller="feature" action="import">Import</g:link></li>
+                        <li><g:link controller="featureGroup" action="list">Feature groups</g:link></li>
 					</ul>
 				</li>
 				<li>

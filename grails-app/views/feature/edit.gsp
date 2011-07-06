@@ -4,73 +4,20 @@
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
         <meta name="layout" content="main"/>
-
         <g:set var="entityName" value="${message(code: 'feature.label', default: 'Feature')}"/>
+        <link rel="stylesheet" href="${resource(dir: 'css', file: 'sam.css')}"/>
         <title><g:message code="default.edit.label" args="[entityName]"/></title>
-        <script>
+        <script type="text/javascript">
             $(document).ready(function() {
-                $('#test-div').html("Available feature templates: ${Feature.list().template}");
-                //alert("Did it werk? Also, "+$('#test-div').html());
                 new SelectAddMore().init({
-                    rel	 : 'template',
-                    url	 : baseUrl + '/templateEditor',
-                    vars	: 'entity,ontologies',
+                    rel  : 'template',
+                    url  : baseUrl + '/templateEditor',
+                    vars        : 'entity,ontologies',
                     label   : 'add / modify..',
                     style   : 'modify',
-                    onClose : function(scope) {
-                        refreshTemplateSelect();
-                    }
+                    onClose : function(scope) {}
                 });
             });
-
-            function refreshTemplateSelect() {
-                $("input[type*='text']").each(function() {
-                    alert(this.value);
-                });
-            }
-
-            function updateFields(e) {
-                <%-- $("input[type*='text']").each(
-                        function() {
-                            if(this.name.toString()==tmp[0]){
-                                alert("Yes, "+this.name+" "+tmp[0]);
-                                this.val(tmp[0]);
-                            }
-                        }
-                ); --%>
-
-            }
-
-            function updaaateFields(id, fields) {
-                var html = $.ajax({
-	                url: "./ajaxGetFields?id="+id,
-	                context: document.body,
-                    dataType:"json",
-                    async: false
-    	        }).responseText;
-
-                var html3 = $.parseJSON(html);
-
-                for(var i = 0; i < html3.length; i++){
-                    var tmp = html3[i].toString().split(' : ');
-                    //$("[name*='"+tmp[0]+"']").val(tmp[1].toString());
-                    var contains = false;
-                    for(var j = 0; j < fields.length; j++){
-                        alert(fields[j].name);
-                        if(fields[j].name==tmp[0]){
-                            contains = true;
-                        } else {
-                        }
-                    }
-                    if(!contains){
-                        alert(tmp[0]+" kan niet gevonden worden. ");
-                    }
-                }
-                <%-- $("input[type*='text']").each(function() {
-                    alert(this.value);
-                }); --%>
-            }
-
 
             function submitForm(id, action) {
                 var form = $( 'form#' + id );
@@ -81,6 +28,18 @@
                 }
 
                 form.submit();
+            }
+
+            function confNewFeatGrp(){
+                // Add the new feature group in a function apart from the refreshEdit controller action,
+                // to make sure feature groups will not be added by accident during a regular refreshEdit call.
+                var html = $.ajax({
+                    url: "./confirmNewFeatureGroup?newFeatureGroupID="+$("#newFeatureGroup").val()+"&id="+${featureInstance.id},
+                    context: document.body,
+                    dataType:"json",
+                    async: false
+                }).responseText;
+                $("#featureGroups_list").html(html);
             }
         </script>
     </head>
@@ -97,13 +56,10 @@
 
         <div class="body">
             <h1><g:message code="default.edit.label" args="[entityName]"/></h1>
-            <g:if test="${flash.message}">
-                <div class="message">${flash.message}</div>
-            </g:if>
             <g:hasErrors bean="${featureInstance}">
                 <div class="errors">
                     <g:renderErrors bean="${featureInstance}" as="list"/>
-                </div>it.escapedName()
+                </div>
             </g:hasErrors>
             <g:form class="Feature" action="refreshEdit" name="edit" method="post">
                 <%-- <input type="hidden" name="_eventId" value="refreshEdit" /> --%>
@@ -112,7 +68,61 @@
                 <div class="dialog">
                     <table>
                         <tbody>
+                            <tr class="prop">
+                                <td valign="top" class="name">
+                                    <label for="featureGroups"><g:message code="feature.featureGroups.label" default="Feature Groups"/></label>
+                                </td>
+                                <td valign="top" class="value" id="featureGroups_list">
+                                    <g:each in="${org.dbxp.sam.FeaturesAndGroups.findAllByFeature(featureInstance)}" var="f">
+                                        <%-- <li><g:link controller="featureGroup" action="show" id="${f?.featureGroup.id}">${f?.featureGroup.name.encodeAsHTML()}</g:link></li> --%>
+                                        <g:form method="post" action="removeGroup">
+                                            <g:hiddenField name="fgid" value="${f?.id}"/>
+                                            <li>
+                                                <g:link controller="featureGroup" action="show" id="${f?.featureGroup.id}">${f?.featureGroup.name.encodeAsHTML()}</g:link>
+                                                <span class="buttons">
+                                                    <span class="button">
+                                                        <g:actionSubmit class="delete" action="removeGroup" value="${message(code: 'default.button.delete.label', default: 'Delete')}" onclick="return confirm('${message(code: 'default.button.delete.confirm.message', default: 'Are you sure?')}');"/>
+                                                    </span>
+                                                </span>
+                                            </li>
+                                        </g:form>
+                                    </g:each>
+                                </td>
+                            </tr>
 
+                            <tr class="prop">
+                                <td valign="top" class="name">
+                                    Add this feature to feature group
+                                </td>
+                                <td valign="top" class="value">
+                                    <g:select id="newFeatureGroup" name="newFeatureGroup" from="${org.dbxp.sam.FeatureGroup.list()}" optionKey="id" optionValue="name"/>
+                                    <span class="buttons">
+                                        <span class="button">
+                                            <%-- <button type="button" name="confirmNewFeatureGroup" onclick="confNewFeatGrp();">
+                                                Confirm
+                                            </button> --%>
+                                            <span class="simpleButton">
+                                                <a name="confirmNewFeatureGroup" class="buttons button input delete" onclick="confNewFeatGrp();">
+                                                    Confirm
+                                                </a>
+                                            </simpleButton>
+                                            <%-- <input type="submit" name="confirmNewFeatureGroup" onclick="confNewFeatGrp();"/> --%>
+                                        </span>
+                                    </span>
+                                </td>
+                            </tr>
+
+                            <tr class="prop">
+                                <td valign="top" class="name">
+                                    Template
+                                </td>
+                                <td valign="top" class="value ${hasErrors(bean: featureInstance, field: 'template', 'errors')}">
+                                    <af:templateElement name="template" rel="template" description="" value="${featureInstance?.template}" error="template" entity="${Feature}" ontologies="${featureInstance.giveDomainFields()}" addDummy="true"
+                                                        onChange="if(!\$( 'option:selected', \$(this) ).hasClass( 'modify' )){ submitForm('edit');}">
+                                    </af:templateElement>
+                                </td>
+                            </tr>
+                        
                             <tr class="prop">
                                 <td valign="top" class="name">
 
@@ -134,46 +144,7 @@
                             </g:each>
 
                             <tr class="prop">
-                                <td valign="top" class="name">
-                                    <label for="featureGroups"><g:message code="feature.featureGroups.label"
-                                                                          default="Feature Groups"/></label>
-                                </td>
-                                <td valign="top"
-                                    class="value ${hasErrors(bean: featureInstance, field: 'featureGroups', 'errors')}">
-
-                                </td>
-                            </tr>
-
-                            <%--
-                            <tr class="prop">
-                                <td valign="top" class="name">
-                                    Template
-                                </td>
-                                <td valign="top" class="value ${hasErrors(bean: featureInstance, field: 'template', 'errors')}">
-
-                                    <af:templateElement name="template_oud" rel="template" description="" value="${featureInstance?.template}" error="template" entity="${Feature}" ontologies="${featureInstance.giveDomainFields()}" addDummy="true" onChange="updaaateFields(${featureInstance?.id}, ${featureInstance.giveFields().name})">
-                                    </af:templateElement>
-                                </td>
-                            </tr>
-                            --%>
-
-                            <tr class="prop">
-                                <td valign="top" class="name">
-                                    Template nieuw
-                                </td>
-                                <td valign="top" class="value ${hasErrors(bean: featureInstance, field: 'template', 'errors')}">
-                                    <%-- <af:templateElement name="template" rel="template" description="with template" value="${featureInstance?.template}" error="template" entity="${Feature}" ontologies="${featureInstance.giveDomainFields()}" addDummy="true" onChange="${remoteFunction(controller:'feature',action:'ajaxGetFields',params:'\'id=\'+escape(this.value)',onComplete:'updateFields(e)')}">
-                                        The template to use for this feature.
-                                    </af:templateElement> --%>
-                                    <af:templateElement name="template" rel="template" description="" value="${featureInstance?.template}" error="template" entity="${Feature}" ontologies="${featureInstance.giveDomainFields()}" addDummy="true" onChange="submitForm('edit');">
-                                    </af:templateElement>
-                                </td>
-                            </tr>
-
-                            <tr class="prop">
-                                <td valign="top" class="name">
- ${featureInstance.giveTemplateFields().name}
-                                </td>
+                                <td/>
                                 <td valign="top" class="name">
                                     <br/><br/>Template specific fields:<br/>
                                 </td>

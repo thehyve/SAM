@@ -3,6 +3,7 @@ package org.dbxp.sam
 import grails.converters.JSON
 import org.dbnp.gdt.Template
 import grails.converters.deep.JSON
+import org.codehaus.groovy.grails.commons.ConfigurationHolder
 
 class FeatureController {
 
@@ -75,7 +76,6 @@ class FeatureController {
 				featureInstance.changeTemplate( params.template );
 			}
 
-            println params
             // does the study have a template set?
             if (featureInstance.template) {
                 // yes, iterate through template fields
@@ -83,10 +83,8 @@ class FeatureController {
                     // and set their values
                     if(params.get(it.getName())!=null){
                         featureInstance.setFieldValue(it.name, params.get(it.getName()))
-                        println "Field: "+it+","+params.get(it.getName())
                     } else {
                         featureInstance.setFieldValue(it.name, params.get(it.getName().toLowerCase()))
-                        println "Field: "+it+","+params.get(it.getName().toLowerCase())
                     }
                 }
             }
@@ -130,41 +128,109 @@ class FeatureController {
     }
 
     def ajaxGetFields = {
-		/*def templateInstances = Template.list()
-        def templateInstance
-        templateInstances.each{
-            println "ajaxGetFields! "+it
-            if(it.name==params.tmp){
-                templateInstance = it
-            }
-        }
-        println "ajaxGetFields! "+templateInstance?.name
-		render templateInstance?.fields as JSON*/
         def featureInstance = Feature.get(params.id)
         def result = []
         featureInstance?.giveFields().each {
             result << [it.toString() + " : " + featureInstance.getFieldValue(it.toString())]
         }
-        println "ajaxGetFields : id="+params.id+" result="+result;
 	    render result as JSON
 	}
 
     def refreshEdit = {
-        if(params.template && session.featureInstance.template?.name != params.get('template')) {
-            // set the template
-            session.featureInstance.template = Template.findByName(params.template)
+        updateTemplate()
+        render(view: "edit", model: [featureInstance: session.featureInstance])
+    }
+
+    def confirmNewFeatureGroup = {
+        if(params.newFeatureGroupID) {
+            updateGroups()
         }
 
-        // does the study have a template set?
-        if (session.featureInstance.template && session.featureInstance.template instanceof Template) {
-            // yes, iterate through template fields
-            session.featureInstance.giveFields().each() {
-                // and set their values
-                session.featureInstance.setFieldValue(it.name, params.get(it.escapedName()))
+        // This featureInstance is only used to display an accurate list
+        def featureInstance = Feature.get(params.id)
+        render(view: "FaGList", model: [featureInstance: featureInstance])
+    }
+
+    def updateTemplate = {
+        try {
+            if(params?.template && session?.featureInstance.template?.name != params.get('template')) {
+                // set the template
+                session.featureInstance.template = Template.findByName(params.template)
+            }
+
+            // does the study have a template set?
+            if (session.featureInstance.template && session.featureInstance.template instanceof Template) {
+                // yes, iterate through template fields
+                session.featureInstance.giveFields().each() {
+                    // and set their values
+                    session.featureInstance.setFieldValue(it.name, params.get(it.escapedName()))
+                }
+            }
+        } catch (Exception e){
+            flash.message = "An error occurred while updating this feature's template. Please try again."
+        }
+    }
+
+    def updateGroups = {
+        FeaturesAndGroups.create(FeatureGroup.get(params.newFeatureGroupID), session.featureInstance);
+    }
+
+    def removeGroup = {
+        def featuresAndGroupsInstance
+        try {
+            // Try to find the featuresAndGroupsInstance that we wish to delete
+            featuresAndGroupsInstance = FeaturesAndGroups.get(params.fgid)
+        } catch (Exception e){
+            // An error occurred while fetching the featuresAndGroupsInstance that we wish to remove
+            flash.message = "The specified group could not be found.<br>${e}"
+            if(params?.id){
+                render(view: "edit", model: [featureInstance: featureInstance, id: params.id])
+            } else {
+                redirect(action: "list")
             }
         }
+        if(featuresAndGroupsInstance==null){
+            // We could not find the featuresAndGroupsInstance that we wish to remove
+            flash.message = "The specified group could not be found. The probable cause for this would be that the group has already been removed."
+            if(params?.id || session?.featureInstance.id){
+                def id
+                if(params?.id){
+                    id = params.id
+                } else {
+                    if(session?.featureInstance.id){
+                        id = session.featureInstance.id
+                    }
+                }
+                def featureInstance = Feature.get(id)
+                render(view: "edit", model: [featureInstance: featureInstance, id: id])
+            } else {
+                redirect(action: "list")
+            }
+        } else {
+            // We found the featuresAndGroupsInstance that we wish to remove
 
-        println "t:"+params.template
-        render(view: "edit", model: [featureInstance: session.featureInstance])
+            def groupName = featuresAndGroupsInstance.featureGroup.name
+            def featureID = featuresAndGroupsInstance.feature.id
+
+            // Proceed with deletion
+            try {
+                featuresAndGroupsInstance.delete(flush: true)
+            } catch (org.springframework.dao.DataIntegrityViolationException e) {
+                flash.message = "There has been a problem with removing the group ${groupName} from this feature.<br>${e}"
+                redirect(action: "edit", id: featureID)
+            }
+
+            // Deletion of the featuresAndGroupsInstance was successful, so we will try to get back to this Feature's editing page
+            def featureInstance = Feature.get(featureID)
+            // In case we somehow cannot find the feature in the database
+            if (featureInstance==null) {
+                flash.message = "${message(code: 'default.not.found.message', args: [message(code: 'feature.label', default: 'Feature'), featureID])}"
+                redirect(action: "list")
+            }
+
+            // In case all went well
+            session.featureInstance = featureInstance // Update the session's instance
+            render(view: "edit", model: [featureInstance: featureInstance, id: featureID])
+        }
     }
 }

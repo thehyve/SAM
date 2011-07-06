@@ -15,9 +15,6 @@
         </div>
         <div class="body">
             <h1><g:message code="default.create.label" args="[entityName]" /></h1>
-            <g:if test="${flash.message}">
-            <div class="message">${flash.message}</div>
-            </g:if>
             <g:hasErrors bean="${studyInstance}">
             <div class="errors">
                 <g:renderErrors bean="${studyInstance}" as="list" />
