@@ -23,6 +23,7 @@
         </div>
     </g:hasErrors>
     <g:form action="save">
+        <input type="hidden" name="nextPage" id="nextPage" value="list" />
         <div class="dialog">
             <table>
                 <tbody>
@@ -36,22 +37,13 @@
                     </td>
                 </tr>
 
-                <tr class="prop">
-                    <td valign="top" class="name">
-                        <label for="unit"><g:message code="feature.unit.label" default="Unit"/></label>
-                    </td>
-                    <td valign="top" class="value ${hasErrors(bean: featureInstance, field: 'unit', 'errors')}">
-                        <g:textField name="unit" value="${featureInstance?.unit}"/>
-                    </td>
-                </tr>
-
                 </tbody>
             </table>
         </div>
 
         <div class="buttons">
-            <span class="button"><g:submitButton name="create" class="save"
-                                                 value="${message(code: 'default.button.create.label', default: 'Create')}"/></span>
+            <span class="button"><g:submitButton name="create" class="save" value="${message(code: 'default.button.create.label', default: 'Create')}"/></span>
+            <span class="button"><g:submitButton name="create" class="save" value="${message(code: 'default.button.create.label', default: 'Create')}, ${message(code: 'default.button.edit.label', default: 'Edit')}" onclick="\$('#nextPage').val('edit');"/></span>
         </div>
     </g:form>
 </div>

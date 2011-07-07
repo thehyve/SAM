@@ -15,7 +15,6 @@ class FeatureController {
     }
 	
     def list = {
-        params.max = Math.min(params.max ? params.int('max') : 10, 100)
         [featureInstanceList: Feature.list(params), featureInstanceTotal: Feature.count()]
     }
 
@@ -26,10 +25,15 @@ class FeatureController {
     }
 
     def save = {
+        println "params : "+params
         def featureInstance = new Feature(params)
         if (featureInstance.save(flush: true)) {
             flash.message = "${message(code: 'default.created.message', args: [message(code: 'feature.label', default: 'Feature'), featureInstance.id])}"
-            redirect(action: "show", id: featureInstance.id)
+            if(params?.nextPage=="edit"){
+                redirect(action: "edit", id: featureInstance.id)
+            } else {
+                redirect(action: "list")
+            }
         }
         else {
             render(view: "create", model: [featureInstance: featureInstance])
