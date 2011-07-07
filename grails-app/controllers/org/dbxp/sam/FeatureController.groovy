@@ -4,6 +4,7 @@ import grails.converters.JSON
 import org.dbnp.gdt.Template
 import grails.converters.deep.JSON
 import org.codehaus.groovy.grails.commons.ConfigurationHolder
+import sam_2.SamService
 
 class FeatureController {
 
@@ -111,12 +112,19 @@ class FeatureController {
     def delete = {
         def featureInstance = Feature.get(params.id)
         if (featureInstance) {
+            def FaGList = FeaturesAndGroups.findAllByFeature(featureInstance)
             try {
+                if(FaGList.size()!=0){
+                    FaGList.each {
+                        it.delete(flush: true)
+                    }
+                }
                 featureInstance.delete(flush: true)
                 flash.message = "${message(code: 'default.deleted.message', args: [message(code: 'feature.label', default: 'Feature'), params.id])}"
                 redirect(action: "list")
             }
             catch (org.springframework.dao.DataIntegrityViolationException e) {
+                log.error(e)
                 flash.message = "${message(code: 'default.not.deleted.message', args: [message(code: 'feature.label', default: 'Feature'), params.id])}"
                 redirect(action: "show", id: params.id)
             }
@@ -137,6 +145,9 @@ class FeatureController {
 	}
 
     def refreshEdit = {
+        if(!session.featureInstance.isAttached()){
+            session.featureInstance.attach()
+        }
         updateTemplate()
         render(view: "edit", model: [featureInstance: session.featureInstance])
     }
@@ -152,6 +163,9 @@ class FeatureController {
     }
 
     def updateTemplate = {
+        if(!session.featureInstance.isAttached()){
+            session.featureInstance.attach()
+        }
         try {
             if(params?.template && session?.featureInstance.template?.name != params.get('template')) {
                 // set the template
@@ -167,6 +181,8 @@ class FeatureController {
                 }
             }
         } catch (Exception e){
+            log.error(e)
+            // TODO: Make this more informative
             flash.message = "An error occurred while updating this feature's template. Please try again.<br>${e}"
         }
     }
@@ -181,6 +197,7 @@ class FeatureController {
             // Try to find the featuresAndGroupsInstance that we wish to delete
             featuresAndGroupsInstance = FeaturesAndGroups.get(params.fgid)
         } catch (Exception e){
+            log.error(e)
             // An error occurred while fetching the featuresAndGroupsInstance that we wish to remove
             flash.message = "The specified group could not be found.<br>${e}"
             if(params?.id){
@@ -192,15 +209,15 @@ class FeatureController {
         if(featuresAndGroupsInstance==null){
             // We could not find the featuresAndGroupsInstance that we wish to remove
             flash.message = "The specified group could not be found. The probable cause for this would be that the group has already been removed."
-            if(params?.id || session?.featureInstance.id){
-                def id
-                if(params?.id){
-                    id = params.id
-                } else {
-                    if(session?.featureInstance.id){
-                        id = session.featureInstance.id
-                    }
-                }
+
+            def id
+            if(params?.id){
+                id = params.id
+            } else if(session?.featureInstance.id){
+                id = session.featureInstance.id
+            }
+
+            if(id){
                 def featureInstance = Feature.get(id)
                 render(view: "edit", model: [featureInstance: featureInstance, id: id])
             } else {
@@ -216,21 +233,13 @@ class FeatureController {
             try {
                 featuresAndGroupsInstance.delete(flush: true)
             } catch (org.springframework.dao.DataIntegrityViolationException e) {
+                log.error(e)
                 flash.message = "There has been a problem with removing the group ${groupName} from this feature.<br>${e}"
                 redirect(action: "edit", id: featureID)
             }
 
             // Deletion of the featuresAndGroupsInstance was successful, so we will try to get back to this Feature's editing page
-            def featureInstance = Feature.get(featureID)
-            // In case we somehow cannot find the feature in the database
-            if (featureInstance==null) {
-                flash.message = "${message(code: 'default.not.found.message', args: [message(code: 'feature.label', default: 'Feature'), featureID])}"
-                redirect(action: "list")
-            }
-
-            // In case all went well
-            session.featureInstance = featureInstance // Update the session's instance
-            render(view: "edit", model: [featureInstance: featureInstance, id: featureID])
+            redirect(action: "edit", id: featureID)
         }
     }
 
@@ -238,6 +247,7 @@ class FeatureController {
         def toDeleteList = []
 
         if(params?.fMassDelete!=null){
+            // If necessary, go from a string to a list of strings
             if(params.fMassDelete.class!="".class){
                 toDeleteList = params.fMassDelete
             } else {
@@ -246,31 +256,18 @@ class FeatureController {
         }
 
         if(toDeleteList.size()>0){
-            def hasBeenDeletedList = []
-
-            toDeleteList.each {
-                try{
-                    def featureInstance = Feature.get(it)
-                    def name = featureInstance.name
-                    print name
-                    featureInstance.delete(flush: true)
-                    hasBeenDeletedList.push(name);
-                    flash.message = "The following features were succesfully deleted: "+hasBeenDeletedList.toString()
-                    redirect(action: "list")
-                } catch(Exception e){
-                    print " has not been deleted\n"
-                    flash.message = "Something went wrong when trying to delete "
-                    if(toDeleteList.size()==1){
-                        flash.message += " the feature.<br>"+e
-                    } else {
-                        if(hasBeenDeletedList.size()==0){
-                            flash.message += " the features.<br>"+e
-                        } else {
-                            flash.message += " the features.<br>The following features were succesfully deleted: "+hasBeenDeletedList.toString()+"<br>"+e
-                        }
-                    }
-                    redirect(action: "list")
-                }
+            def service = new SamService()
+            def return_map = [:]
+            return_map = service.deleteMultipleFeatures(toDeleteList)
+            def message = return_map.get("message")
+            if(message){
+                flash.message = message
+            }
+            def action = return_map.get("action")
+            if(action){
+                redirect(action: action)
+            } else {
+                redirect(action:list)
             }
         } else {
             flash.message = "No features were marked when the delete button was clicked, so no features were deleted."
