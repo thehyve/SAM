@@ -1,5 +1,7 @@
 package org.dbxp.sam
 
+import sam_2.SamService
+
 class FeatureGroupController {
 
     static allowedMethods = [save: "POST", update: "POST", delete: "POST"]
@@ -88,12 +90,19 @@ class FeatureGroupController {
     def delete = {
         def featureGroupInstance = FeatureGroup.get(params.id)
         if (featureGroupInstance) {
+            def FaGList = FeaturesAndGroups.findAllByFeatureGroup(featureGroupInstance)
             try {
+                if(FaGList.size()!=0){
+                    FaGList.each {
+                        it.delete(flush: true)
+                    }
+                }
                 featureGroupInstance.delete(flush: true)
                 flash.message = "${message(code: 'default.deleted.message', args: [message(code: 'featureGroup.label', default: 'FeatureGroup'), params.id])}"
                 redirect(action: "list")
             }
             catch (org.springframework.dao.DataIntegrityViolationException e) {
+                log.error(e)
                 flash.message = "${message(code: 'default.not.deleted.message', args: [message(code: 'featureGroup.label', default: 'FeatureGroup'), params.id])}"
                 redirect(action: "show", id: params.id)
             }
@@ -116,29 +125,18 @@ class FeatureGroupController {
         }
 
         if(toDeleteList.size()>0){
-            def hasBeenDeletedList = []
-
-            toDeleteList.each {
-                try{
-                    def featureGroupInstance = FeatureGroup.get(it)
-                    def name = featureGroupInstance.name
-                    featureGroupInstance.delete(flush: true)
-                    hasBeenDeletedList.push(name);
-                    flash.message = "The following feature groups were succesfully deleted: "+hasBeenDeletedList.toString()
-                    redirect(action: "list")
-                } catch(Exception e){
-                    flash.message = "Something went wrong when trying to delete "
-                    if(toDeleteList.size()==1){
-                        flash.message += " the feature group.<br>"+e
-                    } else {
-                        if(hasBeenDeletedList.size()==0){
-                            flash.message += " the feature groups.<br>"+e
-                        } else {
-                            flash.message += " the feature groups.<br>The following features groups were succesfully deleted: "+hasBeenDeletedList.toString()+"<br>"+e
-                        }
-                    }
-                    redirect(action: "list")
-                }
+            def service = new SamService()
+            def return_map = [:]
+            return_map = service.deleteMultipleFeatureGroups(toDeleteList)
+            def message = return_map.get("message")
+            if(message){
+                flash.message = message
+            }
+            def action = return_map.get("action")
+            if(action){
+                redirect(action: action)
+            } else {
+                redirect(action:list)
             }
         } else {
             flash.message = "No feature groups were marked when the delete button was clicked, so no feature groups were deleted."

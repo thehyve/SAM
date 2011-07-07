@@ -88,6 +88,7 @@ class FeaturesAndGroupsController {
                 redirect(action: "list")
             }
             catch (org.springframework.dao.DataIntegrityViolationException e) {
+                log.error(e)
                 flash.message = "${message(code: 'default.not.deleted.message', args: [message(code: 'featuresAndGroups.label', default: 'FeaturesAndGroups'), params.id])}"
                 redirect(action: "show", id: params.id)
             }
