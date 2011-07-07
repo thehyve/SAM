@@ -8,3 +8,5 @@ syntax: regexp
 ^\.classpath$
 syntax: regexp
 ^\.project$
+syntax: regexp
+^\.settings/org\.eclipse\.wst\.common\.project\.facet\.core\.xml$
