@@ -5,9 +5,7 @@
 	        <title><g:layoutTitle default="" /> | Simple Assay Module | dbXP</title>
 	        <g:layoutHead />
             <script type="text/javascript" src="${resource(dir: 'js', file: 'SelectAddMore.js', plugin: 'gdt')}"></script>
-            <link rel="stylesheet" href="${resource(dir: 'css', file: 'demo_table.css')}"/>
             <link rel="stylesheet" href="${resource(dir: 'css', file: 'sam.css')}"/>
-            <script type="text/javascript" src="${resource(dir: 'js', file: 'jquery.dataTables.js')}"></script>
 	    </head>
 	    <body>
 			<content tag="topnav">
@@ -36,7 +34,13 @@
 						<li><g:link url="${org.codehaus.groovy.grails.commons.ConfigurationHolder.config.gscf.baseURL}">Go to GSCF</g:link></li>
 					</ul>
 				</li>
-			</content>    	
+			</content>
+			<div id="contextmenu">
+				<ul>
+					<g:pageProperty name="page.contextmenu" />
+				</ul>					
+			</div>
+				
 	        <g:layoutBody />
 	    </body>
 	</html>
