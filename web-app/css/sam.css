@@ -1,18 +1,46 @@
 /*
     Stylesheet specifically for the SAM module
 */
+body { font-family: Verdana, Arial, Helvetica, sans-serif; font-size: 10px; }
 
-.samNav {
-    color: #333333;
-    font-size: 10px;
-    font-weight: bold;
-    margin-left: 3px;
-    margin-right: 3px;
-    padding-bottom: 2px;
-    padding-top: 2px;
-    font-family: Verdana,Arial,Helvetica,sans-serif;
-    text-align: left;
+div#contextmenu {}
+div#contextmenu ul {
+	list-style-type: none;
+	margin: 0;
+	padding: 0;
+	background-color: #FBFDFF; 
 }
+div#contextmenu ul li { 
+	display: inline-block; *display: inline; zoom: 1; 
+}
+div#contextmenu a {
+	display: inline-block;
+ 	*display: inline; zoom: 1;	
+	padding: 5px 11px;
+}
+	
+div#contextmenu a:hover {
+	background-color: #F0FBFF;
+	color: #359; 
+}
+
+/* Header above each page */
+h1 { padding-left: 11px; }
+
+/* Div around all data (lists/forms) including buttons */
+div.data { padding-left: 11px;}
+
+/* Buttons specifically targeted at the data shown */
+ul.data_nav { 
+    color: #333333;
+    font-weight: bold;
+    margin: 2px 3px;	/* top/bottom left/right */
+    padding: 0px; 
+    list-style-type: none;
+}
+ul.data_nav li { display: inline-block; *display: inline; zoom: 1; margin-right: 20px; }
+
+#footer { display: none; }
 
 .simpleButton {
     cursor: pointer;

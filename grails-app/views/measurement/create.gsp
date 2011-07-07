@@ -1,4 +1,3 @@
-<%@ page import="sam_2.Measurement" %>
 <html>
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
@@ -69,7 +68,7 @@
                         <label for="feature"><g:message code="measurement.feature.label" default="Feature"/></label>
                     </td>
                     <td valign="top" class="value ${hasErrors(bean: measurementInstance, field: 'feature', 'errors')}">
-                        <g:select name="feature.id" from="${sam_2.Feature.list()}" optionKey="id"
+                        <g:select name="feature.id" from="${org.dbxp.sam.Feature.list()}" optionKey="id"
                                   value="${measurementInstance?.feature?.id}"/>
                     </td>
                 </tr>

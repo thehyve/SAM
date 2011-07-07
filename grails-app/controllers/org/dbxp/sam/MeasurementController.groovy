@@ -9,7 +9,7 @@ class MeasurementController {
     }
 
     def list = {
-        params.max = Math.min(params.max ? params.int('max') : 10, 100)
+        //params.max = Math.min(params.max ? params.int('max') : 10, 100)
         [measurementInstanceList: Measurement.list(params), measurementInstanceTotal: Measurement.count()]
     }
 
