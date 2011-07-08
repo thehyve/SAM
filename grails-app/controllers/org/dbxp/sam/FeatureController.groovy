@@ -262,7 +262,11 @@ class FeatureController {
         if(toDeleteList.size()>0){
             def service = new SamService()
             def return_map = [:]
-            return_map = service.deleteMultipleFeatures(toDeleteList)
+            return_map = Feature.deleteMultipleFeatures(toDeleteList)
+            def error = return_map.get("error")
+            if(error){
+                log.error(error)
+            }
             def message = return_map.get("message")
             if(message){
                 flash.message = message

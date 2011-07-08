@@ -127,7 +127,11 @@ class FeatureGroupController {
         if(toDeleteList.size()>0){
             def service = new SamService()
             def return_map = [:]
-            return_map = service.deleteMultipleFeatureGroups(toDeleteList)
+            return_map = FeatureGroup.deleteMultipleFeatureGroups(toDeleteList)
+            def error = return_map.get("error")
+            if(error){
+                log.error(error)
+            }
             def message = return_map.get("message")
             if(message){
                 flash.message = message
