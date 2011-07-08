@@ -25,7 +25,6 @@ class FeatureController {
     }
 
     def save = {
-        println "params : "+params
         def featureInstance = new Feature(params)
         if (featureInstance.save(flush: true)) {
             flash.message = "${message(code: 'default.created.message', args: [message(code: 'feature.label', default: 'Feature'), featureInstance.id])}"

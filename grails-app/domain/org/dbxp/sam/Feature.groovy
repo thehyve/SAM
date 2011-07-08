@@ -13,6 +13,7 @@ class Feature extends TemplateEntity {
 
     static constraints = {
         name(unique:true, blank:false)
+        unit(nullable:true, blank:true)
     }
 
 	/**
@@ -41,7 +42,8 @@ class Feature extends TemplateEntity {
 		new TemplateField(
 			name: 'unit',
 			type: TemplateFieldType.STRING,
-			comment: "...")
+			comment: "...",
+			required: false)
 	]
 
 
