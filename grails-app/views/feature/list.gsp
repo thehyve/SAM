@@ -31,11 +31,16 @@
     </head>
 
     <body>
-        <div class="body">
-            <h1><g:message code="default.list.label" args="[entityName]"/></h1>
+      	<content tag="contextmenu">
+            <li><g:link controller="feature">List features</g:link></li>
+            <li><g:link controller="feature" action="create">Create new feature</g:link></li>
+        </content>
+        <h1><g:message code="default.list.label" args="[entityName]"/></h1>
+
+        <div class="data">
             <g:form name="deleteMultiple" action="deleteMultiple">
                 <div class="list">
-                    <table id="fList">
+                    <table id="fList" class="datatables paginate sortable filter">
                         <thead>
                         <tr>
 
@@ -75,14 +80,10 @@
                         </tbody>
                     </table>
                 </div>
-                <div class="samNav">
-                    <span class="addItem"><g:link class="create" action="create"><g:message code="default.new.label" args="[entityName]"/></g:link></span>
-                    <span class="simpleButton deleteItem">
-                        <a onclick="submitForm('deleteMultiple', '');">
-                            <g:message code="default.button.delete.label" args="[entityName]"/>
-                        </a>
-                    </span>
-                </div>
+                <ul class="data_nav buttons">
+                    <li><g:link controller="feature" action="create" class="create">Add</g:link></li>
+                    <li><a class="delete hamdmadeButton" onclick="submitForm('deleteMultiple', '');">Delete all marked features</a></li>
+                </ul>
             </g:form>
         </div>
     </body>

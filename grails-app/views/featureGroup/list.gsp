@@ -30,8 +30,12 @@
         </script>
     </head>
     <body>
-        <div class="body">
-            <h1><g:message code="default.list.label" args="[entityName]"/></h1>
+        <content tag="contextmenu">
+            <li><g:link controller="featureGroup">List feature groups</g:link></li>
+            <li><g:link controller="featureGroup" action="create">Create new feature group</g:link></li>
+        </content>
+        <h1><g:message code="default.list.label" args="[entityName]"/></h1>
+        <div class="data">
             <g:form name="deleteMultiple" action="deleteMultiple">
                 <div class="list">
                     <table id="fgList">
@@ -78,14 +82,10 @@
                     </table>
                 </div>
                 <br>
-                <div class="samNav">
-                    <span class="addItem"><g:link class="create" action="create"><g:message code="default.new.label" args="[entityName]"/></g:link></span>
-                    <span class="simpleButton deleteItem">
-                        <a onclick="submitForm('deleteMultiple', '');">
-                            <g:message code="default.button.delete.label" args="[entityName]"/>
-                        </a>
-                    </span>
-                </div>
+                <ul class="data_nav buttons">
+                    <li><g:link controller="featureGroup" action="create" class="create">Add</g:link></li>
+                    <li><a class="delete hamdmadeButton" onclick="submitForm('deleteMultiple', '');">Delete all marked groups</a></li>
+                </ul>
             </g:form>
         </div>
     </body>

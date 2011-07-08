@@ -7,8 +7,18 @@
         <title><g:message code="default.show.label" args="[entityName]"/></title>
     </head>
     <body>
-        <div class="body">
-            <h1><g:message code="default.show.label" args="[entityName]"/></h1>
+        <g:hasErrors bean="${featureInstance}">
+           <div class="errors">
+               <g:renderErrors bean="${featureInstance}" as="list"/>
+           </div>
+        </g:hasErrors>
+        <content tag="contextmenu">
+            <li><g:link controller="feature">List features</g:link></li>
+            <li><g:link controller="feature" action="create">Create new feature</g:link></li>
+        </content>
+        <h1><g:message code="default.show.label" args="[entityName]"/></h1>
+
+        <div class="data">
             <div class="dialog">
                 <table>
                     <tbody>
@@ -45,9 +55,9 @@
                 <g:form>
                     <g:hiddenField name="id" value="${featureInstance?.id}"/>
                     <span class="button"><g:actionSubmit class="edit" action="edit"
-                                                         value="${message(code: 'default.button.edit.label', default: 'Edit')}"/></span>
+                                                         value="Edit"/></span>
                     <span class="button"><g:actionSubmit class="delete" action="delete"
-                                                         value="${message(code: 'default.button.delete.label', default: 'Delete')}"
+                                                         value="Delete"
                                                          onclick="return confirm('${message(code: 'default.button.delete.confirm.message', default: 'Are you sure?')}');"/></span>
                 </g:form>
             </div>
