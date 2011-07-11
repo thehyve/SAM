@@ -16,6 +16,10 @@ class Feature extends TemplateEntity {
         unit(nullable:true, blank:true)
     }
 
+    public String toString() {
+		return name + ( unit!=null ? " ("+unit+")" : "" )
+	}
+
 	/**
 	 * Changes the template for this feature. If no template with the given name 
 	 * exists, the template is set to null.
