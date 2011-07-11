@@ -164,30 +164,36 @@ class FeatureController {
         render(view: "FaGList", model: [featureInstance: featureInstance])
     }
 
-    def updateTemplate = {
-        if(!session.featureInstance.isAttached()){
-            session.featureInstance.attach()
-        }
-        try {
-            if(params?.template && session?.featureInstance.template?.name != params.get('template')) {
-                // set the template
-                session.featureInstance.template = Template.findByName(params.template)
-            }
+	def updateTemplate = {
+       if(!session.featureInstance.isAttached()){
+           session.featureInstance.attach()
+       }
+       try {
+           if(params.template==""){
+               println "Removing template..."
+               session.featureInstance.template = null
+           } else if(params?.template && session?.featureInstance.template?.name != params.get('template')) {
+               // set the template
+               println "params.template : "+params.template
+               session.featureInstance.template = Template.findByName(params.template)
+           }
 
-            // does the study have a template set?
-            if (session.featureInstance.template && session.featureInstance.template instanceof Template) {
-                // yes, iterate through template fields
-                session.featureInstance.giveFields().each() {
-                    // and set their values
-                    session.featureInstance.setFieldValue(it.name, params.get(it.escapedName()))
-                }
-            }
-        } catch (Exception e){
-            log.error(e)
-            // TODO: Make this more informative
-            flash.message = "An error occurred while updating this feature's template. Please try again.<br>${e}"
-        }
-    }
+           println "Updating template..."
+           // does the study have a template set?
+           if (session.featureInstance.template && session.featureInstance.template instanceof Template) {
+               // yes, iterate through template fields
+               session.featureInstance.giveFields().each() {
+                   // and set their values
+                   session.featureInstance.setFieldValue(it.name, params.get(it.escapedName()))
+               }
+           }
+       } catch (Exception e){
+           log.error(e)
+           e.printStackTrace()
+           // TODO: Make this more informative
+           flash.message = "An error occurred while updating this feature's template. Please try again.<br>${e}"
+       }
+   }
 
     def updateGroups = {
         FeaturesAndGroups.create(FeatureGroup.get(params.newFeatureGroupID), session.featureInstance);

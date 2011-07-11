@@ -35,7 +35,7 @@
 					</ul>
 				</li>
 			</content>
-			<div id="contextmenu">
+			<div id="contextmenu" class="buttons">
 				<ul>
 					<g:pageProperty name="page.contextmenu" />
 				</ul>					
