@@ -21,7 +21,8 @@
                     <table class="datatables paginate sortable filter">
                         <thead>
                         <tr>
-                            <th>Id</th>
+                            <th class="nonsortable" width="80px"></th>
+
                             <th>Value</th>
                             <th>Operator</th>
                             <th>Comments</th>
@@ -30,18 +31,19 @@
 
                             <th><g:message code="measurement.feature.label" default="Feature"/></th>
 
-                            <th class="nonsortable"></th>
-
                         </tr>
                         </thead>
                         <tbody>
                         <g:each in="${measurementInstanceList}" status="i" var="measurementInstance">
                             <tr class="${(i % 2) == 0 ? 'odd' : 'even'}">
 
-                                <td><g:link action="show"
-                                            id="${measurementInstance.id}">${fieldValue(bean: measurementInstance, field: "id")}</g:link></td>
+                                <td>
+                                    <input type="checkbox" name="mMassDelete" value="${measurementInstance.id}"/>
+                                    <g:buttonsViewEditDelete controller="measurement" id="${measurementInstance.id}"/>
+                                </td>
 
-                                <td>${fieldValue(bean: measurementInstance, field: "value")}</td>
+                                <td><g:link action="show"
+                                            id="${measurementInstance.id}">${fieldValue(bean: measurementInstance, field: "value")}</g:link></td>
 
                                 <td>${fieldValue(bean: measurementInstance, field: "operator")}</td>
 
@@ -51,12 +53,13 @@
 
                                 <td>${fieldValue(bean: measurementInstance, field: "feature")}</td>
 
-                                <td><g:buttonsViewEditDelete controller="measurement" id="${measurementInstance.id}"/></td>
-
                             </tr>
                         </g:each>
                         </tbody>
                     </table>
+                    <ul class="data_nav buttons">
+                        <li><a class="delete handmadeButton" onclick="submitForm('deleteMultiple', '');">Delete all marked measurements</a></li>
+                    </ul>
                 </g:form>
             </div>
 

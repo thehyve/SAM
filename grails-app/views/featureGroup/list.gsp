@@ -27,9 +27,9 @@
     </head>
     <body>
         <content tag="contextmenu">
-            <li><g:link controller="featureGroup">List feature groups</g:link></li>
-            <li><g:link controller="featureGroup" action="create">Create new feature group</g:link></li>
-            <li><g:link controller="feature" action="list">List features</g:link></li>
+            <li><g:link class="list" controller="featureGroup">List feature groups</g:link></li>
+            <li><g:link class="create" controller="featureGroup" action="create">Create new group</g:link></li>
+            <li><g:link class="list" controller="feature" action="list">List features</g:link></li>
         </content>
         <h1><g:message code="default.list.label" args="[entityName]"/></h1>
         <div class="data">
@@ -38,16 +38,22 @@
                     <table id="fgList" class="datatables paginate sortable filter">
                         <thead>
                         <tr>
+                            <th class="nonsortable" width="80px"></th>
+
                             <th>${message(code: 'featureGroup.name.label', default: 'Name')}</th>
 
                             <th>In use</th>
 
-                            <th>Mark for deletion</th>
                         </tr>
                         </thead>
                         <tbody>
                         <g:each in="${featureGroupInstanceList}" status="i" var="featureGroupInstance">
                             <tr class="${(i % 2) == 0 ? 'odd' : 'even'}">
+
+                                <td>
+                                    <input type="checkbox" name="fgMassDelete" value="${featureGroupInstance.id}"/>
+                                    <g:buttonsViewEditDelete controller="featureGroup" id="${featureGroupInstance.id}"/>
+                                </td>
 
                                 <td><g:link action="show"
                                             id="${featureGroupInstance.id}">${fieldValue(bean: featureGroupInstance, field: "name")}</g:link></td>
@@ -69,10 +75,6 @@
                                     ${b}
                                 </td>
 
-                                <td>
-                                    <input type="checkbox" name="fgMassDelete" value="${featureGroupInstance.id}"/>
-                                </td>
-
                             </tr>
                         </g:each>
                         </tbody>
@@ -80,7 +82,6 @@
                 </div>
                 <br>
                 <ul class="data_nav buttons">
-                    <li><g:link controller="featureGroup" action="create" class="create">Add</g:link></li>
                     <li><a class="delete handmadeButton" onclick="submitForm('deleteMultiple', '');">Delete all marked groups</a></li>
                 </ul>
             </g:form>
