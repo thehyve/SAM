@@ -34,6 +34,7 @@
       	<content tag="contextmenu">
             <li><g:link controller="feature">List features</g:link></li>
             <li><g:link controller="feature" action="create">Create new feature</g:link></li>
+            <li><g:link controller="featureGroup">List feature groups</g:link></li>
         </content>
         <h1><g:message code="default.list.label" args="[entityName]"/></h1>
 
@@ -44,13 +45,13 @@
                         <thead>
                         <tr>
 
-                            <th>${message(code: 'feature.name.label', default: 'Name')}</th>
+                            <th>Name</th>
 
-                            <th>${message(code: 'feature.unit.label', default: 'Unit')}</th>
+                            <th>Unit</th>
 
-                            <th><g:link action="list" controller="featureGroup">Groups</g:link></th>
+                            <th>Groups</th>
 
-                            <th>Mark for deletion</th>
+                            <th class="nonsortable">Mark for deletion</th>
 
                         </tr>
                         </thead>
@@ -65,9 +66,9 @@
 
                                 <td>
                                     <g:each in="${FeaturesAndGroups.findAllByFeature(featureInstance)}" var="g">
-                                        <li><g:link action="show" controller="featuresAndGroups"
+                                        <g:link action="show" controller="featuresAndGroups"
                                             id="${g.id}">${fieldValue(bean: g.featureGroup, field: "name")}</g:link>
-                                        </li>
+                                        <br/>
                                     </g:each>
                                 </td>
 
@@ -82,7 +83,7 @@
                 </div>
                 <ul class="data_nav buttons">
                     <li><g:link controller="feature" action="create" class="create">Add</g:link></li>
-                    <li><a class="delete hamdmadeButton" onclick="submitForm('deleteMultiple', '');">Delete all marked features</a></li>
+                    <li><a class="delete handmadeButton" onclick="submitForm('deleteMultiple', '');">Delete all marked features</a></li>
                 </ul>
             </g:form>
         </div>

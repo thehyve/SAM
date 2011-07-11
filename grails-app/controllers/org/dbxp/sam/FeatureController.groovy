@@ -28,7 +28,7 @@ class FeatureController {
         if (featureInstance.save(flush: true)) {
             flash.message = "${message(code: 'default.created.message', args: [message(code: 'feature.label', default: 'Feature'), featureInstance.id])}"
             if(params?.nextPage=="edit"){
-                redirect(action: "edit", id: featureInstance.id)
+                redirect(action: "edit", id: featureInstance.id, featureInstance: featureInstance)
             } else {
                 redirect(action: "list")
             }
@@ -84,11 +84,7 @@ class FeatureController {
                 // yes, iterate through template fields
                 featureInstance.giveFields().each() {
                     // and set their values
-                    if(params.get(it.getName())!=null){
-                        featureInstance.setFieldValue(it.name, params.get(it.getName()))
-                    } else {
-                        featureInstance.setFieldValue(it.name, params.get(it.getName().toLowerCase()))
-                    }
+                    featureInstance.setFieldValue(it.name, params.get(it.escapedName()))
                 }
             }
 
@@ -155,7 +151,7 @@ class FeatureController {
     }
 
     def confirmNewFeatureGroup = {
-        if(params.newFeatureGroupID) {
+        if(params?.newFeatureGroupID) {
             updateGroups()
         }
 
@@ -169,16 +165,16 @@ class FeatureController {
            session.featureInstance.attach()
        }
        try {
-           if(params.template==""){
-               println "Removing template..."
-               session.featureInstance.template = null
-           } else if(params?.template && session?.featureInstance.template?.name != params.get('template')) {
+            if(params.template==""){
+                println "Removing template..."
+                session.featureInstance.template = null
+            } else if(params?.template && session?.featureInstance.template?.name != params.get('template')) {
                // set the template
-               println "params.template : "+params.template
+                println "params.template : "+params.template
                session.featureInstance.template = Template.findByName(params.template)
            }
 
-           println "Updating template..."
+            println "Updating template..."
            // does the study have a template set?
            if (session.featureInstance.template && session.featureInstance.template instanceof Template) {
                // yes, iterate through template fields
@@ -189,7 +185,7 @@ class FeatureController {
            }
        } catch (Exception e){
            log.error(e)
-           e.printStackTrace()
+            e.printStackTrace()
            // TODO: Make this more informative
            flash.message = "An error occurred while updating this feature's template. Please try again.<br>${e}"
        }
@@ -200,16 +196,22 @@ class FeatureController {
     }
 
     def removeGroup = {
+        println "\n\n\n"
+        if(!session.featureInstance.isAttached()){
+            session.featureInstance.attach()
+        }
         def featuresAndGroupsInstance
+        println "params : "+params
+        println "\n\n\n"
         try {
             // Try to find the featuresAndGroupsInstance that we wish to delete
-            featuresAndGroupsInstance = FeaturesAndGroups.get(params.fgid)
+            featuresAndGroupsInstance = FeaturesAndGroups.get(params.fagid)
         } catch (Exception e){
             log.error(e)
             // An error occurred while fetching the featuresAndGroupsInstance that we wish to remove
             flash.message = "The specified group could not be found.<br>${e}"
             if(params?.id){
-                render(view: "edit", model: [featureInstance: featureInstance, id: params.id])
+                render(view: "edit", model: [featureInstance: session.featureInstance, id: params.id])
             } else {
                 redirect(action: "list")
             }
@@ -217,7 +219,6 @@ class FeatureController {
         if(featuresAndGroupsInstance==null){
             // We could not find the featuresAndGroupsInstance that we wish to remove
             flash.message = "The specified group could not be found. The probable cause for this would be that the group has already been removed."
-
             def id
             if(params?.id){
                 id = params.id
@@ -243,11 +244,11 @@ class FeatureController {
             } catch (org.springframework.dao.DataIntegrityViolationException e) {
                 log.error(e)
                 flash.message = "There has been a problem with removing the group ${groupName} from this feature.<br>${e}"
-                redirect(action: "edit", id: featureID)
+                redirect(action: "edit", id: featureID, featureInstance: session.featureInstance)
             }
 
             // Deletion of the featuresAndGroupsInstance was successful, so we will try to get back to this Feature's editing page
-            redirect(action: "edit", id: featureID)
+            redirect(action: "edit", id: featureID, featureInstance: session.featureInstance)
         }
     }
 
