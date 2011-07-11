@@ -17,6 +17,7 @@
         <content tag="contextmenu">
             <li><g:link controller="featureGroup">List feature groups</g:link></li>
             <li><g:link controller="featureGroup" action="create">Create new group</g:link></li>
+            <li><g:link controller="feature" action="list">List features</g:link></li>
         </content>
         <div class="data">
             <div class="dialog">
@@ -42,8 +43,12 @@
             </div>
             <br>
             <ul class="data_nav buttons">
-                <li><g:link controller="featureGroup" action="edit" class="edit">Edit</g:link></li>
-                <li><g:link controller="featureGroup" action="list" class="cancel">Cancel</g:link></li>
+                <g:form>
+                    <g:hiddenField name="id" value="${featureGroupInstance?.id}"/>
+                    <li><g:actionSubmit class="edit" action="edit" value="Edit"/></li>
+                    <li><g:actionSubmit class="delete" action="delete" value="Delete" onclick="return confirm('${message(code: 'default.button.delete.confirm.message', default: 'Are you sure?')}');"/></li>
+                    <li><g:link controller="featureGroup" action="list" class="cancel">Back to list</g:link></li>
+                </g:form>
             </ul>
         </div>
     </body>

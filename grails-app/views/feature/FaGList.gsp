@@ -1,19 +1,19 @@
-<%@ page contentType="text/html;charset=UTF-8" %>
-<html>
-    <head></head>
-    <body>
-        <g:each in="${org.dbxp.sam.FeaturesAndGroups.findAllByFeature(featureInstance)}" var="f">
-            <g:form method="post" action="removeGroup">
-                <g:hiddenField name="fgid" value="${f?.id}"/>
-                <li>
+<table id="featureGroups_list">
+    <g:each in="${org.dbxp.sam.FeaturesAndGroups.findAllByFeature(featureInstance)}" var="f" status="i">
+
+            <tr class="prop ${(i % 2) == 0 ? 'odd' : 'even'}">
+
+                <td>
                     <g:link controller="featureGroup" action="show" id="${f?.featureGroup.id}">${f?.featureGroup.name.encodeAsHTML()}</g:link>
-                    <span class="buttons">
-                        <span class="button">
-                            <g:actionSubmit class="delete" action="removeGroup" value="${message(code: 'default.button.delete.label', default: 'Delete')}" onclick="return confirm('${message(code: 'default.button.delete.confirm.message', default: 'Are you sure?')}');"/>
+                </td>
+                <td>
+                    <g:form method="post" action="removeGroup">
+                        <g:hiddenField name="fagid" value="${f?.id}"/>
+                        <span class="buttons button">
+                            <g:actionSubmit class="delete" action="removeGroup" value="Remove from feature group" onclick="return confirm('Are you sure?');"/>
                         </span>
-                    </span>
-                </li>
-            </g:form>
-        </g:each>
-    </body>
-</html>
+                    </g:form>
+                </td>
+            </tr>
+    </g:each>
+</table>

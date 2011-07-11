@@ -17,6 +17,7 @@
         <content tag="contextmenu">
             <li><g:link controller="featureGroup">List feature groups</g:link></li>
             <li><g:link controller="featureGroup" action="create">Create new group</g:link></li>
+            <li><g:link controller="feature" action="list">List features</g:link></li>
         </content>
         <div class="data">
             <g:form method="post">

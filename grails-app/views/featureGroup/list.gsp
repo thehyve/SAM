@@ -6,10 +6,6 @@
         <g:set var="entityName" value="${message(code: 'featureGroup.label', default: 'FeatureGroup')}"/>
         <title><g:message code="default.list.label" args="[entityName]"/></title>
         <script type="text/javascript">
-            $(document).ready(function() {
-                $('#fgList').dataTable();
-            } );
-
             function deleteItems(){
                 var selected_boxes = $("input[@name=fgMassDelete]:checked");
                 var num = selected_boxes.length;
@@ -33,12 +29,13 @@
         <content tag="contextmenu">
             <li><g:link controller="featureGroup">List feature groups</g:link></li>
             <li><g:link controller="featureGroup" action="create">Create new feature group</g:link></li>
+            <li><g:link controller="feature" action="list">List features</g:link></li>
         </content>
         <h1><g:message code="default.list.label" args="[entityName]"/></h1>
         <div class="data">
             <g:form name="deleteMultiple" action="deleteMultiple">
                 <div class="list">
-                    <table id="fgList">
+                    <table id="fgList" class="datatables paginate sortable filter">
                         <thead>
                         <tr>
                             <th>${message(code: 'featureGroup.name.label', default: 'Name')}</th>
@@ -84,7 +81,7 @@
                 <br>
                 <ul class="data_nav buttons">
                     <li><g:link controller="featureGroup" action="create" class="create">Add</g:link></li>
-                    <li><a class="delete hamdmadeButton" onclick="submitForm('deleteMultiple', '');">Delete all marked groups</a></li>
+                    <li><a class="delete handmadeButton" onclick="submitForm('deleteMultiple', '');">Delete all marked groups</a></li>
                 </ul>
             </g:form>
         </div>

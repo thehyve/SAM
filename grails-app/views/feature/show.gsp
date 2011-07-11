@@ -15,35 +15,34 @@
         <content tag="contextmenu">
             <li><g:link controller="feature">List features</g:link></li>
             <li><g:link controller="feature" action="create">Create new feature</g:link></li>
+            <li><g:link controller="featureGroup">List feature groups</g:link></li>
         </content>
         <h1><g:message code="default.show.label" args="[entityName]"/></h1>
 
         <div class="data">
             <div class="dialog">
-                <table>
+                <table class="">
                     <tbody>
-                        <g:each in="${featureInstance.giveFields()}" var="field">
-                            <tr class="prop">
+                        <% def ii = 0%>
+                        <g:each in="${featureInstance.giveFields()}" var="field" status="i">
+                            <tr class="prop ${(i % 2) == 0 ? 'odd' : 'even'}">
                                 <td valign="top">
                                     ${field}
                                 </td>
                                 <td valign="top" >
                                     ${featureInstance.getFieldValue(field.toString())}
                                 </td>
+                                <% ii = i + 1%>
                             </tr>
                         </g:each>
 
-                        <tr class="prop">
-                            <td valign="top" class="name"><g:message code="feature.featureGroups.label"
-                                                                     default="Feature Groups"/></td>
+                        <tr class="prop  ${(ii % 2) == 0 ? 'odd' : 'even'}">
+                            <td valign="top" class="name">Feature Groups</td>
 
                             <td valign="top" style="text-align: left;" class="value">
-                                <ul>
-                                    <g:each in="${org.dbxp.sam.FeaturesAndGroups.findAllByFeature(featureInstance)}" var="f">
-                                        <li><g:link controller="featureGroup" action="show"
-                                                    id="${f?.featureGroup.id}">${f?.featureGroup.name.encodeAsHTML()}</g:link></li>
-                                    </g:each>
-                                </ul>
+                                <g:each in="${org.dbxp.sam.FeaturesAndGroups.findAllByFeature(featureInstance)}" var="f" status="i">
+                                    <div class="${(i % 2) == 0 ? 'odd' : 'even'}"><g:link controller="featureGroup" action="show" id="${f?.featureGroup.id}">${f?.featureGroup.name.encodeAsHTML()}</g:link></div>
+                                </g:each>
                             </td>
 
                         </tr>
@@ -51,16 +50,14 @@
                 </table>
             </div>
 
-            <div class="buttons">
+            <ul class="data_nav buttons">
                 <g:form>
                     <g:hiddenField name="id" value="${featureInstance?.id}"/>
-                    <span class="button"><g:actionSubmit class="edit" action="edit"
-                                                         value="Edit"/></span>
-                    <span class="button"><g:actionSubmit class="delete" action="delete"
-                                                         value="Delete"
-                                                         onclick="return confirm('${message(code: 'default.button.delete.confirm.message', default: 'Are you sure?')}');"/></span>
+                    <li><g:actionSubmit class="edit" action="edit" value="Edit"/></li>
+                    <li><g:actionSubmit class="delete" action="delete" value="Delete" onclick="return confirm('${message(code: 'default.button.delete.confirm.message', default: 'Are you sure?')}');"/></li>
+                    <li><g:link controller="feature" action="list" class="cancel">Back to list</g:link></li>
                 </g:form>
-            </div>
+            </ul>
         </div>
     </body>
 </html>
