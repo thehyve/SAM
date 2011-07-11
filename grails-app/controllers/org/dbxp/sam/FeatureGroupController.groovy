@@ -1,7 +1,5 @@
 package org.dbxp.sam
 
-import sam_2.SamService
-
 class FeatureGroupController {
 
     static allowedMethods = [save: "POST", update: "POST", delete: "POST"]
@@ -125,7 +123,6 @@ class FeatureGroupController {
         }
 
         if(toDeleteList.size()>0){
-            def service = new SamService()
             def return_map = [:]
             return_map = FeatureGroup.deleteMultipleFeatureGroups(toDeleteList)
             def error = return_map.get("error")

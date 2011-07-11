@@ -40,7 +40,14 @@
 					<g:pageProperty name="page.contextmenu" />
 				</ul>					
 			</div>
-				
+			
+			<g:if test="${flash.message}">
+				<p class="message">${flash.message.toString()}</p>
+			</g:if>
+			<g:if test="${flash.error}">
+				<p class="error">${flash.error.toString()}</p>
+			</g:if>
+							
 	        <g:layoutBody />
 	    </body>
 	</html>

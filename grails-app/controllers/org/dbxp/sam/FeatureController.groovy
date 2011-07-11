@@ -4,7 +4,6 @@ import grails.converters.JSON
 import org.dbnp.gdt.Template
 import grails.converters.deep.JSON
 import org.codehaus.groovy.grails.commons.ConfigurationHolder
-import sam_2.SamService
 
 class FeatureController {
 
@@ -259,7 +258,6 @@ class FeatureController {
         }
 
         if(toDeleteList.size()>0){
-            def service = new SamService()
             def return_map = [:]
             return_map = Feature.deleteMultipleFeatures(toDeleteList)
             def error = return_map.get("error")
