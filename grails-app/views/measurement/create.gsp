@@ -15,6 +15,7 @@
         <content tag="contextmenu">
             <li><g:link class="list" controller="measurement">List measurements</g:link></li>
             <li><g:link class="create" controller="measurement" action="create">Create new measurement</g:link></li>
+            <li><g:link class="import" controller="measurement" action="import">Import</g:link></li>
         </content>
         <h1><g:message code="default.create.label" args="[entityName]"/></h1>
 
