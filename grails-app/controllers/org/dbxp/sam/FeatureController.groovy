@@ -133,16 +133,8 @@ class FeatureController {
         }
     }
 
-    def ajaxGetFields = {
-        def featureInstance = Feature.get(params.id)
-        def result = []
-        featureInstance?.giveFields().each {
-            result << [it.toString() + " : " + featureInstance.getFieldValue(it.toString())]
-        }
-	    render result as JSON
-	}
-
     def refreshEdit = {
+        // Used to refresh the edit page after a change of template
         if(!session.featureInstance.isAttached()){
             session.featureInstance.attach()
         }
@@ -151,8 +143,13 @@ class FeatureController {
     }
 
     def confirmNewFeatureGroup = {
+        // Used to add a new FeaturesAndGroups connection and to refresh the edit page's feature group list
+        if(!session.featureInstance.isAttached()){
+            session.featureInstance.attach()
+        }
         if(params?.newFeatureGroupID) {
-            updateGroups()
+            // Creating a new group
+            FeaturesAndGroups.create(FeatureGroup.get(params.newFeatureGroupID), session.featureInstance);
         }
 
         // This featureInstance is only used to display an accurate list
@@ -160,7 +157,22 @@ class FeatureController {
         render(view: "FaGList", model: [featureInstance: featureInstance])
     }
 
+    def templateSpecific = {
+        // Get a list of template specific fields
+        def featureInstance = Feature.get(params.id)
+        render(view: "templateSpecific", model: [featureInstance: featureInstance])
+    }
+
+    def templateSelection = {
+        // Get a template selector
+        // Actually using this in a .gsp does not seem to lead to a working template editor
+        // TODO: fix this so that add/modify does not have to lead to a page refresh
+        def featureInstance = Feature.get(params.id)
+        render(view: "templateSelection", model: [featureInstance: featureInstance])
+    }
+
 	def updateTemplate = {
+        // A different template has been selected, so all the template fields have to be removed, added or updated with their previous values (they start out empty)
        if(!session.featureInstance.isAttached()){
            session.featureInstance.attach()
        }
@@ -191,18 +203,12 @@ class FeatureController {
        }
    }
 
-    def updateGroups = {
-        FeaturesAndGroups.create(FeatureGroup.get(params.newFeatureGroupID), session.featureInstance);
-    }
-
     def removeGroup = {
-        println "\n\n\n"
+        // Used to delete a FeaturesAndGroups connection
         if(!session.featureInstance.isAttached()){
             session.featureInstance.attach()
         }
         def featuresAndGroupsInstance
-        println "params : "+params
-        println "\n\n\n"
         try {
             // Try to find the featuresAndGroupsInstance that we wish to delete
             featuresAndGroupsInstance = FeaturesAndGroups.get(params.fagid)
@@ -253,8 +259,8 @@ class FeatureController {
     }
 
     def deleteMultiple = {
+        // Used to delete multiple features from the feature list
         def toDeleteList = []
-
         if(params?.fMassDelete!=null){
             // If necessary, go from a string to a list of strings
             if(params.fMassDelete.class!="".class){
@@ -263,7 +269,6 @@ class FeatureController {
                 toDeleteList.push(params.fMassDelete)
             }
         }
-
         if(toDeleteList.size()>0){
             def return_map = [:]
             return_map = Feature.deleteMultipleFeatures(toDeleteList)

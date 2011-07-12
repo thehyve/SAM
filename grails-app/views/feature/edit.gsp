@@ -12,22 +12,30 @@
                     rel  : 'template',
                     url  : baseUrl + '/templateEditor',
                     vars        : 'entity,ontologies',
-                    label   : 'add / modify..',
+                    label   : 'add / modify',
                     style   : 'modify',
                     onClose : function(scope) {
-                        submitForm('edit');
+                        handleTemplateChange();
                     }
                 });
             });
 
+            function handleTemplateChange(id, action){
+                // Filtering out the add/modify button
+                // This can't be done with the .val because it is empty, as is the empty option
+                if($('#template option:selected').text()!='add / modify'){
+                    submitForm(id, action)
+                } else {
+                    location.replace(baseUrl+"/feature/edit?id="+${featureInstance.id});
+                }
+            }
+
             function submitForm(id, action) {
                 var form = $( 'form#' + id );
-
                 if( action != undefined ) {
                     $( 'input[name=event]', form ).val( action );
                     $( 'input[name=_eventId]', form ).val( action );
                 }
-
                 form.submit();
             }
 
@@ -52,9 +60,10 @@
             </div>
         </g:hasErrors>
         <content tag="contextmenu">
-            <li><g:link controller="feature">List features</g:link></li>
-            <li><g:link controller="feature" action="create">Create new feature</g:link></li>
-            <li><g:link controller="featureGroup">List feature groups</g:link></li>
+            <li><g:link class="list" controller="feature">List features</g:link></li>
+            <li><g:link class="create" controller="feature" action="create">Create new feature</g:link></li>
+            <li><g:link class="import" controller="feature" action="import">Import</g:link></li>
+            <li><g:link class="list" controller="featureGroup">List feature groups</g:link></li>
         </content>
         <h1><g:message code="default.edit.label" args="[entityName]"/></h1>
 
@@ -84,7 +93,7 @@
                                     <g:each in="${featureInstance.giveDomainFields()}" var="field" status="i">
                                         <tr class="prop ${(i % 2) == 0 ? 'odd' : 'even'}">
                                             <td valign="top">
-                                                ${field}
+                                                ${field.name.capitalize()}
                                                 <g:if test="${field.required}">
                                                     <i>(required)</i>
                                                 </g:if>
@@ -126,38 +135,23 @@
                                     Template specific fields:
                                 </g:if>
                             </td>
+                        
                             <td valign="top" class="name">
                                 Template selection:
                             </td>
                         </tr>
+                        
                         <tr class="prop">
-                            <td>
-                                <g:if test="${featureInstance.template!=null}">
-                                    <table>
-                                        <g:each in="${featureInstance.giveTemplateFields()}" var="field" status="i">
-                                            <tr class="prop ${(i % 2) == 0 ? 'odd' : 'even'}">
-                                                <td valign="top">
-                                                    ${field}
-                                                    <g:if test="${field.required}">
-                                                        <i>(required)</i>
-                                                    </g:if>
-                                                </td>
-                                                <td valign="top" >
-                                                    <g:textField name="${field.escapedName()}" value="${featureInstance.getFieldValue(field.toString())}"/>
-                                                </td>
-                                            </tr>
-                                        </g:each>
-                                    </table>
-                                </g:if>
+                            <td id="templateSpecific">
+                                <g:include action="templateSpecific" params="['id' : featureInstance.id]"/>
                             </td>
 
-                            <td valign="top" class="value ${hasErrors(bean: featureInstance, field: 'template', 'errors')}">
-                                <af:templateElement name="template" rel="template" description="" value="${featureInstance?.template}" error="template" entity="${Feature}" ontologies="${featureInstance.giveDomainFields()}" addDummy="true"
-                                                    onChange="if(!\$( 'option:selected', \$(this) ).hasClass( 'modify' )){ submitForm('edit');}">
-                                </af:templateElement>
+                            <td id="templateSelection">
+                                <%-- Unfortunately this gives problems with the template editor
+                                <g:include action="templateSelection" params="['id' : featureInstance.id]"/> --%>
+                                <af:templateElement name="template" rel="template" description="" value="${featureInstance?.template}" error="template" entity="${Feature}" ontologies="${featureInstance.giveDomainFields()}" addDummy="true" onChange="if(!\$( 'option:selected', \$(this) ).hasClass( 'modify' )){ handleTemplateChange('edit');}"></af:templateElement>
                             </td>
                         </tr>
-
 
                     </table>
                 </div>
