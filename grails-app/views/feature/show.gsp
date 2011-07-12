@@ -27,7 +27,7 @@
                         <g:each in="${featureInstance.giveFields()}" var="field" status="i">
                             <tr class="prop ${(i % 2) == 0 ? 'odd' : 'even'}">
                                 <td valign="top">
-                                    ${field}
+                                    ${field.name.capitalize()}
                                 </td>
                                 <td valign="top" >
                                     ${featureInstance.getFieldValue(field.toString())}

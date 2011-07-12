@@ -21,6 +21,7 @@
         <h1><g:message code="default.create.label" args="[entityName]"/></h1>
 
         <div class="data">
+            You will be able to add additional detail to this feature by choosing the 'Create and edit' option.
             <g:form action="save">
                 <input type="hidden" name="nextPage" id="nextPage" value="list" />
                 <div class="dialog">
@@ -28,7 +29,7 @@
                         <tbody>
                             <tr class="prop">
                                 <td valign="top" class="name">
-                                    <label for="name"><g:message code="feature.name.label" default="Name"/></label>
+                                    <label for="name">Name</label>
                                 </td>
                                 <td valign="top" class="value ${hasErrors(bean: featureInstance, field: 'name', 'errors')}">
                                     <g:textField name="name" value="${featureInstance?.name}" size="maxlength"/>
