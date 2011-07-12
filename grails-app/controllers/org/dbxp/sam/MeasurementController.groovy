@@ -1,5 +1,8 @@
 package org.dbxp.sam
 
+import org.dbxp.moduleBase.Auth
+import grails.converters.JSON
+
 class MeasurementController {
 
     static allowedMethods = [save: "POST", update: "POST", delete: "POST"]
@@ -101,11 +104,63 @@ class MeasurementController {
 	def importData = {
 		redirect( action: 'importDataFlow' )
 	}
-	
+
 	def importDataFlow = {
+
+        startUp {
+            action{
+                def assayList = [:]
+                def studyList = [:]
+                Auth.findAllByUser(session.getValue('user')).each{
+                    it.study.each { it2 ->
+                        if(it2.canWrite(session.getValue('user'))){
+                            it2.assays.each { assay ->
+                                assayList.put(assay.assayToken, assay.name)
+                                studyList.put(assay.assayToken, it2.name)
+                            }
+                        }
+                    }
+                }
+
+                /* Ugly hack to get around webflow implementation problem
+                 See :
+                 - http://jira.grails.org/browse/GRAILS-6984
+                 - http://stackoverflow.com/questions/1691853/grails-webflow-keeping-things-out-of-flow-scope
+                */
+                /* Seems inadequate, will still complain about a org.dbxp.moduleBase.Study
+                def remove = []
+                flow.persistenceContext.getPersistenceContext().getEntitiesByKey().values().each { entity ->
+                    if(!entity instanceof Serializable){
+                        remove.add(entity)
+                    }
+                }
+                remove.each {flow.persistenceContext.evict(it)}
+                if(flash.size()!=0){
+                    flash.values().each { entity ->
+                        println entity.toString()+" - "+entity.getClass()
+                    }
+                    remove.each {flash.remove(it)}
+                } */
+
+                /* Another possible solution to be used in closures:
+                flow.persistenceContext.evict(it)
+                */
+
+                // \(0_o)/ [Ugly hack to get around webflow implementation problem]
+                // Because the other solutions somehow don't get rid of a magical org.dbxp.moduleBase.Study object...
+                // we will simply clear it
+                flow.persistenceContext.clear()
+
+                ['assayList' : assayList, 'studyList' : studyList]
+            }
+            on("success").to "chooseAssay"
+        }
+
 		chooseAssay {
 			// Step 1: choose study and assay (update assay dropdown based on the study selected)
+            render(view: 'chooseAssay')
 			on("next") {
+                println params
 				flow.study = params.study
 				flow.assay = params.assay
 			}.to "uploadData"

@@ -15,7 +15,7 @@
         <content tag="contextmenu">
             <li><g:link class="list" controller="feature">List features</g:link></li>
             <li><g:link class="create" controller="feature" action="create">Create new feature</g:link></li>
-            <li><g:link class="import" controller="measurement" action="import">Import</g:link></li>
+            <li><g:link class="import" controller="measurement" action="importData">Import</g:link></li>
         </content>
         <h1><g:message code="default.show.label" args="[entityName]"/></h1>
 
