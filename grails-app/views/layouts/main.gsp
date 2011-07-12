@@ -31,4 +31,4 @@
 	        <g:layoutBody />
 	    </body>
 	</html>
-</g:applyLayout>y
+</g:applyLayout>
