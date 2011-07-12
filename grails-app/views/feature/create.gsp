@@ -14,9 +14,10 @@
             </div>
         </g:hasErrors>
         <content tag="contextmenu">
-            <li><g:link controller="feature">List features</g:link></li>
-            <li><g:link controller="feature" action="create">Create new feature</g:link></li>
-            <li><g:link controller="featureGroup">List feature groups</g:link></li>
+            <li><g:link class="list" controller="feature">List features</g:link></li>
+            <li><g:link class="create" controller="feature" action="create">Create new feature</g:link></li>
+            <li><g:link class="import" controller="feature" action="import">Import</g:link></li>
+            <li><g:link class="list" controller="featureGroup">List feature groups</g:link></li>
         </content>
         <h1><g:message code="default.create.label" args="[entityName]"/></h1>
 
