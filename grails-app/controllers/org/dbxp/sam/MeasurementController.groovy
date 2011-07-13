@@ -2,9 +2,12 @@ package org.dbxp.sam
 
 import org.dbxp.moduleBase.Auth
 import grails.converters.JSON
+import org.dbxp.moduleBase.Assay
+import org.dbxp.matriximporter.MatrixImporter
+import org.dbxp.matriximporter.CsvReader
+import org.dbxp.matriximporter.ExcelReader
 
 class MeasurementController {
-
     static allowedMethods = [save: "POST", update: "POST", delete: "POST"]
 
     def index = {
@@ -106,29 +109,33 @@ class MeasurementController {
 	}
 
 	def importDataFlow = {
-
+        /*def assayList = [:]
+        def studyList = [:]
+        def assayToken
+        def assayName
+        def studyName
+        */
         startUp {
             action{
-                def assayList = [:]
-                def studyList = [:]
+                session.assayList = [:]
+                session.studyList = [:]
                 Auth.findAllByUser(session.getValue('user')).each{
                     it.study.each { it2 ->
                         if(it2.canWrite(session.getValue('user'))){
                             it2.assays.each { assay ->
-                                assayList.put(assay.assayToken, assay.name)
-                                studyList.put(assay.assayToken, it2.name)
+                                session.assayList.put(assay.assayToken, assay.name)
+                                session.studyList.put(assay.assayToken, it2.name)
                             }
                         }
                     }
                 }
 
-                /* Ugly hack to get around webflow implementation problem
+                /* \(0_o)/ [Ugly hack to get around webflow implementation problem]
                  See :
                  - http://jira.grails.org/browse/GRAILS-6984
                  - http://stackoverflow.com/questions/1691853/grails-webflow-keeping-things-out-of-flow-scope
                 */
-                /* Seems inadequate, will still complain about a org.dbxp.moduleBase.Study
-                def remove = []
+                /* def remove = []
                 flow.persistenceContext.getPersistenceContext().getEntitiesByKey().values().each { entity ->
                     if(!entity instanceof Serializable){
                         remove.add(entity)
@@ -142,16 +149,12 @@ class MeasurementController {
                     remove.each {flash.remove(it)}
                 } */
 
-                /* Another possible solution to be used in closures:
-                flow.persistenceContext.evict(it)
-                */
 
-                // \(0_o)/ [Ugly hack to get around webflow implementation problem]
                 // Because the other solutions somehow don't get rid of a magical org.dbxp.moduleBase.Study object...
                 // we will simply clear it
                 flow.persistenceContext.clear()
 
-                ['assayList' : assayList, 'studyList' : studyList]
+                ['assayList' : session.assayList, 'studyList' : session.studyList]
             }
             on("success").to "chooseAssay"
         }
@@ -160,25 +163,74 @@ class MeasurementController {
 			// Step 1: choose study and assay (update assay dropdown based on the study selected)
             render(view: 'chooseAssay')
 			on("next") {
-                println params
-				flow.study = params.study
-				flow.assay = params.assay
+                def message = flow?.message // Save the message before clearing the flow
+                String name = Assay.findByAssayToken(params.assay).name
+                flow.persistenceContext.clear() // Get rid of the non-serializable assay (and incidentally all the rest...)
+                flow.message = message // Re-fill our flow
+                flow.assayToken = params.assay
+                flow.studyName = params.study
+                flow.assayName = name
 			}.to "uploadData"
 		}
+
 		uploadData {
 			// Step 2: upload data and give the user a preview. The user then chooses which layout he wants
 			// to use.
+            render(view: 'uploadData', model: ['assayToken': flow.assayToken, 'assayName': flow.assayName, 'studyName': flow.studyName])
 			on("next") {
-				// Save data of this step
-				flow.input = [ "file": params.inputfile, "text": params.text ]
-				flow.layout = params.layout
-			}.to "selectColumns"
+                def f = request.getFile('fileUpload')
+                session.inputfile = f
+			}.to "uploadDataCheck"
 			on("previous") {
 				// Save data of this step
-				flow.input = [ "file": params.inputfile, "text": params.text ]
+				flow.input = [ "file": params.inputfile]
 				flow.layout = params.layout
 			}.to "chooseAssay"
 		}
+
+        uploadDataCheck {
+            // Check to make sure we actually received a file.
+            action {
+                def f = session.inputfile
+                def text = ""
+                if(!f.empty) {
+                    // Save data of this step
+                    flow.message = "It appears this file cannot be read in." // In case we get an error before finishing
+                    try{
+                        new File( "./tempfolder/" ).mkdirs()
+                        f.transferTo( new File( "./tempfolder/" + File.separatorChar + f.getOriginalFilename() ) )
+                        File file = new File("./tempfolder/" + File.separatorChar + f.getOriginalFilename())
+                        text = MatrixImporter.getInstance().importFile(file);
+                        session.inputfile = file
+                    } catch(Exception e) {
+                        // Something went wrong with the file...
+                        flow.message += " The precise error is as follows: "+e
+                        return error()
+                    }
+                    flow.message = null
+                    flow.input = [ "file": session.inputfile, "oringinalFilename": f.getOriginalFilename(), "text": text ]
+                }
+                else {
+                    flow.message = 'Make sure to add a file using the upload field below. The file upload field cannot be empty.'
+                    return error()
+                }
+            }
+            on("success").to "selectLayout"
+            on("error").to "uploadData"
+        }
+
+        selectLayout {
+            // Step x: Choose layout, preview data
+			on("next") {
+				// Save data of this step
+
+			}.to "selectColumns"
+			on("previous") {
+				// Save data of this step
+
+			}.to "uploadData"
+        }
+
 		selectColumns {
 			// Step 3: Choose which features in the database match which column in the uploaded file
 			on("next") {

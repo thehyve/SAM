@@ -46,7 +46,7 @@ class StudyController {
 		def f = request.getFile('fileUpload')
 	    if(!f.empty) {
 		  new File( "./tempfolder/" ).mkdirs()
-		  f.transferTo( new File( "./tempfolder/" + File.separatorChar + f.getOriginalFilename() ) )
+		    f.transferTo( new File( "./tempfolder/" + File.separatorChar + f.getOriginalFilename() ) )
             flash.message = 'Your file'+f.getOriginalFilename()+' has been uploaded. Processing has not been implemented yet.'
 		}
 	    else {
