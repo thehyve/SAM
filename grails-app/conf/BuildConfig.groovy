@@ -31,7 +31,7 @@ grails.project.dependency.resolution = {
     }
 }
 
-//grails.plugin.location.'dbxpModuleBase' = '../dbxpModuleBase'
+grails.plugin.location.'dbxpModuleBase' = '../moduleBase'
 //grails.plugin.location.'matrixImporter' = '../MatrixImporter'
 //grails.plugin.location.'gdt' = '../gdt'
 

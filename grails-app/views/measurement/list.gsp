@@ -15,55 +15,46 @@
         <h1><g:message code="default.list.label" args="[entityName]"/></h1>
 
         <div class="data">
-            <div class="list">
-                <g:form method="post" name="deleteForm" action="delete">
-                    <g:hiddenField name="id" value=""/>
-                    <table class="datatables paginate sortable filter">
-                        <thead>
-                        <tr>
-                            <th class="nonsortable" width="80px"></th>
+            <g:dataTable id="mList" class="paginate sortable filter select_multi">
+                <thead>
+                <tr>
+                    <th>Value</th>
+                    <th>Operator</th>
+                    <th>Comments</th>
 
-                            <th>Value</th>
-                            <th>Operator</th>
-                            <th>Comments</th>
+                    <th><g:message code="measurement.sample.label" default="Sample"/></th>
 
-                            <th><g:message code="measurement.sample.label" default="Sample"/></th>
+                    <th><g:message code="measurement.feature.label" default="Feature"/></th>
 
-                            <th><g:message code="measurement.feature.label" default="Feature"/></th>
+                    <g:buttonsHeader/>
+
+                </tr>
+                </thead>
+                <tbody>
+                    <g:each in="${measurementInstanceList}" status="i" var="measurementInstance">
+                        <tr class="${(i % 2) == 0 ? 'odd' : 'even'}">
+
+                            <td><g:link action="show"
+                                        id="${measurementInstance.id}">${fieldValue(bean: measurementInstance, field: "value")}</g:link></td>
+
+                            <td>${fieldValue(bean: measurementInstance, field: "operator")}</td>
+
+                            <td>${fieldValue(bean: measurementInstance, field: "comments")}</td>
+
+                            <td>${fieldValue(bean: measurementInstance, field: "sample")}</td>
+
+                            <td>${fieldValue(bean: measurementInstance, field: "feature")}</td>
+
+                            <g:buttonsViewEditDelete controller="measurement" id="${measurementInstance.id}" mapEnabled="[blnShow: true, blnEdit: false, blnDelete: true]" />
 
                         </tr>
-                        </thead>
-                        <tbody>
-                        <g:each in="${measurementInstanceList}" status="i" var="measurementInstance">
-                            <tr class="${(i % 2) == 0 ? 'odd' : 'even'}">
-
-                                <td>
-                                    <input type="checkbox" name="mMassDelete" value="${measurementInstance.id}"/>
-                                    <g:buttonsViewEditDelete controller="measurement" id="${measurementInstance.id}"/>
-                                </td>
-
-                                <td><g:link action="show"
-                                            id="${measurementInstance.id}">${fieldValue(bean: measurementInstance, field: "value")}</g:link></td>
-
-                                <td>${fieldValue(bean: measurementInstance, field: "operator")}</td>
-
-                                <td>${fieldValue(bean: measurementInstance, field: "comments")}</td>
-
-                                <td>${fieldValue(bean: measurementInstance, field: "sample")}</td>
-
-                                <td>${fieldValue(bean: measurementInstance, field: "feature")}</td>
-
-                            </tr>
-                        </g:each>
-                        </tbody>
-                    </table>
-                    <ul class="data_nav buttons">
-                        <li><a class="delete handmadeButton" onclick="submitForm('deleteMultiple', '');">Delete all marked measurements</a></li>
-                    </ul>
-                </g:form>
-            </div>
-
+                    </g:each>
+                </tbody>
+            </g:dataTable>
+            <br />
+            <ul class="data_nav buttons">
+                <li><a class="delete handmadeButton" onclick="submitForm('deleteMultiple', '');">Delete all marked measurements</a></li>
+            </ul>
         </div>
-
     </body>
 </html>
