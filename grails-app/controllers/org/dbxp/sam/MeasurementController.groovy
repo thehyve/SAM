@@ -201,7 +201,61 @@ class MeasurementController {
                         f.transferTo( new File( "./tempfolder/" + File.separatorChar + f.getOriginalFilename() ) )
                         File file = new File("./tempfolder/" + File.separatorChar + f.getOriginalFilename())
                         text = MatrixImporter.getInstance().importFile(file);
+
+
+                        // In the following section we will try to find out what layout the data in this file has
+                        def sampl = 0
+                        def subj = 0
+
+                        if(text[1][0]==null || text[1][0]==""){
+                            // Cell A2 empty? That would indicate subject layout.
+                            // It is also a pretty good sign that this is not a sample layout
+                            subj++
+                            sampl--
+                        } else {
+                            // IT cell A2 is not empty, it supports a conclusion of sample layout,
+                            // but it does not substract from a subject layout conclusion (there might be a comment there)
+                            sampl++
+                        }
+
+                        // If the second row contains only doubles, this makes it more likely to be a sample layout
+                        def double_rainbow = true
+                        for(int i = 1; i < text[1].size(); i++){
+                            if(i == 15){
+                                // Don't check everything
+                                break;
+                            }
+                            if(!text[1][i].isDouble()){
+                                double_rainbow = false
+                            }
+                        }
+                        if(double_rainbow){
+                            sampl++
+                        }
+
+                        // If the first row contains different features, this makes it more likely to be a sample layout
+                        // The converse is also true
+                        def tmp = []
+                        for(int i = 1; i < text[0].size(); i++){
+                            if(i == 15){
+                                // Don't check everything
+                                break;
+                            }
+                            tmp.push(!text[0][i])
+                        }
+                        if(tmp.size()==tmp.unique().size()){
+                            sampl++
+                        } else {
+                            subj++
+                        }
+
+                        def guess = ""
+                        if(subj>sampl) guess = "subject_layout"
+                        if(sampl>subj) guess = "sample_layout"
+
+
                         session.inputfile = file
+                        session.layoutguess = guess
                     } catch(Exception e) {
                         // Something went wrong with the file...
                         flow.message += " The precise error is as follows: "+e
@@ -223,21 +277,22 @@ class MeasurementController {
             // Step x: Choose layout, preview data
 			on("next") {
 				// Save data of this step
-
+                println "params: "+params
+                println "session: "+session
+                session.layout = params.layoutselector
 			}.to "selectColumns"
-			on("previous") {
-				// Save data of this step
-
-			}.to "uploadData"
+			on("previous") {}.to "uploadData"
         }
 
 		selectColumns {
 			// Step 3: Choose which features in the database match which column in the uploaded file
 			on("next") {
+                println "selectColumns next "
 				// Save data of this step
 				flow.matching = params.matches
 			}.to "checkInput"
 			on("previous") {
+                println "selectColumns prev"
 				// Save data of this step
 				flow.matching = params.matches
 			}.to "uploadData"

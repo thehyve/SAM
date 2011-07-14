@@ -13,11 +13,10 @@
         <div class="data">
             <h1>Choose columns</h1>
             <p></p>
-            <g:form method="post" name="importData" action="importData">
-                <g:hiddenField name="assay" value=""/>
-                <g:hiddenField name="study" value=""/>
-                <g:submitButton name="next" value="next">Next</g:submitButton>
-            </g:form>
+            <form method="post">
+                <g:submitButton name="previous" value="Previous" action="previous"/>
+                <g:submitButton name="next" value="Next" action="next"/>
+            </form>
         </div>
     </body>
 </html>
