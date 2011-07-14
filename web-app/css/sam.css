@@ -46,7 +46,10 @@ ul.data_nav li { display: inline-block; *display: inline; zoom: 1; margin-right:
     color: #333333;
 }
 
-/* This class is used for error message */
+/* Used for distinguishing parts of the screen */
+.border-top { border-top: 2px solid #ccc; }
+
+/* This class is used for error messages */
 .errors {
     /*color: #FF0000;*/
     background: url(../plugins/famfamfam-1.0.1/images/icons/error.png) no-repeat scroll 10px 10px #ffcccc;

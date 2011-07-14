@@ -42,7 +42,7 @@
 
                             <td valign="top" style="text-align: left;" class="value">
                                 <g:each in="${org.dbxp.sam.FeaturesAndGroups.findAllByFeature(featureInstance)}" var="f" status="i">
-                                    <div class="${(i % 2) == 0 ? 'odd' : 'even'}"><g:link controller="featureGroup" action="show" id="${f?.featureGroup.id}">${f?.featureGroup.name.encodeAsHTML()}</g:link></div>
+                                    <g:link controller="featureGroup" action="show" id="${f?.featureGroup.id}">${f?.featureGroup.name.encodeAsHTML()}</g:link><br />
                                 </g:each>
                             </td>
 

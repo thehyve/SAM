@@ -20,36 +20,39 @@
                 });
             });
 
-            function handleTemplateChange(id, action){
+            function handleTemplateChange(id){
                 // Filtering out the add/modify button
                 // This can't be done with the .val because it is empty, as is the empty option
                 if($('#template option:selected').text()!='add / modify'){
-                    submitForm(id, action)
+					$( 'form#' + id ).submit();
                 } else {
-                    location.replace(baseUrl+"/feature/edit?id="+${featureInstance.id});
+                    location.replace(baseUrl + "/feature/edit?id=${featureInstance.id}");
                 }
             }
 
-            function submitForm(id, action) {
-                var form = $( 'form#' + id );
-                if( action != undefined ) {
-                    $( 'input[name=event]', form ).val( action );
-                    $( 'input[name=_eventId]', form ).val( action );
-                }
-                form.submit();
-            }
-
-            function confNewFeatGrp(){
+            function addToFeatureGroup(){
                 // Add the new feature group in a function apart from the refreshEdit controller action,
                 // to make sure feature groups will not be added by accident during a regular refreshEdit call.
-                var html = $.ajax({
-                    url: baseUrl+"/feature/confirmNewFeatureGroup?newFeatureGroupID="+$("#newFeatureGroup").val()+"&id="+${featureInstance.id},
-                    context: document.body,
-                    dataType:"json",
-                    async: false
-                }).responseText;
-                $("#featureGroups_list").html(html);
+                $.ajax({
+                    url: baseUrl+"/feature/confirmNewFeatureGroup?newFeatureGroupID="+$("#newFeatureGroup").val()+"&id=${featureInstance.id}",
+                    success: function(html, textStatus, jqXHR) {
+                    	$("#featureGroups_list").replaceWith(html);
+                    }
+                });
             }
+
+            function removeFromFeatureGroup( fagId ){
+                // Add the new feature group in a function apart from the refreshEdit controller action,
+                // to make sure feature groups will not be added by accident during a regular refreshEdit call.
+                $.ajax({
+                    url: baseUrl+"/feature/removeFromGroup?fagId="+fagId+"&id=${featureInstance.id}",
+                    type: "POST",
+                    success: function(html, textStatus, jqXHR) {
+                    	$("#featureGroups_list").replaceWith(html);
+                    }
+                });
+            }            
+            
         </script>
     </head>
 
@@ -75,11 +78,11 @@
                 <div class="dialog">
                     <table>
                         <tr class="prop">
-                            <td valign="top" class="name">
+                            <td valign="top">
                                 Common fields:
                             </td>
-                            <td valign="top" class="name">
-                                Feature group selection:
+                            <td valign="top" style="width: 40%;">
+                                Groups containing this feature:
                             </td>
                         </tr>
 
@@ -103,25 +106,18 @@
                                             </td>
                                         </tr>
                                     </g:each>
+									<tr class="prop ${(featureInstance.giveDomainFields().size() % 2) == 0 ? 'odd' : 'even'}">
+										<td>Template</td>
+			                            <td id="templateSelection">
+			                                <%-- Unfortunately this gives problems with the template editor
+			                                <g:include action="templateSelection" params="['id' : featureInstance.id]"/> --%>
+			                                <af:templateElement name="template" rel="template" description="" value="${featureInstance?.template}" error="template" entity="${Feature}" ontologies="${featureInstance.giveDomainFields()}" addDummy="true" onChange="if(!\$( 'option:selected', \$(this) ).hasClass( 'modify' )){ handleTemplateChange('edit');}"></af:templateElement>
+			                            </td>
+			                           </tr>                                    
                                 </table>
                             </td>
-                            <td>
-                                <g:include action="confirmNewFeatureGroup" params="['id' : featureInstance.id]" />
-                                <table>
-                                    <tr valign="top" class="value">
-                                        <td valign="top" class="name">
-                                            Add this feature to feature group
-                                        </td>
-                                        <td>
-                                            <g:select id="newFeatureGroup" name="newFeatureGroup" from="${org.dbxp.sam.FeatureGroup.list()}" optionKey="id" optionValue="name"/>
-                                            <span class="buttons button simpleButton">
-                                                <a name="confirmNewFeatureGroup" class="buttons button input add handmadeButton" onclick="confNewFeatGrp();">
-                                                    Confirm addition to this group
-                                                </a>
-                                            </span>
-                                        </td>
-                                    </tr>
-                                </table>
+                            <td rowspan="3" style="width: 40%;">
+                               	<g:include action="confirmNewFeatureGroup" params="['id' : featureInstance.id]" />
                             </td>
                         </tr>
 
@@ -135,21 +131,11 @@
                                     Template specific fields:
                                 </g:if>
                             </td>
-                        
-                            <td valign="top" class="name">
-                                Template selection:
-                            </td>
                         </tr>
                         
                         <tr class="prop">
                             <td id="templateSpecific">
                                 <g:include action="templateSpecific" params="['id' : featureInstance.id]"/>
-                            </td>
-
-                            <td id="templateSelection">
-                                <%-- Unfortunately this gives problems with the template editor
-                                <g:include action="templateSelection" params="['id' : featureInstance.id]"/> --%>
-                                <af:templateElement name="template" rel="template" description="" value="${featureInstance?.template}" error="template" entity="${Feature}" ontologies="${featureInstance.giveDomainFields()}" addDummy="true" onChange="if(!\$( 'option:selected', \$(this) ).hasClass( 'modify' )){ handleTemplateChange('edit');}"></af:templateElement>
                             </td>
                         </tr>
 

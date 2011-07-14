@@ -150,12 +150,25 @@ class FeatureController {
         if(params?.newFeatureGroupID) {
             // Creating a new group
             FeaturesAndGroups.create(FeatureGroup.get(params.newFeatureGroupID), session.featureInstance);
+			println "Association created"
         }
 
         // This featureInstance is only used to display an accurate list
         def featureInstance = Feature.get(params.id)
-        render(view: "FaGList", model: [featureInstance: featureInstance])
+		showFaGList( featureInstance );
     }
+	
+	protected def showFaGList( featureInstance ) {
+		def groupList = FeaturesAndGroups.findAllByFeature(featureInstance)
+		def remainingGroups 
+		
+		if( groupList )
+			remainingGroups = FeatureGroup.executeQuery( "FROM FeatureGroup fg WHERE fg NOT IN (:groups)", [ 'groups': groupList*.featureGroup ] )
+		else
+			remainingGroups = FeatureGroup.list()
+			
+		render(view: "FaGList", model: [groupList: groupList, remainingGroups: remainingGroups])
+	}
 
     def templateSpecific = {
         // Get a list of template specific fields
@@ -203,59 +216,44 @@ class FeatureController {
        }
    }
 
-    def removeGroup = {
+    def removeFromGroup = {
         // Used to delete a FeaturesAndGroups connection
         if(!session.featureInstance.isAttached()){
             session.featureInstance.attach()
         }
-        def featuresAndGroupsInstance
+		
+        // Clear message so no message will be shown if everything is OK
+		flash.message = "";
+		
         try {
             // Try to find the featuresAndGroupsInstance that we wish to delete
-            featuresAndGroupsInstance = FeaturesAndGroups.get(params.fagid)
+            def featuresAndGroupsInstance = FeaturesAndGroups.get(params.fagId)
+			
+			if(featuresAndGroupsInstance==null){
+				// We could not find the featuresAndGroupsInstance that we wish to remove
+				flash.message = "The specified group could not be found. The probable cause for this would be that the group has already been removed."
+			} else {
+				// We found the featuresAndGroupsInstance that we wish to remove
+				def groupName = featuresAndGroupsInstance.featureGroup.name
+				def featureID = featuresAndGroupsInstance.feature.id
+	
+				// Proceed with deletion
+				try {
+					featuresAndGroupsInstance.delete(flush: true)
+				} catch (org.springframework.dao.DataIntegrityViolationException e) {
+					log.error(e)
+					flash.message = "There has been a problem with removing the group ${groupName} from this feature.<br>${e}"
+				}
+			}
         } catch (Exception e){
             log.error(e)
             // An error occurred while fetching the featuresAndGroupsInstance that we wish to remove
             flash.message = "The specified group could not be found.<br>${e}"
-            if(params?.id){
-                render(view: "edit", model: [featureInstance: session.featureInstance, id: params.id])
-            } else {
-                redirect(action: "list")
-            }
         }
-        if(featuresAndGroupsInstance==null){
-            // We could not find the featuresAndGroupsInstance that we wish to remove
-            flash.message = "The specified group could not be found. The probable cause for this would be that the group has already been removed."
-            def id
-            if(params?.id){
-                id = params.id
-            } else if(session?.featureInstance.id){
-                id = session.featureInstance.id
-            }
 
-            if(id){
-                def featureInstance = Feature.get(id)
-                render(view: "edit", model: [featureInstance: featureInstance, id: id])
-            } else {
-                redirect(action: "list")
-            }
-        } else {
-            // We found the featuresAndGroupsInstance that we wish to remove
-
-            def groupName = featuresAndGroupsInstance.featureGroup.name
-            def featureID = featuresAndGroupsInstance.feature.id
-
-            // Proceed with deletion
-            try {
-                featuresAndGroupsInstance.delete(flush: true)
-            } catch (org.springframework.dao.DataIntegrityViolationException e) {
-                log.error(e)
-                flash.message = "There has been a problem with removing the group ${groupName} from this feature.<br>${e}"
-                redirect(action: "edit", id: featureID, featureInstance: session.featureInstance)
-            }
-
-            // Deletion of the featuresAndGroupsInstance was successful, so we will try to get back to this Feature's editing page
-            redirect(action: "edit", id: featureID, featureInstance: session.featureInstance)
-        }
+		// This featureInstance is only used to display an accurate list
+		def featureInstance = Feature.get( params.int( 'id' ) )
+		showFaGList( featureInstance );
     }
 
     def deleteMultiple = {
