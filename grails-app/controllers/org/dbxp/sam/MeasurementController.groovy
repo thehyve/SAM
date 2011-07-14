@@ -6,9 +6,12 @@ import org.dbxp.moduleBase.Assay
 import org.dbxp.matriximporter.MatrixImporter
 import org.dbxp.matriximporter.CsvReader
 import org.dbxp.matriximporter.ExcelReader
+import org.dbxp.moduleBase.Sample
+import org.dbxp.moduleBase.Study
 
 class MeasurementController {
     static allowedMethods = [save: "POST", update: "POST", delete: "POST"]
+    def fuzzySearchService
 
     def index = {
         redirect(action: "list", params: params)
@@ -256,13 +259,14 @@ class MeasurementController {
 
                         session.inputfile = file
                         session.layoutguess = guess
+                        session.text = text
                     } catch(Exception e) {
                         // Something went wrong with the file...
                         flow.message += " The precise error is as follows: "+e
                         return error()
                     }
                     flow.message = null
-                    flow.input = [ "file": session.inputfile, "oringinalFilename": f.getOriginalFilename(), "text": text ]
+                    flow.input = [ "file": session.inputfile, "oringinalFilename": f.getOriginalFilename()]
                 }
                 else {
                     flow.message = 'Make sure to add a file using the upload field below. The file upload field cannot be empty.'
@@ -277,9 +281,34 @@ class MeasurementController {
             // Step x: Choose layout, preview data
 			on("next") {
 				// Save data of this step
-                println "params: "+params
-                println "session: "+session
                 session.layout = params.layoutselector
+
+                def possible_matches = [:]
+                if(params.layoutselector=="sample_layout"){
+                    // Try to match first row to features
+                    def feature_matches = [:]
+                    for(int i = 1; i < session.text[0].size(); i++){
+                        def match = fuzzySearchService.mostSimilar(session.text[0][i], Feature.list().name)
+                        feature_matches.put(session.text[0][i], match)
+                    }
+
+                    // Try to match first column to samples
+                    def patterns = []
+                    for(int i = 1; i < session.text.size(); i++){
+                        patterns.push(session.text[i][0]);
+                    }
+                    def samples = Assay.findByAssayToken(flow.assayToken).samples.name.toList()
+                    def sample_matches_raw = fuzzySearchService.mostSimilarUnique(patterns.toList(), samples, 0)
+                    def sample_matches = [:]
+                    sample_matches_raw.each {
+                        sample_matches.put(it.pattern, it.candidate)
+                    }
+                    session.feature_matches = feature_matches
+                    session.sample_matches = sample_matches
+                    session.features = Feature.list().name
+                    session.samples = samples
+                    flow.persistenceContext.clear();
+                }
 			}.to "selectColumns"
 			on("previous") {}.to "uploadData"
         }
@@ -287,15 +316,13 @@ class MeasurementController {
 		selectColumns {
 			// Step 3: Choose which features in the database match which column in the uploaded file
 			on("next") {
-                println "selectColumns next "
 				// Save data of this step
 				flow.matching = params.matches
 			}.to "checkInput"
 			on("previous") {
-                println "selectColumns prev"
 				// Save data of this step
 				flow.matching = params.matches
-			}.to "uploadData"
+			}.to "selectLayout"
 		}
 		checkInput {
 			on("save").to "saveData"
