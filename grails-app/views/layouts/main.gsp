@@ -5,6 +5,7 @@
 	        <title><g:layoutTitle default="" /> | Simple Assay Module | dbXP</title>
 	        <g:layoutHead />
             <script type="text/javascript" src="${resource(dir: 'js', file: 'SelectAddMore.js', plugin: 'gdt')}"></script>
+            <script type="text/javascript" src="${resource(dir: 'js', file: 'removeWebFlowExecutionKey.js')}"></script>
             <link rel="stylesheet" href="${resource(dir: 'css', file: 'sam.css')}"/>
 	    </head>
 	    <body>
