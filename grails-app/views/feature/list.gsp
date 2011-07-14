@@ -40,53 +40,47 @@
         <h1><g:message code="default.list.label" args="[entityName]"/></h1>
 
         <div class="data">
-            <g:form name="deleteMultiple" action="deleteMultiple">
-                <div class="list">
-                    <table id="fList" class="datatables paginate sortable filter">
-                        <thead>
-                        <tr>
+            <g:dataTable id="fList" class="paginate sortable filter select_multi">
+                <thead>
+                    <tr>
 
-                            <th>Name</th>
+                        <th>Name</th>
 
-                            <th>Unit</th>
+                        <th>Unit</th>
 
-                            <th>Groups</th>
+                        <th>Groups</th>
 
-                            <th class="nonsortable">Mark for deletion</th>
+                        <g:buttonsHeader/>
+
+                    </tr>
+                </thead>
+                <tbody>
+                    <g:each in="${featureInstanceList}" status="i" var="featureInstance">
+                        <tr class="${(i % 2) == 0 ? 'odd' : 'even'}">
+
+                            <td><g:link action="show"
+                                        id="${featureInstance.id}">${fieldValue(bean: featureInstance, field: "name")}</g:link></td>
+
+                            <td>${fieldValue(bean: featureInstance, field: "unit")}</td>
+
+                            <td>
+                                <g:each in="${FeaturesAndGroups.findAllByFeature(featureInstance)}" var="g">
+                                    <g:link action="show" controller="featuresAndGroups"
+                                        id="${g.id}">${fieldValue(bean: g.featureGroup, field: "name")}</g:link>
+                                    <br/>
+                                </g:each>
+                            </td>
+
+                            <g:buttonsViewEditDelete controller="feature" id="${featureInstance.id}"/>
 
                         </tr>
-                        </thead>
-                        <tbody>
-                        <g:each in="${featureInstanceList}" status="i" var="featureInstance">
-                            <tr class="${(i % 2) == 0 ? 'odd' : 'even'}">
-
-                                <td><g:link action="show"
-                                            id="${featureInstance.id}">${fieldValue(bean: featureInstance, field: "name")}</g:link></td>
-
-                                <td>${fieldValue(bean: featureInstance, field: "unit")}</td>
-
-                                <td>
-                                    <g:each in="${FeaturesAndGroups.findAllByFeature(featureInstance)}" var="g">
-                                        <g:link action="show" controller="featuresAndGroups"
-                                            id="${g.id}">${fieldValue(bean: g.featureGroup, field: "name")}</g:link>
-                                        <br/>
-                                    </g:each>
-                                </td>
-
-                                <td>
-                                    <input type="checkbox" name="fMassDelete" value="${featureInstance.id}"/>
-                                </td>
-
-                            </tr>
-                        </g:each>
-                        </tbody>
-                    </table>
-                </div>
-                <ul class="data_nav buttons">
-                    <li><g:link controller="feature" action="create" class="create">Add</g:link></li>
-                    <li><a class="delete handmadeButton" onclick="submitForm('deleteMultiple', '');">Delete all marked features</a></li>
-                </ul>
-            </g:form>
+                    </g:each>
+                </tbody>
+            </g:dataTable>
+            <br />
+            <ul class="data_nav buttons">
+                <li><a class="delete handmadeButton" onclick="submitForm('deleteMultiple', '');">Delete all marked features</a></li>
+            </ul>
         </div>
     </body>
 </html>
