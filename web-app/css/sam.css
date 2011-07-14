@@ -3,10 +3,10 @@
 */
 body { font-family: Verdana, Arial, Helvetica, sans-serif; font-size: 10px; }
 
-div#contextmenu {}
+div#contextmenu { margin-top: 0; }
 div#contextmenu ul {
 	list-style-type: none;
-	margin: 0;
+	margin: 0 0 0 11px;
 	padding: 0;
 	background-color: #FBFDFF; 
 }
@@ -15,8 +15,8 @@ div#contextmenu ul li {
 }
 div#contextmenu a {
 	display: inline-block;
- 	*display: inline; zoom: 1;	
-	padding: 5px 11px;
+ 	*display: inline; zoom: 1;
+ 	padding-top: 6px; padding-bottom: 6px;
 }
 	
 div#contextmenu a:hover {
@@ -42,29 +42,20 @@ ul.data_nav li { display: inline-block; *display: inline; zoom: 1; margin-right:
 
 #footer { display: none; }
 
-.handmadeButton {
-    cursor: pointer;
-}
-
-.addItem {
-    background: url("../plugins/famfamfam-1.0.1/images/icons/add.png") no-repeat scroll 5px 50% transparent;
-    padding-left: 28px;
-}
-
-.deleteItem {
-    background: url("../plugins/famfamfam-1.0.1/images/icons/delete.png") no-repeat scroll 5px 50% transparent;
-    padding-left: 28px;
-}
-
 #content a:link, #content a:visited {
     color: #333333;
 }
 
+/* This class is used for error message */
 .errors {
     /*color: #FF0000;*/
-    background: url("/sam_2/plugins/famfamfam-1.0.1/images/icons/error.png") no-repeat scroll 10px 10px #ffcccc;
+    background: url(../plugins/famfamfam-1.0.1/images/icons/error.png) no-repeat scroll 10px 10px #ffcccc;
     border: 1px solid #FF0000;
     margin: 10px 10px 0px 10px;
     padding: 10px 10px 10px 33px;
     text-align: justify;
 }
+
+.buttons .import { 
+    background-image: url(../plugins/famfamfam-1.0.1/images/icons/page_white_add.png);
+}	

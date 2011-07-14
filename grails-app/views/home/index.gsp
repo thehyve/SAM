@@ -51,10 +51,6 @@
         </style>
     </head>
     <body>
-    	<content tag="contextmenu">
-    		<li><g:link controller="feature">Feature</g:link></li>
-    		<li><g:link controller="measurement">Measurement</g:link></li>
-    	</content>
         <div id="nav">
             <div class="homePagePanel">
                 <div class="panelTop"></div>
