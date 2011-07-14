@@ -115,7 +115,7 @@
                                         <td>
                                             <g:select id="newFeatureGroup" name="newFeatureGroup" from="${org.dbxp.sam.FeatureGroup.list()}" optionKey="id" optionValue="name"/>
                                             <span class="buttons button simpleButton">
-                                                <a name="confirmNewFeatureGroup" class="buttons button input add handmadeButton" onclick="confNewFeatGrp();">
+                                                <a href="#" name="confirmNewFeatureGroup" class="buttons button input add" onclick="confNewFeatGrp(); return false;">
                                                     Confirm addition to this group
                                                 </a>
                                             </span>

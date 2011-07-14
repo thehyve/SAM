@@ -6,9 +6,12 @@ import org.dbxp.moduleBase.Assay
 import org.dbxp.matriximporter.MatrixImporter
 import org.dbxp.matriximporter.CsvReader
 import org.dbxp.matriximporter.ExcelReader
+import org.dbxp.moduleBase.Sample
+import org.dbxp.moduleBase.Study
 
 class MeasurementController {
     static allowedMethods = [save: "POST", update: "POST", delete: "POST"]
+    def fuzzySearchService
 
     def index = {
         redirect(action: "list", params: params)
@@ -201,14 +204,69 @@ class MeasurementController {
                         f.transferTo( new File( "./tempfolder/" + File.separatorChar + f.getOriginalFilename() ) )
                         File file = new File("./tempfolder/" + File.separatorChar + f.getOriginalFilename())
                         text = MatrixImporter.getInstance().importFile(file);
+
+
+                        // In the following section we will try to find out what layout the data in this file has
+                        def sampl = 0
+                        def subj = 0
+
+                        if(text[1][0]==null || text[1][0]==""){
+                            // Cell A2 empty? That would indicate subject layout.
+                            // It is also a pretty good sign that this is not a sample layout
+                            subj++
+                            sampl--
+                        } else {
+                            // IT cell A2 is not empty, it supports a conclusion of sample layout,
+                            // but it does not substract from a subject layout conclusion (there might be a comment there)
+                            sampl++
+                        }
+
+                        // If the second row contains only doubles, this makes it more likely to be a sample layout
+                        def double_rainbow = true
+                        for(int i = 1; i < text[1].size(); i++){
+                            if(i == 15){
+                                // Don't check everything
+                                break;
+                            }
+                            if(!text[1][i].isDouble()){
+                                double_rainbow = false
+                            }
+                        }
+                        if(double_rainbow){
+                            sampl++
+                        }
+
+                        // If the first row contains different features, this makes it more likely to be a sample layout
+                        // The converse is also true
+                        def tmp = []
+                        for(int i = 1; i < text[0].size(); i++){
+                            if(i == 15){
+                                // Don't check everything
+                                break;
+                            }
+                            tmp.push(!text[0][i])
+                        }
+                        if(tmp.size()==tmp.unique().size()){
+                            sampl++
+                        } else {
+                            subj++
+                        }
+
+                        def guess = ""
+                        if(subj>sampl) guess = "subject_layout"
+                        if(sampl>subj) guess = "sample_layout"
+
+
                         session.inputfile = file
+                        session.layoutguess = guess
+                        session.text = text
                     } catch(Exception e) {
                         // Something went wrong with the file...
                         flow.message += " The precise error is as follows: "+e
                         return error()
                     }
                     flow.message = null
-                    flow.input = [ "file": session.inputfile, "oringinalFilename": f.getOriginalFilename(), "text": text ]
+                    flow.input = [ "file": session.inputfile, "oringinalFilename": f.getOriginalFilename()]
                 }
                 else {
                     flow.message = 'Make sure to add a file using the upload field below. The file upload field cannot be empty.'
@@ -223,12 +281,36 @@ class MeasurementController {
             // Step x: Choose layout, preview data
 			on("next") {
 				// Save data of this step
+                session.layout = params.layoutselector
 
+                def possible_matches = [:]
+                if(params.layoutselector=="sample_layout"){
+                    // Try to match first row to features
+                    def feature_matches = [:]
+                    for(int i = 1; i < session.text[0].size(); i++){
+                        def match = fuzzySearchService.mostSimilar(session.text[0][i], Feature.list().name)
+                        feature_matches.put(session.text[0][i], match)
+                    }
+
+                    // Try to match first column to samples
+                    def patterns = []
+                    for(int i = 1; i < session.text.size(); i++){
+                        patterns.push(session.text[i][0]);
+                    }
+                    def samples = Assay.findByAssayToken(flow.assayToken).samples.name.toList()
+                    def sample_matches_raw = fuzzySearchService.mostSimilarUnique(patterns.toList(), samples, 0)
+                    def sample_matches = [:]
+                    sample_matches_raw.each {
+                        sample_matches.put(it.pattern, it.candidate)
+                    }
+                    session.feature_matches = feature_matches
+                    session.sample_matches = sample_matches
+                    session.features = Feature.list().name
+                    session.samples = samples
+                    flow.persistenceContext.clear();
+                }
 			}.to "selectColumns"
-			on("previous") {
-				// Save data of this step
-
-			}.to "uploadData"
+			on("previous") {}.to "uploadData"
         }
 
 		selectColumns {
@@ -240,7 +322,7 @@ class MeasurementController {
 			on("previous") {
 				// Save data of this step
 				flow.matching = params.matches
-			}.to "uploadData"
+			}.to "selectLayout"
 		}
 		checkInput {
 			on("save").to "saveData"

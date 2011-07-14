@@ -81,7 +81,7 @@
                 <br>
                 <ul class="data_nav buttons">
                     <li><g:link controller="featureGroup" action="create" class="create">Add</g:link></li>
-                    <li><a class="delete handmadeButton" onclick="submitForm('deleteMultiple', '');">Delete all marked groups</a></li>
+                    <li><a href="#" class="delete" onclick="submitForm('deleteMultiple', ''); return false;">Delete all marked groups</a></li>
                 </ul>
             </g:form>
         </div>

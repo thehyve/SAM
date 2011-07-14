@@ -5,8 +5,8 @@ import org.dbxp.matriximporter.MatrixImporter
 class BootStrap {
 
     def init = { servletContext ->
-        MatrixImporter.getInstance().registerReader( new CsvReader() );
-        MatrixImporter.getInstance().registerReader( new ExcelReader() );
+        // Register your reader here, like this:
+        // MatrixImporter.getInstance().registerReader( new ExcelReader() );
     }
     def destroy = {
     }

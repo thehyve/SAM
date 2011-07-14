@@ -24,9 +24,9 @@
                     <g:each in="${assayList}" status="i" var="assayInstance">
                         <tr class="${(i % 2) == 0 ? 'odd' : 'even'}">
                             <td>
-                                <div class="handmadeButton" onclick="$('#assay').val('${assayInstance.key}');$('#study').val('${studyList.get(assayInstance.key)}');">
+                                <a href="#" onclick="$('#assay').val('${assayInstance.key}');$('#study').val('${studyList.get(assayInstance.key)}'); $('#_eventId_next').removeAttr('disabled'); return false;">
                                     ${assayInstance.value}
-                                </div>
+                                </a>
                             </td>
                             <td>
                                 ${studyList.get(assayInstance.key)}
@@ -39,7 +39,7 @@
             <g:form method="post" name="importData" action="importData">
                 <g:hiddenField name="assay" value=""/>
                 <g:hiddenField name="study" value=""/>
-                <g:submitButton name="next" value="next">Next</g:submitButton>
+                <g:submitButton name="next" value="Next" action="next" disabled='true'/>
             </g:form>
         </div>
     </body>
