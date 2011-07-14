@@ -46,19 +46,24 @@
                         <thead>
                         <tr>
 
+                            <th class="nonsortable" width="80px"></th>
+
                             <th>Name</th>
 
                             <th>Unit</th>
 
                             <th>Groups</th>
 
-                            <th class="nonsortable">Mark for deletion</th>
-
                         </tr>
                         </thead>
                         <tbody>
                         <g:each in="${featureInstanceList}" status="i" var="featureInstance">
                             <tr class="${(i % 2) == 0 ? 'odd' : 'even'}">
+
+                                <td>
+                                    <input type="checkbox" name="fMassDelete" value="${featureInstance.id}"/>
+                                    <g:buttonsViewEditDelete controller="feature" id="${featureInstance.id}"/>
+                                </td>
 
                                 <td><g:link action="show"
                                             id="${featureInstance.id}">${fieldValue(bean: featureInstance, field: "name")}</g:link></td>
@@ -73,17 +78,12 @@
                                     </g:each>
                                 </td>
 
-                                <td>
-                                    <input type="checkbox" name="fMassDelete" value="${featureInstance.id}"/>
-                                </td>
-
                             </tr>
                         </g:each>
                         </tbody>
                     </table>
                 </div>
                 <ul class="data_nav buttons">
-                    <li><g:link controller="feature" action="create" class="create">Add</g:link></li>
                     <li><a class="delete handmadeButton" onclick="submitForm('deleteMultiple', '');">Delete all marked features</a></li>
                 </ul>
             </g:form>
