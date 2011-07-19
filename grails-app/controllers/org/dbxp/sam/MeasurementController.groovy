@@ -1,13 +1,8 @@
 package org.dbxp.sam
 
-import org.dbxp.moduleBase.Auth
-import grails.converters.JSON
-import org.dbxp.moduleBase.Assay
 import org.dbxp.matriximporter.MatrixImporter
-import org.dbxp.matriximporter.CsvReader
-import org.dbxp.matriximporter.ExcelReader
-import org.dbxp.moduleBase.Sample
-import org.dbxp.moduleBase.Study
+import org.dbxp.moduleBase.Assay
+import org.dbxp.moduleBase.Auth
 
 class MeasurementController {
     static allowedMethods = [save: "POST", update: "POST", delete: "POST"]
@@ -125,56 +120,26 @@ class MeasurementController {
         */
         startUp {
             action{
-                session.assayList = [:]
-                session.studyList = [:]
+                flow.assayList = [:]
+                flow.studyList = [:]
                 Auth.findAllByUser(session.getValue('user')).each{
                     it.study.each { it2 ->
                         if(it2.canWrite(session.getValue('user'))){
                             it2.assays.each { assay ->
-                                session.assayList.put(assay.assayToken, assay.name)
-                                session.studyList.put(assay.assayToken, it2.name)
+                                flow.assayList.put(assay.assayToken, assay.name)
+                                flow.studyList.put(assay.assayToken, it2.name)
                             }
                         }
                     }
                 }
-
-                /* \(0_o)/ [Ugly hack to get around webflow implementation problem]
-                 See :
-                 - http://jira.grails.org/browse/GRAILS-6984
-                 - http://stackoverflow.com/questions/1691853/grails-webflow-keeping-things-out-of-flow-scope
-                */
-                /* def remove = []
-                flow.persistenceContext.getPersistenceContext().getEntitiesByKey().values().each { entity ->
-                    if(!entity instanceof Serializable){
-                        remove.add(entity)
-                    }
-                }
-                remove.each {flow.persistenceContext.evict(it)}
-                if(flash.size()!=0){
-                    flash.values().each { entity ->
-                        println entity.toString()+" - "+entity.getClass()
-                    }
-                    remove.each {flash.remove(it)}
-                } */
-
-
-                // Because the other solutions somehow don't get rid of a magical org.dbxp.moduleBase.Study object...
-                // we will simply clear it
-                flow.persistenceContext.clear()
-
-                ['assayList' : session.assayList, 'studyList' : session.studyList]
             }
             on("success").to "chooseAssay"
         }
 
 		chooseAssay {
 			// Step 1: choose study and assay (update assay dropdown based on the study selected)
-            render(view: 'chooseAssay')
 			on("next") {
-                def message = flow?.message // Save the message before clearing the flow
                 String name = Assay.findByAssayToken(params.assay).name
-                flow.persistenceContext.clear() // Get rid of the non-serializable assay (and incidentally all the rest...)
-                flow.message = message // Re-fill our flow
                 flow.assayToken = params.assay
                 flow.studyName = params.study
                 flow.assayName = name
@@ -184,22 +149,16 @@ class MeasurementController {
 		uploadData {
 			// Step 2: upload data and give the user a preview. The user then chooses which layout he wants
 			// to use.
-            render(view: 'uploadData', model: ['assayToken': flow.assayToken, 'assayName': flow.assayName, 'studyName': flow.studyName])
 			on("next") {
-                def f = request.getFile('fileUpload')
-                session.inputfile = f
+                flow.inputfile = request.getFile('fileUpload')
 			}.to "uploadDataCheck"
-			on("previous") {
-				// Save data of this step
-				flow.input = [ "file": params.inputfile]
-				flow.layout = params.layout
-			}.to "chooseAssay"
+			on("previous"){}.to "chooseAssay"
 		}
 
         uploadDataCheck {
             // Check to make sure we actually received a file.
             action {
-                def f = session.inputfile
+                def f = flow.inputfile
                 def text = ""
                 if(!f.empty) {
                     // Save data of this step
@@ -257,21 +216,25 @@ class MeasurementController {
                             subj++
                         }
 
-                        def guess = ""
+                        // Take a guess at the layout
+                        def guess = "sample_layout"
                         if(subj>sampl) guess = "subject_layout"
-                        if(sampl>subj) guess = "sample_layout"
+                        flow.layoutguess = guess
 
-
-                        session.inputfile = file
-                        session.layoutguess = guess
-                        session.text = text
+                        // Do we already have some manual selections?
+                        // If our text did not change, we can re-use them.
+                        if(flow.edited_text != null && flow.text != text){
+                            flow.edited_text = null
+                        }
+                        
+                        flow.text = text
                     } catch(Exception e) {
                         // Something went wrong with the file...
                         flow.message += " The precise error is as follows: "+e
                         return error()
                     }
                     flow.message = null
-                    flow.input = [ "file": session.inputfile, "oringinalFilename": f.getOriginalFilename()]
+                    flow.input = [ "file": flow.inputfile, "originalFilename": f.getOriginalFilename()]
                 }
                 else {
                     flow.message = 'Make sure to add a file using the upload field below. The file upload field cannot be empty.'
@@ -286,21 +249,21 @@ class MeasurementController {
             // Step x: Choose layout, preview data
 			on("next") {
 				// Save data of this step
-                session.layout = params.layoutselector
+                flow.layout = params.layoutselector
 
                 def possible_matches = [:]
                 if(params.layoutselector=="sample_layout"){
                     // Try to match first row to features
                     def feature_matches = [:]
-                    for(int i = 1; i < session.text[0].size(); i++){
-                        def match = fuzzySearchService.mostSimilar(session.text[0][i], Feature.list().name)
-                        feature_matches.put(session.text[0][i], match)
+                    for(int i = 1; i < flow.text[0].size(); i++){
+                        def match = fuzzySearchService.mostSimilar(flow.text[0][i], Feature.list().name)
+                        feature_matches.put(flow.text[0][i], match)
                     }
 
                     // Try to match first column to samples
                     def patterns = []
-                    for(int i = 1; i < session.text.size(); i++){
-                        patterns.push(session.text[i][0]);
+                    for(int i = 1; i < flow.text.size(); i++){
+                        patterns.push(flow.text[i][0]);
                     }
                     def samples = Assay.findByAssayToken(flow.assayToken).samples.name.toList()
                     def sample_matches_raw = fuzzySearchService.mostSimilarUnique(patterns.toList(), samples, 0)
@@ -308,11 +271,14 @@ class MeasurementController {
                     sample_matches_raw.each {
                         sample_matches.put(it.pattern, it.candidate)
                     }
-                    session.feature_matches = feature_matches
-                    session.sample_matches = sample_matches
-                    session.features = Feature.list().name
-                    session.samples = samples
-                    flow.persistenceContext.clear();
+
+                    flow.feature_matches = feature_matches.sort()
+                    flow.sample_matches = sample_matches.sort()
+                    flow.features = Feature.list().name
+                    flow.features.sort()
+                    flow.samples = samples.sort()
+                } else {
+                    println "subject layout not implemented yet..."
                 }
 			}.to "selectColumns"
 			on("previous") {}.to "uploadData"
@@ -322,11 +288,41 @@ class MeasurementController {
 			// Step 3: Choose which features in the database match which column in the uploaded file
 			on("next") {
 				// Save data of this step
-				flow.matching = params.matches
+                // This will be the data that will be saved
+
+                if(flow.layout=="sample_layout"){
+                    flow.edited_text = new Object[flow.text.size()][flow.text[0].size()]
+                    for(int i = 0; i < flow.text.size(); i++){
+                        for(int j = 0; j < flow.text[i].size(); j++){
+                            if(params.get(i+","+j)){
+                                flow.edited_text[i][j] = params.get(i+","+j)
+                            } else {
+                                flow.edited_text[i][j] = flow.text[i][j]
+                            }
+                        }
+                    }
+                } else {
+                    println "subject layout not implemented yet..."
+                }
 			}.to "checkInput"
 			on("previous") {
 				// Save data of this step
-				flow.matching = params.matches
+                // This is done to be able to redo matching when going back to, for example, the selectLayout step
+
+                if(params.layoutselector=="sample_layout"){
+                    flow.edited_text = new Object[flow.text.size()][flow.text[0].size()]
+                    for(int i = 0; i < flow.text.size(); i++){
+                        for(int j = 0; j < flow.text[i].size(); j++){
+                            if(params.get(i+","+j)){
+                                flow.edited_text[i][j] = params.get(i+","+j)
+                            } else {
+                                flow.edited_text[i][j] = flow.text[i][j]
+                            }
+                        }
+                    }
+                } else {
+                    println "subject layout not implemented yet..."
+                }
 			}.to "selectLayout"
 		}
 		checkInput {
@@ -335,7 +331,65 @@ class MeasurementController {
 		}
 		saveData {
 			action {
-				// Save data into the database 
+				// Save data into the database
+                flash.message = ""
+
+                if(flow.layout=="sample_layout"){
+                    def sList = [:]
+                    Assay.findByAssayToken(flow.assayToken).samples.toList().each {
+                        sList.put(it.name,it)
+                    }
+                    for(int i = 1; i < flow.edited_text.size(); i++){
+                        // For a particular sample
+                        def s = sList.get(flow.edited_text[i][0])
+                        for(int j = 1; j < flow.edited_text[0].size(); j++){
+                            // ... and a particular feature
+                            def f = Feature.findByName(flow.edited_text[0][j])
+                            // ... a measurement will be created
+
+                            // Check if the measurement has an operator or is a comment
+                            def operator
+                            def comments
+                            def val
+                            if(!flow.edited_text[i][j].isDouble()){
+                                // Apparantly the value is not a valid double
+
+                                // Is the first character a valid operator?
+                                if(Measurement.validOperators.contains(flow.edited_text[i][j].substring(0,1))){
+                                    // Apparently, it is.
+                                    operator = flow.edited_text[i][j].substring(0,1)
+                                    val = Double.valueOf(flow.edited_text[i][j].substring(1))
+                                } else {
+                                    // Apparently it is not.
+                                    // We'll use the comments field instead.
+                                    comments = flow.edited_text[i][j]
+                                }
+                            } else {
+                                // This is a simple double value
+                                val = Double.valueOf(flow.edited_text[i][j])
+                            }
+                            try {
+                                def m = new Measurement(sample:s,feature:f,value:val,operator:operator,comments:comments)
+                                if(!m.save(flush : true)){
+                                    flash.message += "<br>"+m.getErrors().allErrors
+                                    println m.getErrors().allErrors
+                                }
+                            } catch(Exception e) {
+                                flash.message += "<br>"+e
+                                // TODO: better logging
+                                println e
+                            }
+                        }
+                    }
+                } else {
+                    println "subject layout not implemented yet..."
+                }
+
+                if(flash.message!=""){
+                    flash.message = "There were errors while saving your measurements: "+flash.message
+                } else {
+                    flash.remove('message');
+                }
 			}
 			on("success").to "finishScreen"
 			on("error").to "errorSaving"
