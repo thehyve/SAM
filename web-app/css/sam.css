@@ -1,7 +1,7 @@
 /*
     Stylesheet specifically for the SAM module
 */
-body { font-family: Verdana, Arial, Helvetica, sans-serif; font-size: 10px; }
+body { font-family: Verdana, Arial, Helvetica, sans-serif; }
 
 div#contextmenu { margin-top: 0; }
 div#contextmenu ul {
@@ -34,7 +34,7 @@ div.data { padding-left: 11px;}
 ul.data_nav {
     color: #333333;
     font-weight: bold;
-    margin: 2px 3px;	/* top/bottom right/left */
+    margin: 2px 3px;
     padding: 0px; 
     list-style-type: none;
 }
@@ -51,14 +51,21 @@ ul.data_nav li { display: inline-block; *display: inline; zoom: 1; margin-right:
 
 /* This class is used for error messages */
 .errors {
-    /*color: #FF0000;*/
-    background: url(../plugins/famfamfam-1.0.1/images/icons/error.png) no-repeat scroll 10px 10px #ffcccc;
+    background: url("../plugins/famfamfam-1.0.1/images/icons/error.png") no-repeat scroll 10px 10px #ffcccc;
+
+}
+
+.badcell {
+    background: url("../plugins/famfamfam-1.0.1/images/icons/error.png") no-repeat scroll 2px 1px #ffcccc;
     border: 1px solid #FF0000;
-    margin: 10px 10px 0px 10px;
-    padding: 10px 10px 10px 33px;
+    margin: 2px 2px 0px 2px;
+    padding: 2px 2px 2px 20px;
     text-align: justify;
 }
 
-.buttons .import { 
-    background-image: url(../plugins/famfamfam-1.0.1/images/icons/page_white_add.png);
-}	
+.layoutchoice {
+    border: 1px solid lightgray;
+    margin:  15px 0px 15px 0px;
+    text-align: left;
+    
+}

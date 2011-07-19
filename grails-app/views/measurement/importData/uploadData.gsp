@@ -19,8 +19,8 @@
                         <tr>
                             <td></td>
                             <td><span style="color: darkgreen;">Feature name 1</span></td>
-                            <td><span style="color: lightseagreen;">Feature name 2</span></td>
-                            <td><span style="color: green;">Feature name 2</span></td>
+                            <td><span style="color: black;">Feature name 2</span></td>
+                            <td><span style="color: lightseagreen;">Feature name 3</span></td>
                         </tr>
                         <tr>
                             <td><span style="color: purple;">Sample name</span></td>
@@ -47,7 +47,7 @@
                             <td></td>
                             <td><span style="color: darkgreen;">Feature name 1</span></td>
                             <td><span style="color: darkgreen;">Feature name 1</span></td>
-                            <td><span style="color: darkgreen;">Feature name 1</span></td>
+                            <td><span style="color: black;">Feature name 2</span></td>
                         </tr>
                         <tr>
                             <td></td>
@@ -84,7 +84,9 @@
             </g:else>
                 <form method="post" enctype="multipart/form-data">
                     <input id="file" type="file" id="fileUpload" name="fileUpload"/>
-                    <g:submitButton name="next" class="upload" value="next">Upload file and continue importing</g:submitButton>
+                    <br>
+                    <g:submitButton name="previous" value="Previous" action="previous"/>
+                    <g:submitButton name="next" value="Upload file and continue importing" action="next"/>
                 </form>
             </div>
         </div>
