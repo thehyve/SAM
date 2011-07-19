@@ -40,7 +40,7 @@
         <h1><g:message code="default.list.label" args="[entityName]"/></h1>
 
         <div class="data">
-            <dt:dataTable id="fList" class="paginate sortable filter selectOne">
+            <dt:dataTable id="fList" class="paginate sortable filter selectOne serverside" rel="${g.createLink( controller: 'feature', action: 'datatables_list' )}">
                 <thead>
                     <tr>
 
@@ -48,12 +48,13 @@
 
                         <th>Unit</th>
 
-                        <th>Groups</th>
+                        <th class="nonsortable">Groups</th>
 
                         <dt:buttonsHeader/>
 
                     </tr>
                 </thead>
+                <!-- 
                 <tbody>
                     <g:each in="${featureInstanceList}" status="i" var="featureInstance">
                         <tr class="${(i % 2) == 0 ? 'odd' : 'even'}" id="rowid_${featureInstance.id}">
@@ -77,6 +78,7 @@
                         </tr>
                     </g:each>
                 </tbody>
+                 -->
             </dt:dataTable>
             <br />
             <ul class="data_nav buttons">

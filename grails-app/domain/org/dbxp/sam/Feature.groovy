@@ -20,6 +20,10 @@ class Feature extends TemplateEntity {
 		return name + ( unit!=null ? " ("+unit+")" : "" )
 	}
 
+	public def getFeatureGroups() {
+		return FeatureGroup.executeQuery( "SELECT DISTINCT fg FROM FeatureGroup fg, FeaturesAndGroups fag WHERE fag.featureGroup = fg AND fag.feature = :feature", [ "feature": this ] )
+	}
+	
 	/**
 	 * Changes the template for this feature. If no template with the given name 
 	 * exists, the template is set to null.
