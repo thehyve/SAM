@@ -16,7 +16,7 @@ class dataTablesTagLib {
         out << "</form>";
 
         String strClass="";
-        if(!attrs.class == null)
+        if(!(attrs.class == null))
             strClass = " " + attrs.class;
 
         out << "<table id='"+attrs.id+"_table' class='datatables"+strClass+"'>";

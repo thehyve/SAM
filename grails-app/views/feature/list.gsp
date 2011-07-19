@@ -40,7 +40,7 @@
         <h1><g:message code="default.list.label" args="[entityName]"/></h1>
 
         <div class="data">
-            <g:dataTable id="fList" class="paginate sortable filter select_multi">
+            <g:dataTable id="fList" class="paginate sortable filter selectMulti">
                 <thead>
                     <tr>
 
@@ -58,8 +58,9 @@
                     <g:each in="${featureInstanceList}" status="i" var="featureInstance">
                         <tr class="${(i % 2) == 0 ? 'odd' : 'even'}">
 
-                            <td><g:link action="show"
-                                        id="${featureInstance.id}">${fieldValue(bean: featureInstance, field: "name")}</g:link></td>
+                            <td rowid="${featureInstance.id}">
+                                <g:link action="show" id="${featureInstance.id}">${fieldValue(bean: featureInstance, field: "name")}</g:link>
+                            </td>
 
                             <td>${fieldValue(bean: featureInstance, field: "unit")}</td>
 

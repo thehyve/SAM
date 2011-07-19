@@ -15,7 +15,7 @@
         <h1><g:message code="default.list.label" args="[entityName]"/></h1>
 
         <div class="data">
-            <g:dataTable id="mList" class="paginate sortable filter select_multi">
+            <g:dataTable id="mList" class="paginate sortable filter selectMulti">
                 <thead>
                 <tr>
                     <th>Value</th>
@@ -34,8 +34,9 @@
                     <g:each in="${measurementInstanceList}" status="i" var="measurementInstance">
                         <tr class="${(i % 2) == 0 ? 'odd' : 'even'}">
 
-                            <td><g:link action="show"
-                                        id="${measurementInstance.id}">${fieldValue(bean: measurementInstance, field: "value")}</g:link></td>
+                            <td rowid="${measurementInstance.id}">
+                                <g:link action="show" id="${measurementInstance.id}">${fieldValue(bean: measurementInstance, field: "value")}</g:link>
+                            </td>
 
                             <td>${fieldValue(bean: measurementInstance, field: "operator")}</td>
 
