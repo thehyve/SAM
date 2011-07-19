@@ -89,6 +89,10 @@ class MeasurementController {
     }
 
     def delete = {
+        // TODO: Implement Delete
+        println("DATA: "+params.ids);
+        redirect(action: "list")
+        /*
         def measurementInstance = Measurement.get(params.id)
         if (measurementInstance) {
             try {
@@ -105,8 +109,9 @@ class MeasurementController {
             flash.message = "${message(code: 'default.not.found.message', args: [message(code: 'measurement.label', default: 'Measurement'), params.id])}"
             redirect(action: "list")
         }
+        */
     }
-	
+
 	def importData = {
 		redirect( action: 'importDataFlow' )
 	}

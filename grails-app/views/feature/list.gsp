@@ -40,7 +40,7 @@
         <h1><g:message code="default.list.label" args="[entityName]"/></h1>
 
         <div class="data">
-            <g:dataTable id="fList" class="paginate sortable filter selectMulti">
+            <dt:dataTable id="fList" class="paginate sortable filter selectOne">
                 <thead>
                     <tr>
 
@@ -50,15 +50,15 @@
 
                         <th>Groups</th>
 
-                        <g:buttonsHeader/>
+                        <dt:buttonsHeader/>
 
                     </tr>
                 </thead>
                 <tbody>
                     <g:each in="${featureInstanceList}" status="i" var="featureInstance">
-                        <tr class="${(i % 2) == 0 ? 'odd' : 'even'}">
+                        <tr class="${(i % 2) == 0 ? 'odd' : 'even'}" id="rowid_${featureInstance.id}">
 
-                            <td rowid="${featureInstance.id}">
+                            <td>
                                 <g:link action="show" id="${featureInstance.id}">${fieldValue(bean: featureInstance, field: "name")}</g:link>
                             </td>
 
@@ -72,15 +72,15 @@
                                 </g:each>
                             </td>
 
-                            <g:buttonsViewEditDelete controller="feature" id="${featureInstance.id}"/>
+                            <dt:buttonsViewEditDelete controller="feature" id="${featureInstance.id}"/>
 
                         </tr>
                     </g:each>
                 </tbody>
-            </g:dataTable>
+            </dt:dataTable>
             <br />
             <ul class="data_nav buttons">
-                    <li><a href="#" class="delete" onclick="submitForm('deleteMultiple', ''); return false;">Delete all marked features</a></li>
+                    <li><a href="#" class="delete" onclick="submitPaginatedForm('fList','delete', 'ERRORBERICHT!!');">Delete all marked features</a></li>
             </ul>
         </div>
     </body>

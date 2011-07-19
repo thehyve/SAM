@@ -33,7 +33,7 @@
         </content>
         <h1><g:message code="default.list.label" args="[entityName]"/></h1>
         <div class="data">
-            <g:dataTable id="fgList" class="paginate sortable filter selectMulti">
+            <dt:dataTable id="fgList" class="paginate sortable filter selectMulti">
                 <thead>
                     <tr>
 
@@ -41,7 +41,7 @@
 
                         <th>In use</th>
 
-                        <g:buttonsHeader numColumns="3"/>
+                        <dt:buttonsHeader numColumns="3"/>
 
                     </tr>
                 </thead>
@@ -70,12 +70,12 @@
                                 ${b}
                             </td>
 
-                            <g:buttonsViewEditDelete controller="featureGroup" id="${featureGroupInstance.id}"/>
+                            <dt:buttonsViewEditDelete controller="featureGroup" id="${featureGroupInstance.id}"/>
 
                         </tr>
                     </g:each>
                 </tbody>
-            </g:dataTable>
+            </dt:dataTable>
             <br />
             <ul class="data_nav buttons">
                     <li><a href="#" class="delete" onclick="submitForm('deleteMultiple', ''); return false;">Delete all marked groups</a></li>

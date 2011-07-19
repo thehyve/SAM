@@ -15,7 +15,7 @@
         <h1><g:message code="default.list.label" args="[entityName]"/></h1>
 
         <div class="data">
-            <g:dataTable id="mList" class="paginate sortable filter selectMulti">
+            <dt:dataTable id="mList" class="paginate sortable filter selectMulti">
                 <thead>
                 <tr>
                     <th>Value</th>
@@ -26,15 +26,15 @@
 
                     <th><g:message code="measurement.feature.label" default="Feature"/></th>
 
-                    <g:buttonsHeader/>
+                    <dt:buttonsHeader/>
 
                 </tr>
                 </thead>
                 <tbody>
                     <g:each in="${measurementInstanceList}" status="i" var="measurementInstance">
-                        <tr class="${(i % 2) == 0 ? 'odd' : 'even'}">
+                        <tr class="${(i % 2) == 0 ? 'odd' : 'even'}" id="rowid_${measurementInstance.id}">
 
-                            <td rowid="${measurementInstance.id}">
+                            <td>
                                 <g:link action="show" id="${measurementInstance.id}">${fieldValue(bean: measurementInstance, field: "value")}</g:link>
                             </td>
 
@@ -46,15 +46,15 @@
 
                             <td>${fieldValue(bean: measurementInstance, field: "feature")}</td>
 
-                            <g:buttonsViewEditDelete controller="measurement" id="${measurementInstance.id}" mapEnabled="[blnShow: true, blnEdit: false, blnDelete: true]" />
+                            <dt:buttonsViewEditDelete controller="measurement" id="${measurementInstance.id}" />
 
                         </tr>
                     </g:each>
                 </tbody>
-            </g:dataTable>
+            </dt:dataTable>
             <br />
             <ul class="data_nav buttons">
-                <li><a class="delete handmadeButton" onclick="submitForm('deleteMultiple', '');">Delete all marked measurements</a></li>
+                <li><a href="#" class="delete" onclick="submitPaginatedForm('mList','delete', 'ERRORBERICHT!!');">Delete all marked measurements</a></li>
             </ul>
         </div>
     </body>
