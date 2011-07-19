@@ -62,31 +62,14 @@ grails.spring.bean.packages = []
 // request parameters to mask when logging exceptions
 grails.exceptionresolver.params.exclude = ['password']
 
-// set per-environment serverURL stem for creating absolute links
-environments {
-    production {
-        grails.serverURL = "http://www.changeme.com"
-    }
-    development {
-        // Base URL of GSCF instance
-       gscf.baseURL = "http://194.171.10.86:8080/gscf-0.8.3-www"
-
-        // Server URL of the module
-        grails.serverURL = "http://194.171.10.66:8191/${appName}"
-
-        // Consumer ID of this module that is used in communication with GSCF
-        module.consumerID = "http://194.171.10.66:8191/${appName}"
-
-        // See BaseFilters.groovy
-        module.defaultAuthenticationRequired = true
-
-        // Make sure synchronization is performed
-        module.synchronization.perform = true
-    }
-    test {
-        grails.serverURL = "http://localhost:8080/${appName}"
-    }
-
+// Temporary directory to upload files to.
+// If the directory is given relative (e.g. 'fileuploads/temp'), it is taken relative to the web-app directory
+// Otherwise, it should be given as an absolute path (e.g. '/home/user/sequences')
+// The directory should be writable by the webserver user
+if (grails.util.GrailsUtil.environment == GrailsApplication.ENV_TEST) {
+	uploads.uploadDir = "webtestfiles"
+} else {
+	uploads.uploadDir = (new File("/tmp")?.canWrite()) ? "/tmp" : "fileuploads"
 }
 
 // log4j configuration
@@ -112,7 +95,7 @@ log4j = {
 
     warn   'org.mortbay.log'
 
-    info    "grails.app",
-            'org.codehaus.groovy.grails.plugins' // plugins
+    trace    "grails.app",
+            //'org.codehaus.groovy.grails.plugins' // plugins
             "dbxp.moduleBase"
 }

@@ -1,7 +1,7 @@
 /*
     Stylesheet specifically for the SAM module
 */
-body { font-family: Verdana, Arial, Helvetica, sans-serif; font-size: 10px; }
+body { font-family: Verdana, Arial, Helvetica, sans-serif; font-size: 11px; }
 
 div#contextmenu { margin-top: 0; }
 div#contextmenu ul {
@@ -25,7 +25,7 @@ div#contextmenu a:hover {
 }
 
 /* Header above each page */
-h1 { padding-left: 11px; }
+h1 { }
 
 /* Div around all data (lists/forms) including buttons */
 div.data { padding-left: 11px;}
