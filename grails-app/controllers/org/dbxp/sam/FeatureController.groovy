@@ -18,7 +18,7 @@ class FeatureController {
 	
 	/**
 	 * Returns data for datatable. 
-	 * @see http://www.datatables.net/usage/server-side
+	 * @see ! http://www.datatables.net/usage/server-side
 	 * @see ../moduleBase/datatables.js
 	 */
 	def datatables_list = {
@@ -45,13 +45,13 @@ class FeatureController {
 		int numColumns = params.int( 'columns' );
 		
 		// Search parameters; searchable columns are determined serverside
-		String search = params.int( 'sSearch' );
-		
+		String search = params.sSearch;
+
 		// Sort parameters
 		int sortingCols = params.int( 'iSortingCols' );
 		List sortOn = []
 		for( int i = 0; i < sortingCols; i++ ) {
-			sortOn[ i ] = [ 'column': params.int( 'iSortCol_' + i ) + 1, 'direction': params[ 'sSortDir_' + i ] ];
+			sortOn[ i ] = [ 'column': params.int( 'iSortCol_' + i ), 'direction': params[ 'sSortDir_' + i ] ];
 		}
 		
 		// What columns to return?
@@ -72,17 +72,19 @@ class FeatureController {
 			}
 
 			// Group names should be searched separately
-			hqlConstraints << "EXISTS ( FROM FeatureGroup fg, FeaturesAndGroups fag WHERE fg = fag.featureGroup AND fag.feature = f AND fg.name LIKE :search"
+			hqlConstraints << "EXISTS ( FROM FeatureGroup fg, FeaturesAndGroups fag WHERE fg = fag.featureGroup AND fag.feature = f AND fg.name LIKE :search)";
 			
 			hql += "WHERE " + hqlConstraints.join( " OR " ) + " "
+
+            println(hql);
 		}
 			
 		// Sort properties
 		if( sortOn ) {
-			orderHQL = "ORDER BY " + sortOn.collect { it.column + " " + it.direction }.join( " " ); 
+			orderHQL = "ORDER BY " + sortOn.collect { columns[it.column] + " " + it.direction }.join( " " );
 		}
 
-		// Display properties
+        // Display properties
 		def records = Feature.executeQuery( hql + orderHQL, hqlParams, [ max: displayLength, offset: displayStart ] );
 		def numTotalRecords = Feature.count();
 		def filteredRecords = Feature.executeQuery( "SELECT id " + hql, hqlParams );
