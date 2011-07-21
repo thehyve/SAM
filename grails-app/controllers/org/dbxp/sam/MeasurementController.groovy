@@ -84,28 +84,52 @@ class MeasurementController {
     }
 
     def delete = {
-        // TODO: Implement Delete
-        println("DATA: "+params.ids);
-        redirect(action: "list")
-        /*
-        def measurementInstance = Measurement.get(params.id)
-        if (measurementInstance) {
-            try {
-                measurementInstance.delete(flush: true)
-                flash.message = "${message(code: 'default.deleted.message', args: [message(code: 'measurement.label', default: 'Measurement'), params.id])}"
-                redirect(action: "list")
-            }
-            catch (org.springframework.dao.DataIntegrityViolationException e) {
-                flash.message = "${message(code: 'default.not.deleted.message', args: [message(code: 'measurement.label', default: 'Measurement'), params.id])}"
-                redirect(action: "show", id: params.id)
-            }
-        }
-        else {
-            flash.message = "${message(code: 'default.not.found.message', args: [message(code: 'measurement.label', default: 'Measurement'), params.id])}"
-            redirect(action: "list")
-        }
-        */
+        def ids = params.list( 'ids' ).findAll { it.isLong() }.collect { it.toDouble() };
+		
+		if( !ids ) {
+			response.sendError( 404 );
+			return;
+		}
+		
+		def numDeleted = 0;
+		def numErrors = 0;
+		def numNotFound = 0;
+		
+		ids.each { id ->
+			def measurementInstance = Measurement.get(id)
+	        if (measurementInstance) {
+                try {
+					measurementInstance.delete(flush: true)
+					numDeleted++;
+	            } catch (org.springframework.dao.DataIntegrityViolationException e) {
+	                log.error(e)
+					numErrors++;
+	            }
+	        }
+	        else {
+				numNotFound++;
+	        }
+		}
+		
+		if( numDeleted == 1  )
+			flash.message = "1 measurement has been deleted from the database"
+		if( numDeleted > 1 )
+			flash.message = numDeleted + " measurements have been deleted from the database"
+		
+		flash.error = ""
+		if( numNotFound == 1 )
+			flash.error += "1 measurement has been deleted before." 
+		if( numNotFound > 1 )
+			flash.error += numNotFound+ " measurements have been deleted before." 
+
+		if( numErrors == 1 )
+			flash.error += "1 measurement could not be deleted. Please try again" 
+		if( numErrors > 1 )
+			flash.error += numErrors + " measurements could not be deleted. Please try again" 
+		
+		redirect(action: "list")
     }
+
 
 	def importData = {
 		redirect( action: 'importDataFlow' )

@@ -86,29 +86,57 @@ class FeatureGroupController {
     }
 
     def delete = {
-        def featureGroupInstance = FeatureGroup.get(params.id)
-        if (featureGroupInstance) {
-            def FaGList = FeaturesAndGroups.findAllByFeatureGroup(featureGroupInstance)
-            try {
-                if(FaGList.size()!=0){
-                    FaGList.each {
-                        it.delete(flush: true)
-                    }
-                }
-                featureGroupInstance.delete(flush: true)
-                flash.message = "${message(code: 'default.deleted.message', args: [message(code: 'featureGroup.label', default: 'FeatureGroup'), params.id])}"
-                redirect(action: "list")
-            }
-            catch (org.springframework.dao.DataIntegrityViolationException e) {
-                log.error(e)
-                flash.message = "${message(code: 'default.not.deleted.message', args: [message(code: 'featureGroup.label', default: 'FeatureGroup'), params.id])}"
-                redirect(action: "show", id: params.id)
-            }
-        }
-        else {
-            flash.message = "${message(code: 'default.not.found.message', args: [message(code: 'featureGroup.label', default: 'FeatureGroup'), params.id])}"
-            redirect(action: "list")
-        }
+        def ids = params.list( 'ids' ).findAll { it.isLong() }.collect { it.toDouble() };
+		
+		if( !ids ) {
+			response.sendError( 404 );
+			return;
+		}
+		
+		def numDeleted = 0;
+		def numErrors = 0;
+		def numNotFound = 0;
+		
+		ids.each { id ->
+			def featureGroupInstance = FeatureGroup.get(id)
+	        if (featureGroupInstance) {
+                try {
+					def FaGList = FeaturesAndGroups.findAllByFeatureGroup(featureGroupInstance)
+					if(FaGList.size()!=0){
+						FaGList.each {
+							it.delete(flush: true)
+						}
+					}
+					
+					featureGroupInstance.delete(flush: true)
+					numDeleted++;
+	            } catch (org.springframework.dao.DataIntegrityViolationException e) {
+	                log.error(e)
+					numErrors++;
+	            }
+	        }
+	        else {
+				numNotFound++;
+	        }
+		}
+		
+		if( numDeleted == 1  )
+			flash.message = "1 feature group has been deleted from the database"
+		if( numDeleted > 1 )
+			flash.message = numDeleted + " feature groups have been deleted from the database"
+		
+		flash.error = ""
+		if( numNotFound == 1 )
+			flash.error += "1 feature group has been deleted before." 
+		if( numNotFound > 1 )
+			flash.error += numNotFound+ " feature groups have been deleted before." 
+
+		if( numErrors == 1 )
+			flash.error += "1 feature group could not be deleted. Please try again" 
+		if( numErrors > 1 )
+			flash.error += numErrors + " feature groups could not be deleted. Please try again" 
+		
+		redirect(action: "list")
     }
 
     def deleteMultiple = {

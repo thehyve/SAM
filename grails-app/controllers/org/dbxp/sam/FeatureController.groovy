@@ -208,29 +208,57 @@ class FeatureController {
     }
 
     def delete = {
-        def featureInstance = Feature.get(params.id)
-        if (featureInstance) {
-            def FaGList = FeaturesAndGroups.findAllByFeature(featureInstance)
-            try {
-                if(FaGList.size()!=0){
-                    FaGList.each {
-                        it.delete(flush: true)
-                    }
-                }
-                featureInstance.delete(flush: true)
-                flash.message = "${message(code: 'default.deleted.message', args: [message(code: 'feature.label', default: 'Feature'), params.id])}"
-                redirect(action: "list")
-            }
-            catch (org.springframework.dao.DataIntegrityViolationException e) {
-                log.error(e)
-                flash.message = "${message(code: 'default.not.deleted.message', args: [message(code: 'feature.label', default: 'Feature'), params.id])}"
-                redirect(action: "show", id: params.id)
-            }
-        }
-        else {
-            flash.message = "${message(code: 'default.not.found.message', args: [message(code: 'feature.label', default: 'Feature'), params.id])}"
-            redirect(action: "list")
-        }
+        def ids = params.list( 'ids' ).findAll { it.isLong() }.collect { it.toDouble() };
+		
+		if( !ids ) {
+			response.sendError( 404 );
+			return;
+		}
+		
+		def numDeleted = 0;
+		def numErrors = 0;
+		def numNotFound = 0;
+		
+		ids.each { id ->
+			def featureInstance = Feature.get(id)
+	        if (featureInstance) {
+	            def FaGList = FeaturesAndGroups.findAllByFeature(featureInstance)
+	            try {
+	                if(FaGList.size()!=0){
+	                    FaGList.each {
+	                        it.delete(flush: true)
+	                    }
+	                }
+	                featureInstance.delete(flush: true)
+					numDeleted++;
+	            }
+	            catch (org.springframework.dao.DataIntegrityViolationException e) {
+	                log.error(e)
+					numErrors++;
+	            }
+	        }
+	        else {
+				numNotFound++;
+	        }
+		}
+		
+		if( numDeleted == 1  )
+			flash.message = "1 feature has been deleted from the database"
+		if( numDeleted > 1 )
+			flash.message = numDeleted + " features have been deleted from the database"
+		
+		flash.error = ""
+		if( numNotFound == 1 )
+			flash.error += "1 feature has been deleted before." 
+		if( numNotFound > 1 )
+			flash.error += numNotFound+ " features have been deleted before." 
+
+		if( numErrors == 1 )
+			flash.error += "1 feature could not be deleted. Please try again" 
+		if( numErrors > 1 )
+			flash.error += numErrors + " features could not be deleted. Please try again" 
+		
+		redirect(action: "list")
     }
 
     def refreshEdit = {
@@ -356,37 +384,4 @@ class FeatureController {
 		showFaGList( featureInstance );
     }
 
-    def deleteMultiple = {
-        // Used to delete multiple features from the feature list
-        def toDeleteList = []
-        if(params?.fMassDelete!=null){
-            // If necessary, go from a string to a list of strings
-            if(params.fMassDelete.class!="".class){
-                toDeleteList = params.fMassDelete
-            } else {
-                toDeleteList.push(params.fMassDelete)
-            }
-        }
-        if(toDeleteList.size()>0){
-            def return_map = [:]
-            return_map = Feature.deleteMultipleFeatures(toDeleteList)
-            def error = return_map.get("error")
-            if(error){
-                log.error(error)
-            }
-            def message = return_map.get("message")
-            if(message){
-                flash.message = message
-            }
-            def action = return_map.get("action")
-            if(action){
-                redirect(action: action)
-            } else {
-                redirect(action:list)
-            }
-        } else {
-            flash.message = "No features were marked when the delete button was clicked, so no features were deleted."
-            redirect(action: "list")
-        }
-    }
 }
