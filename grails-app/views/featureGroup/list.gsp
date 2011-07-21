@@ -47,7 +47,7 @@
                 </thead>
                 <tbody>
                     <g:each in="${featureGroupInstanceList}" status="i" var="featureGroupInstance">
-                        <tr class="${(i % 2) == 0 ? 'odd' : 'even'}">
+                        <tr class="${(i % 2) == 0 ? 'odd' : 'even'}" id="rowid_${featureGroupInstance.id}">
 
                             <td rowid="${featureGroupInstance.id}">
                                 <g:link action="show" id="${featureGroupInstance.id}">${fieldValue(bean: featureGroupInstance, field: "name")}</g:link>
@@ -70,7 +70,7 @@
                                 ${b}
                             </td>
 
-                            <dt:buttonsViewEditDelete controller="featureGroup" id="${featureGroupInstance.id}"/>
+                            <dt:buttonsShowEditDelete controller="featureGroup" id="${featureGroupInstance.id}"/>
 
                         </tr>
                     </g:each>
@@ -78,7 +78,7 @@
             </dt:dataTable>
             <br />
             <ul class="data_nav buttons">
-                    <li><a href="#" class="delete" onclick="submitForm('deleteMultiple', ''); return false;">Delete all marked groups</a></li>
+                    <li><a href="#" class="delete" onclick="if(confirm('${message(code: 'default.button.delete.confirm.message', default: 'Are you sure?')}')) {submitPaginatedForm('fgList','delete', 'No rows selected');} else {return false;}">Delete all marked groups</a></li>
             </ul>
         </div>
     </body>

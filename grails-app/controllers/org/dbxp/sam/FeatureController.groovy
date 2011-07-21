@@ -19,7 +19,7 @@ class FeatureController {
 	/**
 	 * Returns data for datatable. 
 	 * @see http://www.datatables.net/usage/server-side
-	 * @see dbxpModuleBase/datatables.js
+	 * @see ../moduleBase/datatables.js
 	 */
 	def datatables_list = {
 		/*	Input:
@@ -94,13 +94,18 @@ class FeatureController {
 		string 	sColumns 				Optional - this is a string of column names, comma separated (used in combination with sName) which will allow DataTables to reorder data on the client-side if required for display. Note that the number of column names returned must exactly match the number of columns in the table. For a more flexible JSON format, please consider using mDataProp.
 		array 	aaData 					The data in a 2D array. Note that you can change the name of this parameter with sAjaxDataProp.
 		*/
-		
+
+
+
 		def returnValues = [
 			iTotalRecords: numTotalRecords,
 			iTotalDisplayRecords: filteredRecords.size(),
 			sEcho: params.int( 'sEcho' ),
-			aaData: records.collect { 
-				[ it.name, it.unit, it.getFeatureGroups()*.name?.join( ", " ), '', '', '']
+			aaData: records.collect {
+				[ it.id, it.name, it.unit, it.getFeatureGroups()*.name?.join( ", " ),
+                    dt.buttonShow(id: it.id, controller: "feature", blnEnabled: true),
+                    dt.buttonEdit(id: it.id, controller: "feature", blnEnabled: true),
+                    dt.buttonDelete(id: it.id, controller: "feature", blnEnabled: true)]
 			},
 			aIds: filteredRecords 
 		]

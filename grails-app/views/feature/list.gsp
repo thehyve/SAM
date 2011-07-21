@@ -40,7 +40,7 @@
         <h1><g:message code="default.list.label" args="[entityName]"/></h1>
 
         <div class="data">
-            <dt:dataTable id="fList" class="paginate sortable filter selectOne serverside" rel="${g.createLink( controller: 'feature', action: 'datatables_list' )}">
+            <dt:dataTable id="fList" class="paginate sortable filter selectMulti serverside" rel="${g.createLink( controller: 'feature', action: 'datatables_list' )}">
                 <thead>
                     <tr>
 
@@ -73,7 +73,7 @@
                                 </g:each>
                             </td>
 
-                            <dt:buttonsViewEditDelete controller="feature" id="${featureInstance.id}"/>
+                            <dt:buttonsShowEditDelete controller="feature" id="${featureInstance.id}"/>
 
                         </tr>
                     </g:each>
@@ -82,7 +82,7 @@
             </dt:dataTable>
             <br />
             <ul class="data_nav buttons">
-                    <li><a href="#" class="delete" onclick="submitPaginatedForm('fList','delete', 'ERRORBERICHT!!');">Delete all marked features</a></li>
+                    <li><a href="#" class="delete" onclick="if(confirm('${message(code: 'default.button.delete.confirm.message', default: 'Are you sure?')}')) {submitPaginatedForm('fList','delete', 'No rows selected');} else {return false;}">Delete all marked features</a></li>
             </ul>
         </div>
     </body>

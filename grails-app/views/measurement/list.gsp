@@ -46,7 +46,7 @@
 
                             <td>${fieldValue(bean: measurementInstance, field: "feature")}</td>
 
-                            <dt:buttonsViewEditDelete controller="measurement" id="${measurementInstance.id}" />
+                            <dt:buttonsShowEditDelete controller="measurement" id="${measurementInstance.id}" />
 
                         </tr>
                     </g:each>
@@ -54,7 +54,7 @@
             </dt:dataTable>
             <br />
             <ul class="data_nav buttons">
-                <li><a href="#" class="delete" onclick="submitPaginatedForm('mList','delete', 'ERRORBERICHT!!');">Delete all marked measurements</a></li>
+                <li><a href="#" class="delete" onclick="if(confirm('${message(code: 'default.button.delete.confirm.message', default: 'Are you sure?')}')) {submitPaginatedForm('mList','delete', 'No rows selected');} else {return false;}">Delete all marked measurements</a></li>
             </ul>
         </div>
     </body>
