@@ -63,13 +63,28 @@ ul.data_nav li { display: inline-block; *display: inline; zoom: 1; margin-right:
     border: 1px solid #FF0000;
     margin: 2px 2px 0px 2px;
     padding: 2px 2px 2px 20px;
-    text-align: justify;
 }
 
 .layoutchoice {
     border: 1px solid lightgray;
     margin:  15px 0px 15px 0px;
     text-align: left;
+}
+
+.buttons .import { 
+	background-image: url(../plugins/famfamfam-1.0.1/images/icons/page_white_add.png);
+}
+
+.importerInteractiveCell {
+    cursor: pointer;
+}
+
+.importerOperatorCell {
+    background-color: #ffefef;
+}
+
+.importerCommentCell {
+    background-color: pink;
 }
 
 .buttons .import { 

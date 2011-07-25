@@ -1,0 +1,19 @@
+div.tooltip {
+}
+
+div.tooltip span {
+    border-radius: 5px 5px 5px 5px;
+    box-shadow: 5px 5px rgba(0, 0, 0, 0.1);
+    display:none;
+    border: 1px dotted lightgray;
+    color: #000000;
+    background: none repeat scroll 0 0 lightgoldenrodyellow;
+    padding:2px 3px;
+    margin-left:8px;
+    width:250px;
+}
+
+div.tooltip:hover span{
+    display:inline;
+    position:absolute;
+}  

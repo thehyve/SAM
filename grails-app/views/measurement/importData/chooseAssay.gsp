@@ -37,9 +37,16 @@
                 </table>
             </div>
             <g:form method="post" name="importData" action="importData">
-                <g:hiddenField name="assay" value=""/>
-                <g:hiddenField name="study" value=""/>
-                <g:submitButton name="next" value="Next" action="next" disabled='true'/>
+                <g:if test="${assay!=null && studyName!=null}">
+                    <g:hiddenField name="assay" value="${assay.assayToken}"/>
+                    <g:hiddenField name="study" value="${studyName}"/>
+                    <g:submitButton name="next" value="Next" action="next"/>
+                </g:if>
+                <g:else>
+                    <g:hiddenField name="assay" value="${assay}"/>
+                    <g:hiddenField name="study" value="${study}"/>
+                    <g:submitButton name="next" value="Next" action="next" disabled='true'/>
+                </g:else>
             </g:form>
         </div>
     </body>

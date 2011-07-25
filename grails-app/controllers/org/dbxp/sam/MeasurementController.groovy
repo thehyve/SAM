@@ -3,6 +3,7 @@ package org.dbxp.sam
 import org.dbxp.matriximporter.MatrixImporter
 import org.dbxp.moduleBase.Assay
 import org.dbxp.moduleBase.Auth
+import org.dbxp.moduleBase.Sample
 
 class MeasurementController {
     static allowedMethods = [save: "POST", update: "POST", delete: "POST"]
@@ -129,19 +130,13 @@ class MeasurementController {
 		
 		redirect(action: "list")
     }
-
-
+	
 	def importData = {
 		redirect( action: 'importDataFlow' )
 	}
 
 	def importDataFlow = {
-        /*def assayList = [:]
-        def studyList = [:]
-        def assayToken
-        def assayName
-        def studyName
-        */
+
         startUp {
             action{
                 flow.assayList = [:]
@@ -163,10 +158,8 @@ class MeasurementController {
 		chooseAssay {
 			// Step 1: choose study and assay (update assay dropdown based on the study selected)
 			on("next") {
-                String name = Assay.findByAssayToken(params.assay).name
-                flow.assayToken = params.assay
+                flow.assay = Assay.findByAssayToken(params.assay)
                 flow.studyName = params.study
-                flow.assayName = name
 			}.to "uploadData"
 		}
 
@@ -192,71 +185,72 @@ class MeasurementController {
                         f.transferTo( new File( "./tempfolder/" + File.separatorChar + f.getOriginalFilename() ) )
                         File file = new File("./tempfolder/" + File.separatorChar + f.getOriginalFilename())
                         text = MatrixImporter.getInstance().importFile(file);
-
-
-                        // In the following section we will try to find out what layout the data in this file has
-                        def sampl = 0
-                        def subj = 0
-
-                        if(text[1][0]==null || text[1][0]==""){
-                            // Cell A2 empty? That would indicate subject layout.
-                            // It is also a pretty good sign that this is not a sample layout
-                            subj++
-                            sampl--
-                        } else {
-                            // IT cell A2 is not empty, it supports a conclusion of sample layout,
-                            // but it does not substract from a subject layout conclusion (there might be a comment there)
-                            sampl++
-                        }
-
-                        // If the second row contains only doubles, this makes it more likely to be a sample layout
-                        def double_rainbow = true
-                        for(int i = 1; i < text[1].size(); i++){
-                            if(i == 15){
-                                // Don't check everything
-                                break;
-                            }
-                            if(!text[1][i].isDouble()){
-                                double_rainbow = false
-                            }
-                        }
-                        if(double_rainbow){
-                            sampl++
-                        }
-
-                        // If the first row contains different features, this makes it more likely to be a sample layout
-                        // The converse is also true
-                        def tmp = []
-                        for(int i = 1; i < text[0].size(); i++){
-                            if(i == 15){
-                                // Don't check everything
-                                break;
-                            }
-                            tmp.push(!text[0][i])
-                        }
-                        if(tmp.size()==tmp.unique().size()){
-                            sampl++
-                        } else {
-                            subj++
-                        }
-
-                        // Take a guess at the layout
-                        def guess = "sample_layout"
-                        if(subj>sampl) guess = "subject_layout"
-                        flow.layoutguess = guess
-
-                        // Do we already have some manual selections?
-                        // If our text did not change, we can re-use them.
-                        if(flow.edited_text != null && flow.text != text){
-                            flow.edited_text = null
-                        }
-                        
-                        flow.text = text
-                    } catch(Exception e) {
+                    } catch(Exception e){
                         // Something went wrong with the file...
                         flow.message += " The precise error is as follows: "+e
                         return error()
                     }
+
+                    // In the following section we will try to find out what layout the data in this file has
+                    def sampl = 0
+                    def subj = 0
+
+                    if(text[1][0]==null || text[1][0]==""){
+                        // Cell A2 empty? That would indicate subject layout.
+                        // It is also a pretty good sign that this is not a sample layout
+                        subj++
+                        sampl--
+                    } else {
+                        // IT cell A2 is not empty, it supports a conclusion of sample layout,
+                        // but it does not substract from a subject layout conclusion (there might be a comment there)
+                        sampl++
+                    }
+
+                    // If the second row contains only doubles, this makes it more likely to be a sample layout
+                    def double_rainbow = true
+                    for(int i = 1; i < text[1].size(); i++){
+                        if(i == 15){
+                            // Don't check everything
+                            break;
+                        }
+                        if(!text[1][i].isDouble()){
+                            double_rainbow = false
+                        }
+                    }
+                    if(double_rainbow){
+                        sampl++
+                    }
+
+                    // If the first row contains different features, this makes it more likely to be a sample layout
+                    // The opposite situation is also true
+                    def tmp = []
+                    for(int i = 1; i < text[0].size(); i++){
+                        if(i == 15){
+                            // Don't check everything
+                            break;
+                        }
+                        tmp.push(!text[0][i])
+                    }
+                    if(tmp.size()==tmp.unique().size()){
+                        sampl++
+                    } else {
+                        subj++
+                    }
+
+                    // Take a guess at the layout
+                    def guess = "sample_layout"
+                    if(subj>sampl) guess = "subject_layout"
+                    flow.layoutguess = guess
+
+                    // Do we already have some manual selections?
+                    // If our text did not change, we can re-use them.
+                    if(flow.edited_text != null && flow.text != text){
+                        flow.edited_text = null
+                        flow.operator = null
+                        flow.comments = null
+                    }
+
+                    flow.text = text
                     flow.message = null
                     flow.input = [ "file": flow.inputfile, "originalFilename": f.getOriginalFilename()]
                 }
@@ -277,30 +271,29 @@ class MeasurementController {
 
                 def possible_matches = [:]
                 if(params.layoutselector=="sample_layout"){
+                    flow.features = Feature.list().sort(){it.name}
+                    flow.samples = flow.assay.samples.sort(){it.name}
+
                     // Try to match first row to features
-                    def feature_matches = [:]
+                    flow.feature_matches = [:]
                     for(int i = 1; i < flow.text[0].size(); i++){
-                        def match = fuzzySearchService.mostSimilar(flow.text[0][i], Feature.list().name)
-                        feature_matches.put(flow.text[0][i], match)
+                        def index = fuzzySearchService.mostSimilarWithIndex(flow.text[0][i], flow.features*.toString())
+                        if(index!=null){
+                            flow.feature_matches[flow.text[0][i]] = index
+                        } else {
+                            flow.feature_matches[flow.text[0][i]] = 0
+                        }
                     }
-
                     // Try to match first column to samples
-                    def patterns = []
+                    flow.sample_matches = [:]
                     for(int i = 1; i < flow.text.size(); i++){
-                        patterns.push(flow.text[i][0]);
+                        def index = fuzzySearchService.mostSimilarWithIndex(flow.text[i][0], flow.samples.name)
+                        if(index!=null){
+                            flow.sample_matches[flow.text[i][0]] = index
+                        } else {
+                            flow.sample_matches[flow.text[i][0]] = 0
+                        }
                     }
-                    def samples = Assay.findByAssayToken(flow.assayToken).samples.name.toList()
-                    def sample_matches_raw = fuzzySearchService.mostSimilarUnique(patterns.toList(), samples, 0)
-                    def sample_matches = [:]
-                    sample_matches_raw.each {
-                        sample_matches.put(it.pattern, it.candidate)
-                    }
-
-                    flow.feature_matches = feature_matches.sort()
-                    flow.sample_matches = sample_matches.sort()
-                    flow.features = Feature.list().name
-                    flow.features.sort()
-                    flow.samples = samples.sort()
                 } else {
                     println "subject layout not implemented yet..."
                 }
@@ -311,17 +304,63 @@ class MeasurementController {
 		selectColumns {
 			// Step 3: Choose which features in the database match which column in the uploaded file
 			on("next") {
-				// Save data of this step
-                // This will be the data that will be saved
+				// Save data of this step and make some more information available about the contents of the cells
+                if(!flow.operator){
+                    flow.operator = [:]
+                }
+                if(!flow.comments){
+                    flow.comments = [:]
+                }
 
                 if(flow.layout=="sample_layout"){
-                    flow.edited_text = new Object[flow.text.size()][flow.text[0].size()]
-                    for(int i = 0; i < flow.text.size(); i++){
-                        for(int j = 0; j < flow.text[i].size(); j++){
-                            if(params.get(i+","+j)){
-                                flow.edited_text[i][j] = params.get(i+","+j)
-                            } else {
-                                flow.edited_text[i][j] = flow.text[i][j]
+                    if(!flow.edited_text){
+                        flow.edited_text = new Object[flow.text.size()][flow.text[0].size()]
+
+                        // Generate extra information about cell contents and fold the user's selections into our data storage object flow.edited_text
+                        for(int i = 0; i < flow.text.size(); i++){
+                            for(int j = 0; j < flow.text[i].size(); j++){
+                                if(params[i+','+j]){
+                                    println params[i+','+j]+"   "+params[i+','+j].class
+                                    // Here we are catching a user's feature or sample selection from the previous page and incorporating it into our new dataset
+                                    // We receive an object's id and use this to the object to the flow.edited_text
+                                    if(params[i+','+j] == 'null'){
+                                        // We didn't actually receive a proper id, so set the field to null
+                                        flow.edited_text[i][j] = null
+                                        continue;
+                                    }
+                                    if(i==0){
+                                        flow.edited_text[i][j] = Feature.findById(params[i+','+j])
+                                        continue;
+                                    }
+                                    if(j==0){
+                                        flow.edited_text[i][j] = Sample.findById(params[i+','+j])
+                                        continue;
+                                    }
+                                } else {
+                                    flow.edited_text[i][j] = flow.text[i][j]
+                                    def txt = flow.edited_text[i][j]
+                                    if(i>0 && j>0 && txt!=null && txt!=""){
+                                        txt = txt.trim()
+                                        if(!txt.isDouble()){
+                                            // Apparently the value is not a valid double
+
+                                            // Is the first character a valid operator?
+                                            if(Measurement.validOperators.contains(txt.substring(0,1)) && txt.substring(1).trim().isDouble()){
+                                                // Apparently, it is.
+                                                flow.operator.put(i+","+j,txt.substring(0,1).trim())
+                                                flow.edited_text[i][j] = Double.valueOf(txt.substring(1).trim())
+                                            } else {
+                                                // Apparently it is not.
+                                                // We'll use the comments field instead.
+                                                flow.comments.put(i+","+j,flow.edited_text[i][j])
+                                                flow.edited_text[i][j] = ""
+                                            }
+                                        } else {
+                                            // This is a simple double value
+                                            // We don't need to save more information than contained in flow.edited_text
+                                        }
+                                    }
+                                }
                             }
                         }
                     }
@@ -332,15 +371,31 @@ class MeasurementController {
 			on("previous") {
 				// Save data of this step
                 // This is done to be able to redo matching when going back to, for example, the selectLayout step
-
-                if(params.layoutselector=="sample_layout"){
+                if(!flow.edited_text){
                     flow.edited_text = new Object[flow.text.size()][flow.text[0].size()]
+                }
+                
+                if(flow.layout=="sample_layout"){
+                    // Fold the user's selections into our flow.feature_matches and flow.sample_matches
                     for(int i = 0; i < flow.text.size(); i++){
                         for(int j = 0; j < flow.text[i].size(); j++){
-                            if(params.get(i+","+j)){
-                                flow.edited_text[i][j] = params.get(i+","+j)
-                            } else {
-                                flow.edited_text[i][j] = flow.text[i][j]
+                            if(params[i+','+j]){
+                                // Here we are catching a user's feature or sample selection from the previous page and incorporating it into our new dataset
+                                // We receive an object's id and use this to the object to the flow.edited_text
+
+                                if(params[i+','+j] == 'null'){
+                                    // We didn't actually receive a proper id, so set the field to null
+                                    flow.edited_text[i][j] = null
+                                    continue;
+                                }
+                                if(i==0){
+                                    flow.edited_text[i][j] = Feature.findById(params[i+','+j])
+                                    continue;
+                                }
+                                if(j==0){
+                                    flow.edited_text[i][j] = Sample.findById(params[i+','+j])
+                                    continue;
+                                }
                             }
                         }
                     }
@@ -351,57 +406,73 @@ class MeasurementController {
 		}
 		checkInput {
 			on("save").to "saveData"
-			on("previous").to "selectColumns"
+			on("previous"){
+                // Save edits into the flow.edited_text object
+                if(flow.layout=="sample_layout"){
+                    for(int i = 1; i < flow.edited_text.size(); i++){
+                        for(int j = 1; j < flow.edited_text[0].size(); j++){
+                            def txt = params?.get('valueHidden'+i+','+j)
+                            def comm = params?.get('commentHidden'+i+','+j)
+                            def op = params?.get('operatorHidden'+i+','+j)
+                            if(txt.class==java.lang.String){
+                                flow.edited_text[i][j] = txt
+                            }
+                            if(op.class==java.lang.String){
+                                if(op==""){
+                                    flow.operator.remove(i+","+j)
+                                } else {
+                                    flow.operator.put(i+","+j,op)
+                                }
+                            }
+                            if(comm.class==java.lang.String){
+                                if(comm==""){
+                                    flow.comments.remove(i+","+j)
+                                } else {
+                                    flow.comments.put(i+","+j,comm)
+                                }
+                            }
+
+                        }
+                    }
+                } else {
+                    println "subject layout not implemented yet..."
+                }
+            }.to "selectColumns"
 		}
 		saveData {
 			action {
 				// Save data into the database
                 flash.message = ""
 
+                def measurementList = []
                 if(flow.layout=="sample_layout"){
-                    def sList = [:]
-                    Assay.findByAssayToken(flow.assayToken).samples.toList().each {
-                        sList.put(it.name,it)
-                    }
                     for(int i = 1; i < flow.edited_text.size(); i++){
                         // For a particular sample
-                        def s = sList.get(flow.edited_text[i][0])
-                        for(int j = 1; j < flow.edited_text[0].size(); j++){
-                            // ... and a particular feature
-                            def f = Feature.findByName(flow.edited_text[0][j])
-                            // ... a measurement will be created
-
-                            // Check if the measurement has an operator or is a comment
-                            def operator
-                            def comments
-                            def val
-                            if(!flow.edited_text[i][j].isDouble()){
-                                // Apparantly the value is not a valid double
-
-                                // Is the first character a valid operator?
-                                if(Measurement.validOperators.contains(flow.edited_text[i][j].substring(0,1))){
-                                    // Apparently, it is.
-                                    operator = flow.edited_text[i][j].substring(0,1)
-                                    val = Double.valueOf(flow.edited_text[i][j].substring(1))
-                                } else {
-                                    // Apparently it is not.
-                                    // We'll use the comments field instead.
-                                    comments = flow.edited_text[i][j]
+                        if(flow.edited_text[i][0]!=null && flow.edited_text[i][0]!="null"){
+                            Sample s = flow.edited_text[i][0]
+                            for(int j = 1; j < flow.edited_text[0].size(); j++){
+                                // ... and a particular feature
+                                if(flow.edited_text[0][j]!=null && flow.edited_text[0][j]!="null"){
+                                    Feature f = flow.edited_text[0][j]
+                                    // ... a measurement will be created
+                                    def txt = params?.get('valueHidden'+i+','+j)
+                                    def comm = params?.get('commentHidden'+i+','+j)
+                                    def op = params?.get('operatorHidden'+i+','+j)
+                                    flow.edited_text[i][j] = op+""+txt+" "+comm
+                                    measurementList.add(importerCreateMeasurement(s, f, txt, comm, op));
                                 }
-                            } else {
-                                // This is a simple double value
-                                val = Double.valueOf(flow.edited_text[i][j])
                             }
-                            try {
-                                def m = new Measurement(sample:s,feature:f,value:val,operator:operator,comments:comments)
-                                if(!m.save(flush : true)){
-                                    flash.message += "<br>"+m.getErrors().allErrors
-                                    println m.getErrors().allErrors
-                                }
-                            } catch(Exception e) {
-                                flash.message += "<br>"+e
-                                // TODO: better logging
-                                println e
+                        }
+                    }
+
+                    Measurement.withTransaction {
+                        status ->
+                        measurementList.each {
+                            m ->
+                            if(!m.save(flush : true)){
+                                flash.message += "<br>"+m.getErrors().allErrors
+                                println m.getErrors().allErrors
+                                status.setRollbackOnly();
                             }
                         }
                     }
@@ -411,6 +482,7 @@ class MeasurementController {
 
                 if(flash.message!=""){
                     flash.message = "There were errors while saving your measurements: "+flash.message
+                    return error()
                 } else {
                     flash.remove('message');
                 }
@@ -419,9 +491,58 @@ class MeasurementController {
 			on("error").to "errorSaving"
 		}
 		errorSaving {
-			on( "previous" ).to "selectColumns"
+			on("previous").to "checkInput"
 		}
 		finishScreen()
 	}
-	
+
+    Measurement importerCreateMeasurement(Sample s, Feature f, def txt, def comm, def op) {
+        def operator
+        def comments
+        def val
+
+        // Check if the measurement value has an operator or is a comment
+        if(!txt.isDouble()){
+            // Apparently the value is not a valid double
+
+            // Do we have enough characters for an operator and a number? Is the first character a valid operator?
+            if(txt.length()>1 && Measurement.validOperators.contains(txt.substring(0,1)) && txt.substring(1).trim().isDouble()){
+                // Apparently, it is.
+                operator = txt.substring(0,1).trim()
+                val = Double.valueOf(txt.substring(1).trim())
+            } else {
+                // Apparently it is not.
+                // We'll use the comments field instead.
+                comments = txt
+            }
+        } else {
+            // This is a simple double value
+            val = Double.valueOf(txt)
+        }
+
+        // If comments were added to the webflow...
+        if(comm!=null && comm!=comments){
+            // If the comments added in the webflow are different from the cell contents, these will probably be comments on the cell contents, so set them
+            // If we already have comments, add the webflow comments to the end
+            if(comments==null){
+                comments = comm
+            } else {
+                comments += " "+comm
+            }
+        }
+
+        // If an operator was added in the webflow...
+        if(op!=null){
+            // If an operator was added to webflow, the user explicitly did that, so add the operator from the webflow
+            // If an invalid operator was added, add that operator to the comments instead
+            if(Measurement.validOperators.contains(op)){
+                operator = op
+            } else {
+                comments = "Operator: "+op+". "+comments
+            }
+        }
+
+        return new Measurement(sample:s,feature:f,value:val,operator:operator,comments:comments)
+    }
+
 }

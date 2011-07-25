@@ -8,7 +8,7 @@ class Measurement {
     String operator // '<', '>' or '='
     Double value
     String comments
-    static final validOperators = ['<', '>', '=','',null]
+    static final validOperators = ['<', '>','',null]
 
     static mapping = {
         comments type: 'text'
