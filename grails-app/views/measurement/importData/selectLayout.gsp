@@ -97,7 +97,7 @@
                                     <g:if test="${layoutguess=='subject_layout'}">Our guess is that this file uses the subject layout.<br></g:if>
                                     Using the subject layout and the sample of the file contents, the data types would be as follows:
                                     <%
-                                        def content_sample_subject_layout = "<table>"
+                                        def content_sample_subject_layout = "<table style='width: auto;'>"
                                         for(int i = 0; i < text.size(); i++){
                                             if(i == 5){
                                                 break;
@@ -113,20 +113,39 @@
                                                     if(i==0){
                                                         if(j==0 && text[i][j]!=null && text[i][j].length()!=0){
                                                             content_sample_subject_layout += '<td style="border: 1px solid lightgray;color: black;" class="badcell"> This cell contains data ("'+text[i][j]+'"), this will be ignored.</td>'                                        } else {
-                                                            content_sample_subject_layout += '<td style="border: 1px solid lightgray; color: darkgreen;">'+text[i][j]+"</td>"
+                                                            content_sample_subject_layout += '<td style="border: 1px solid lightgray; color: darkgreen;">';
+                                                            if(text[i][j]!=null && text[i][j].length()>25){
+                                                                content_sample_subject_layout += text[i][j].substring(0,19)+"&hellip;"
+                                                            } else {
+                                                                content_sample_subject_layout += text[i][j]
+                                                            }
+                                                            content_sample_subject_layout += "</td>"
                                                         }
                                                     } else {
                                                         if(i==1){
                                                             if(j==0 && text[i][j]!=null && text[i][j].length()!=0){
                                                                 content_sample_subject_layout += '<td style="border: 1px solid lightgray; color: black;" class="badcell">This cell contains data ("'+text[i][j]+'"), this will be ignored.</td>'
                                                             } else {
-                                                                content_sample_subject_layout += '<td style="border: 1px solid lightgray; color: peru;">'+text[i][j]+"</td>"
+                                                                content_sample_subject_layout += '<td style="border: 1px solid lightgray; color: peru;">';
+                                                            if(text[i][j]!=null && text[i][j].length()>25){
+                                                                content_sample_subject_layout += text[i][j].substring(0,19)+"&hellip;"
+                                                            } else {
+                                                                content_sample_subject_layout += text[i][j]
+                                                            }
+                                                            content_sample_subject_layout += "</td>"
                                                             }
                                                         } else {
                                                             def colour = ""
                                                             if(j==0){colour = "gray"}
                                                             else{colour = "blue"}
-                                                            content_sample_subject_layout += '<td style="border: 1px solid lightgray;  color: '+colour+';">'+text[i][j]+"</td>"                                                        }
+                                                            content_sample_subject_layout += '<td style="border: 1px solid lightgray;  color: '+colour+';">';
+                                                            if(text[i][j]!=null && text[i][j].length()>25){
+                                                                content_sample_subject_layout += text[i][j].substring(0,19)+"&hellip;"
+                                                            } else {
+                                                                content_sample_subject_layout += text[i][j]
+                                                            }
+                                                            content_sample_subject_layout += "</td>"
+                                                        }
                                                     }
                                                 }
                                                 content_sample_subject_layout += "</tr>"

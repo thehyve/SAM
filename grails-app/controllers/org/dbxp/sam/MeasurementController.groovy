@@ -295,7 +295,44 @@ class MeasurementController {
                         }
                     }
                 } else {
-                    println "subject layout not implemented yet..."
+                    flow.features = Feature.list().sort(){it.name}
+                    flow.timepoints = ["1d", "2d", "3d"]
+                    flow.subjects = ["subject 1", "subject 2", "subject 3"]
+
+                    // Try to match first row to features
+                    flow.feature_matches = [:]
+                    for(int i = 1; i < flow.text[0].size(); i++){
+                        def index = fuzzySearchService.mostSimilarWithIndex(flow.text[0][i], flow.features*.toString())
+                        if(index!=null){
+                            flow.feature_matches[flow.text[0][i]] = index
+                        } else {
+                            flow.feature_matches[flow.text[0][i]] = 0
+                        }
+                    }
+                    // Try to match second row to timepoints
+                    flow.timepoint_matches = [:]
+                    for(int i = 1; i < flow.text[1].size(); i++){
+                        def index = fuzzySearchService.mostSimilarWithIndex(flow.text[1][i], flow.timepoints)
+                        if(index!=null){
+                            flow.timepoint_matches[flow.text[1][i]] = index
+                        } else {
+                            flow.timepoint_matches[flow.text[1][i]] = 0
+                        }
+                    }
+                    // Try to match first column to subjects
+                    flow.subject_matches = [:]
+                    for(int i = 2; i < flow.text.size(); i++){
+                        def index = fuzzySearchService.mostSimilarWithIndex(flow.text[i][0], flow.subjects)
+                        if(index!=null){
+                            flow.subject_matches[flow.text[i][0]] = index
+                        } else {
+                            flow.subject_matches[flow.text[i][0]] = 0
+                        }
+                    }
+                    println flow.subjects
+                    println flow.subject_matches
+                    println flow.timepoints
+                    println flow.timepoint_matches
                 }
 			}.to "selectColumns"
 			on("previous") {}.to "uploadData"
@@ -312,17 +349,16 @@ class MeasurementController {
                     flow.comments = [:]
                 }
 
+                // Generate extra information about cell contents and fold the user's selections into our data storage object flow.edited_text
                 if(flow.layout=="sample_layout"){
                     if(!flow.edited_text){
                         flow.edited_text = new Object[flow.text.size()][flow.text[0].size()]
-
-                        // Generate extra information about cell contents and fold the user's selections into our data storage object flow.edited_text
                         for(int i = 0; i < flow.text.size(); i++){
                             for(int j = 0; j < flow.text[i].size(); j++){
                                 if(params[i+','+j]){
                                     println params[i+','+j]+"   "+params[i+','+j].class
                                     // Here we are catching a user's feature or sample selection from the previous page and incorporating it into our new dataset
-                                    // We receive an object's id and use this to the object to the flow.edited_text
+                                    // We receive an object's id and use this to add the object to the flow.edited_text
                                     if(params[i+','+j] == 'null'){
                                         // We didn't actually receive a proper id, so set the field to null
                                         flow.edited_text[i][j] = null
@@ -365,7 +401,61 @@ class MeasurementController {
                         }
                     }
                 } else {
-                    println "subject layout not implemented yet..."
+                    if(!flow.edited_text){
+                        flow.edited_text = new Object[flow.text.size()][flow.text[0].size()]
+                        for(int i = 0; i < flow.text.size(); i++){
+                            for(int j = 0; j < flow.text[i].size(); j++){
+                                if(params[i+','+j]){
+                                    println params[i+','+j]+"   "+params[i+','+j].class
+                                    // Here we are catching a user's feature, timepoint or subject selection from the previous page and incorporating it into our new dataset
+                                    // We receive an object's id and use this to add the object to the flow.edited_text
+                                    if(params[i+','+j] == 'null'){
+                                        // We didn't actually receive a proper id, so set the field to null
+                                        flow.edited_text[i][j] = null
+                                        continue;
+                                    }
+                                    if(i==0){
+                                        flow.edited_text[i][j] = Feature.findById(params[i+','+j])
+                                        continue;
+                                    }
+                                    if(i==1){
+                                        // Not yet implemented properly
+                                        flow.edited_text[i][j] = params[i+','+j]
+                                        continue;
+                                    }
+                                    if(j==0){
+                                        // Not yet implemented properly
+                                        flow.edited_text[i][j] = params[i+','+j]
+                                        continue;
+                                    }
+                                } else {
+                                    flow.edited_text[i][j] = flow.text[i][j]
+                                    def txt = flow.edited_text[i][j]
+                                    if(i>0 && j>0 && txt!=null && txt!=""){
+                                        txt = txt.trim()
+                                        if(!txt.isDouble()){
+                                            // Apparently the value is not a valid double
+
+                                            // Is the first character a valid operator?
+                                            if(Measurement.validOperators.contains(txt.substring(0,1)) && txt.substring(1).trim().isDouble()){
+                                                // Apparently, it is.
+                                                flow.operator.put(i+","+j,txt.substring(0,1).trim())
+                                                flow.edited_text[i][j] = Double.valueOf(txt.substring(1).trim())
+                                            } else {
+                                                // Apparently it is not.
+                                                // We'll use the comments field instead.
+                                                flow.comments.put(i+","+j,flow.edited_text[i][j])
+                                                flow.edited_text[i][j] = ""
+                                            }
+                                        } else {
+                                            // This is a simple double value
+                                            // We don't need to save more information than contained in flow.edited_text
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
 			}.to "checkInput"
 			on("previous") {
@@ -400,7 +490,35 @@ class MeasurementController {
                         }
                     }
                 } else {
-                    println "subject layout not implemented yet..."
+                    // Fold the user's selections into our flow.feature_matches, flow.timepoint_matches and flow.subject_matches
+                    for(int i = 0; i < flow.text.size(); i++){
+                        for(int j = 0; j < flow.text[i].size(); j++){
+                            if(params[i+','+j]){
+                                // Here we are catching a user's feature or sample selection from the previous page and incorporating it into our new dataset
+                                // We receive an object's id and use this to the object to the flow.edited_text
+
+                                if(params[i+','+j] == 'null'){
+                                    // We didn't actually receive a proper id, so set the field to null
+                                    flow.edited_text[i][j] = null
+                                    continue;
+                                }
+                                if(i==0){
+                                    flow.edited_text[i][j] = Feature.findById(params[i+','+j])
+                                    continue;
+                                }
+                                if(i==1){
+                                    // Not yet implemented properly
+                                    flow.edited_text[i][j] = params[i+','+j]
+                                    continue;
+                                }
+                                if(j==0){
+                                    // Not yet implemented properly
+                                    flow.edited_text[i][j] = params[i+','+j]
+                                    continue;
+                                }
+                            }
+                        }
+                    }
                 }
 			}.to "selectLayout"
 		}
@@ -478,6 +596,7 @@ class MeasurementController {
                     }
                 } else {
                     println "subject layout not implemented yet..."
+                    flash.message = "subject layout not implemented yet..."
                 }
 
                 if(flash.message!=""){
