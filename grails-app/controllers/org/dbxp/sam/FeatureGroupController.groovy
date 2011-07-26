@@ -13,11 +13,6 @@ class FeatureGroupController {
         [featureGroupInstanceList: FeatureGroup.list(params), featureGroupInstanceTotal: FeatureGroup.count()]
     }
 
-    def list_test = {
-        //params.max = Math.min(params.max ? params.int('max') : 10, 100)
-        [featureGroupInstanceList: FeatureGroup.list(params), featureGroupInstanceTotal: FeatureGroup.count()]
-    }
-
     def create = {
         def featureGroupInstance = new FeatureGroup()
         featureGroupInstance.properties = params
@@ -37,12 +32,13 @@ class FeatureGroupController {
 
     def show = {
         def featureGroupInstance = FeatureGroup.get(params.id)
+        def features = org.dbxp.sam.FeaturesAndGroups.findAllByFeatureGroup(featureGroupInstance).feature.toList()
         if (!featureGroupInstance) {
             flash.message = "${message(code: 'default.not.found.message', args: [message(code: 'featureGroup.label', default: 'FeatureGroup'), params.id])}"
             redirect(action: "list")
         }
         else {
-            [featureGroupInstance: featureGroupInstance]
+            [featureGroupInstance: featureGroupInstance, features: features]
         }
     }
 

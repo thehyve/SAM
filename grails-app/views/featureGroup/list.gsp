@@ -39,7 +39,7 @@
 
                         <th>${message(code: 'featureGroup.name.label', default: 'Name')}</th>
 
-                        <th>In use</th>
+                        <th>Does this group contain features?</th>
 
                         <dt:buttonsHeader numColumns="3"/>
 
@@ -59,12 +59,12 @@
                                     def b = ""
                                     if(a!=null && a.size()>0){
                                         if(a.size()>1){
-                                            b = "Yes, used by "+a.size()+" features"
+                                            b = "Yes, it contains "+a.size()+" features."
                                         } else {
-                                            b = "Yes, used by one feature"
+                                            b = "Yes, it contains a feature."
                                         }
                                     } else {
-                                        b = "No, not in use"
+                                        b = "No, it does not contain features."
                                     }
                                 %>
                                 ${b}

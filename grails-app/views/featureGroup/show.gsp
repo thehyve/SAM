@@ -23,21 +23,25 @@
             <div class="dialog">
                 <table>
                     <tbody>
-
-                    <tr class="prop">
-                        <td valign="top" class="name"><g:message code="featureGroup.id.label" default="Id"/></td>
-
-                        <td valign="top" class="value">${fieldValue(bean: featureGroupInstance, field: "id")}</td>
-
-                    </tr>
-
                     <tr class="prop">
                         <td valign="top" class="name"><g:message code="featureGroup.name.label" default="Name"/></td>
-
                         <td valign="top" class="value">${fieldValue(bean: featureGroupInstance, field: "name")}</td>
-
                     </tr>
 
+                    <tr class="prop">
+                        <td valign="top" class="name">Features</td>
+                        <td valign="top" class="value">
+                            <table>
+                                <g:each in="${features}" var="f" status="i">
+                                    <tr class="prop ${(i % 2) == 0 ? 'odd' : 'even'}">
+                                        <td>
+                                            <g:link controller="feature" action="show" id="${f.id}">${f.name}</g:link>
+                                        </td>
+                                    </tr>
+                                </g:each>
+                            </table>
+                        </td>
+                    </tr>
                     </tbody>
                 </table>
             </div>
