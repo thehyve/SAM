@@ -266,6 +266,14 @@ class FeatureController {
         if(!session.featureInstance.isAttached()){
             session.featureInstance.attach()
         }
+
+        session.featureInstance.getDomainFields().each {
+            println it
+            if(params[it?.name]!=null){
+                session.featureInstance.setProperty(it.name, params[it.name])
+            }
+        }
+        
         updateTemplate()
         render(view: "edit", model: [featureInstance: session.featureInstance])
     }
