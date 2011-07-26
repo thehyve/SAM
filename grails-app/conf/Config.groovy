@@ -99,3 +99,5 @@ log4j = {
             //'org.codehaus.groovy.grails.plugins' // plugins
             "dbxp.moduleBase"
 }
+
+module.synchronization.classes.sample = "org.dbxp.sam.SAMSample"
