@@ -351,7 +351,7 @@ class FeatureController {
         }
 		
         // Clear message so no message will be shown if everything is OK
-		flash.message = "";
+        flash.FGError = "";
 		
         try {
             // Try to find the featuresAndGroupsInstance that we wish to delete
@@ -359,7 +359,7 @@ class FeatureController {
 			
 			if(featuresAndGroupsInstance==null){
 				// We could not find the featuresAndGroupsInstance that we wish to remove
-				flash.message = "The specified group could not be found. The probable cause for this would be that the group has already been removed."
+				flash.FGError = "The specified group could not be found. The probable cause for this would be that the group has already been removed."
 			} else {
 				// We found the featuresAndGroupsInstance that we wish to remove
 				def groupName = featuresAndGroupsInstance.featureGroup.name
@@ -370,13 +370,13 @@ class FeatureController {
 					featuresAndGroupsInstance.delete(flush: true)
 				} catch (org.springframework.dao.DataIntegrityViolationException e) {
 					log.error(e)
-					flash.message = "There has been a problem with removing the group ${groupName} from this feature.<br>${e}"
+					flash.FGError = "There has been a problem with removing the group ${groupName} from this feature.<br>${e}"
 				}
 			}
         } catch (Exception e){
             log.error(e)
             // An error occurred while fetching the featuresAndGroupsInstance that we wish to remove
-            flash.message = "The specified group could not be found.<br>${e}"
+            flash.FGError = "The specified group could not be found.<br>${e}"
         }
 
 		// This featureInstance is only used to display an accurate list

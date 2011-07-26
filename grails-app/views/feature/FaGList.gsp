@@ -1,6 +1,6 @@
-<g:if test="${flash.message}">
+<g:if test="${flash.FGError}">
 	<div class="errors">
-		${flash.message}
+		${flash.FGError}
 	</div>
 </g:if>
 <table id="featureGroups_list">
