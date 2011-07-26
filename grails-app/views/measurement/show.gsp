@@ -2,8 +2,7 @@
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
         <meta name="layout" content="main"/>
-        <g:set var="entityName" value="${message(code: 'measurement.label', default: 'Measurement')}"/>
-        <title><g:message code="default.show.label" args="[entityName]"/></title>
+        <title>Measurement properties</title>
     </head>
 
     <body>
@@ -17,7 +16,7 @@
             <li><g:link class="create" controller="measurement" action="create">Create new measurement</g:link></li>
             <li><g:link class="import" controller="measurement" action="importData">Import</g:link></li>
         </content>
-        <h1><g:message code="default.show.label" args="[entityName]"/></h1>
+        <h1>Measurement properties</h1>
 
         <div class="data">
             <g:form method="post">
@@ -77,7 +76,7 @@
 
                 <ul class="data_nav buttons">
                     <li><g:link controller="measurement" action="edit" id="${measurementInstance?.id}" class="edit">Edit</g:link></li>
-                    <li><g:actionSubmit class="delete" action="delete" value="Delete" onclick="return confirm('${message(code: 'default.button.delete.confirm.message', default: 'Are you sure?')}');"/></li>
+                    <li><g:actionSubmit class="delete" action="delete" value="Delete" onclick="return confirm('Are you sure?');"/></li>
                     <li><g:link controller="measurement" action="list" class="cancel">Cancel</g:link></li>
                 </ul>
             </g:form>

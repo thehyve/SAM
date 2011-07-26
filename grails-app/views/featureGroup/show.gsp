@@ -3,8 +3,7 @@
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
         <meta name="layout" content="main"/>
-        <g:set var="entityName" value="${message(code: 'featureGroup.label', default: 'FeatureGroup')}"/>
-        <title><g:message code="default.show.label" args="[entityName]"/></title>
+        <title>FeatureGroup ${featureGroupInstance.name}'s properties</title>
     </head>
 
     <body>
@@ -13,7 +12,7 @@
                 <g:renderErrors bean="${featureGroupInstance}" as="list"/>
             </div>
         </g:hasErrors>
-        <h1><g:message code="default.show.label" args="[entityName]"/></h1>
+        <h1>FeatureGroup ${featureGroupInstance.name}'s properties</h1>
         <content tag="contextmenu">
             <li><g:link class="list" controller="featureGroup">List feature groups</g:link></li>
             <li><g:link class="create" controller="featureGroup" action="create">Create new group</g:link></li>
@@ -50,7 +49,7 @@
                 <g:form>
                     <g:hiddenField name="id" value="${featureGroupInstance?.id}"/>
                     <li><g:actionSubmit class="edit" action="edit" value="Edit"/></li>
-                    <li><g:actionSubmit class="delete" action="delete" value="Delete" onclick="return confirm('${message(code: 'default.button.delete.confirm.message', default: 'Are you sure?')}');"/></li>
+                    <li><g:actionSubmit class="delete" action="delete" value="Delete" onclick="return confirm('Are you sure?');"/></li>
                     <li><g:link controller="featureGroup" action="list" class="cancel">Back to list</g:link></li>
                 </g:form>
             </ul>

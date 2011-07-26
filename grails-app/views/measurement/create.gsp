@@ -2,8 +2,7 @@
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
         <meta name="layout" content="main"/>
-        <g:set var="entityName" value="${message(code: 'measurement.label', default: 'Measurement')}"/>
-        <title><g:message code="default.create.label" args="[entityName]"/></title>
+        <title>Create a new measurement</title>
     </head>
 
     <body>
@@ -17,7 +16,7 @@
             <li><g:link class="create" controller="measurement" action="create">Create new measurement</g:link></li>
             <li><g:link class="import" controller="measurement" action="importData">Import</g:link></li>
         </content>
-        <h1><g:message code="default.create.label" args="[entityName]"/></h1>
+        <h1>Create a new measurement</h1>
 
         <div class="data">
             <g:form action="save">

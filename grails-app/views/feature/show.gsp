@@ -3,8 +3,7 @@
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
         <meta name="layout" content="main"/>
-        <g:set var="entityName" value="${message(code: 'feature.label', default: 'Feature')}"/>
-        <title><g:message code="default.show.label" args="[entityName]"/></title>
+        <title>Feature ${featureInstance.name}'s properties</title>
     </head>
     <body>
         <g:hasErrors bean="${featureInstance}">
@@ -18,7 +17,7 @@
             <li><g:link class="import" controller="feature" action="import">Import</g:link></li>
             <li><g:link class="list" controller="featureGroup">List feature groups</g:link></li>
         </content>
-        <h1><g:message code="default.show.label" args="[entityName]"/></h1>
+        <h1>Feature ${featureInstance.name}'s properties</h1>
 
         <div class="data">
             <div class="dialog">
@@ -55,7 +54,7 @@
                 <g:form>
                     <g:hiddenField name="id" value="${featureInstance?.id}"/>
                     <li><g:actionSubmit class="edit" action="edit" value="Edit"/></li>
-                    <li><g:actionSubmit class="delete" action="delete" value="Delete" onclick="return confirm('${message(code: 'default.button.delete.confirm.message', default: 'Are you sure?')}');"/></li>
+                    <li><g:actionSubmit class="delete" action="delete" value="Delete" onclick="return confirm('Are you sure?');"/></li>
                     <li><g:link controller="feature" action="list" class="cancel">Back to list</g:link></li>
                 </g:form>
             </ul>

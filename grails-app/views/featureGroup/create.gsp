@@ -3,8 +3,7 @@
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
         <meta name="layout" content="main"/>
-        <g:set var="entityName" value="${message(code: 'featureGroup.label', default: 'FeatureGroup')}"/>
-        <title><g:message code="default.create.label" args="[entityName]"/></title>
+        <title>Create a new featureGroup</title>
     </head>
 
     <body>
@@ -13,7 +12,7 @@
                 <g:renderErrors bean="${featureGroupInstance}" as="list"/>
             </div>
         </g:hasErrors>
-        <h1><g:message code="default.create.label" args="[entityName]"/></h1>
+        <h1>Create a new featureGroup</h1>
         <content tag="contextmenu">
             <li><g:link class="list" controller="featureGroup">List feature groups</g:link></li>
             <li><g:link class="create" controller="featureGroup" action="create">Create new group</g:link></li>

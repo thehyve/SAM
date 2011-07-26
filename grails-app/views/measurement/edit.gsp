@@ -2,8 +2,7 @@
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
         <meta name="layout" content="main"/>
-        <g:set var="entityName" value="${message(code: 'measurement.label', default: 'Measurement')}"/>
-        <title><g:message code="default.edit.label" args="[entityName]"/></title>
+        <title>Edit measurement</title>
     </head>
 
     <body>
@@ -17,7 +16,7 @@
                 <g:renderErrors bean="${measurementInstance}" as="list"/>
             </div>
         </g:hasErrors>
-        <h1><g:message code="default.edit.label" args="[entityName]"/></h1>
+        <h1>Edit measurement</h1>
 
         <div class="data">
             <g:form method="post">
@@ -80,7 +79,7 @@
 
                 <ul class="data_nav buttons">
                     <li><g:actionSubmit class="save" action="update" value="Update"/></li>
-                    <li><g:actionSubmit class="delete" action="delete" value="Delete" onclick="return confirm('${message(code: 'default.button.delete.confirm.message', default: 'Are you sure?')}');"/></li>
+                    <li><g:actionSubmit class="delete" action="delete" value="Delete" onclick="return confirm('Are you sure?');"/></li>
                     <li><g:link controller="measurement" action="list" class="cancel">Cancel</g:link></li>
                 </ul>
 

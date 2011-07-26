@@ -27,7 +27,7 @@ class MeasurementController {
     def save = {
         def measurementInstance = new Measurement(params)
         if (measurementInstance.save(flush: true)) {
-            flash.message = "${message(code: 'default.created.message', args: [message(code: 'measurement.label', default: 'Measurement'), measurementInstance.id])}"
+            flash.message = "The measurement has been created."
             redirect(action: "show", id: measurementInstance.id)
         }
         else {
@@ -38,7 +38,7 @@ class MeasurementController {
     def show = {
         def measurementInstance = Measurement.get(params.id)
         if (!measurementInstance) {
-            flash.message = "${message(code: 'default.not.found.message', args: [message(code: 'measurement.label', default: 'Measurement'), params.id])}"
+            flash.message = "The requested measurement could not be found."
             redirect(action: "list")
         }
         else {
@@ -49,7 +49,7 @@ class MeasurementController {
     def edit = {
         def measurementInstance = Measurement.get(params.id)
         if (!measurementInstance) {
-            flash.message = "${message(code: 'default.not.found.message', args: [message(code: 'measurement.label', default: 'Measurement'), params.id])}"
+            flash.message = "The requested measurement could not be found."
             redirect(action: "list")
         }
         else {
@@ -64,14 +64,14 @@ class MeasurementController {
                 def version = params.version.toLong()
                 if (measurementInstance.version > version) {
 
-                    measurementInstance.errors.rejectValue("version", "default.optimistic.locking.failure", [message(code: 'measurement.label', default: 'Measurement')] as Object[], "Another user has updated this Measurement while you were editing")
+                    measurementInstance.errors.rejectValue("Another user has updated this feature while you were editing. Because of this, your changes have not been saved to the database.")
                     render(view: "edit", model: [measurementInstance: measurementInstance])
                     return
                 }
             }
             measurementInstance.properties = params
             if (!measurementInstance.hasErrors() && measurementInstance.save(flush: true)) {
-                flash.message = "${message(code: 'default.updated.message', args: [message(code: 'measurement.label', default: 'Measurement'), measurementInstance.id])}"
+                flash.message = "The measurement has been updated."
                 redirect(action: "show", id: measurementInstance.id)
             }
             else {
@@ -79,7 +79,7 @@ class MeasurementController {
             }
         }
         else {
-            flash.message = "${message(code: 'default.not.found.message', args: [message(code: 'measurement.label', default: 'Measurement'), params.id])}"
+            flash.message = "The requested measurement could not be found."
             redirect(action: "list")
         }
     }

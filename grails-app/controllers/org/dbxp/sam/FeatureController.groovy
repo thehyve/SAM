@@ -126,7 +126,7 @@ class FeatureController {
     def save = {
         def featureInstance = new Feature(params)
         if (featureInstance.save(flush: true)) {
-            flash.message = "${message(code: 'default.created.message', args: [message(code: 'feature.label', default: 'Feature'), featureInstance.id])}"
+            flash.message = "The feature ${featureInstance.name} has been created."
             if(params?.nextPage=="edit"){
                 redirect(action: "edit", id: featureInstance.id, featureInstance: featureInstance)
             } else {
@@ -141,7 +141,7 @@ class FeatureController {
     def show = {
         def featureInstance = Feature.get(params.id)
         if (!featureInstance) {
-            flash.message = "${message(code: 'default.not.found.message', args: [message(code: 'feature.label', default: 'Feature'), params.id])}"
+            flash.message = "The requested feature could not be found."
             redirect(action: "list")
         }
         else {
@@ -153,7 +153,7 @@ class FeatureController {
         def featureInstance = Feature.get(params.id)
         session.featureInstance = featureInstance
         if (!featureInstance) {
-            flash.message = "${message(code: 'default.not.found.message', args: [message(code: 'feature.label', default: 'Feature'), params.id])}"
+            flash.message = "The requested feature could not be found."
             redirect(action: "list")
         }
         else {
@@ -168,7 +168,7 @@ class FeatureController {
                 def version = params.version.toLong()
                 if (featureInstance.version > version) {
 
-                    featureInstance.errors.rejectValue("version", "default.optimistic.locking.failure", [message(code: 'feature.label', default: 'Feature')] as Object[], "Another user has updated this Feature while you were editing")
+                    featureInstance.errors.rejectValue("Another user has updated this feature while you were editing. Because of this, your changes have not been saved to the database.")
                     render(view: "edit", model: [featureInstance: featureInstance])
                     return
                 }
@@ -194,7 +194,7 @@ class FeatureController {
 			
             featureInstance.properties = params
             if (!featureInstance.hasErrors() && featureInstance.save(flush: true)) {
-                flash.message = "${message(code: 'default.updated.message', args: [message(code: 'feature.label', default: 'Feature'), featureInstance.id])}"
+                flash.message = "The feature has been updated."
                 redirect(action: "show", id: featureInstance.id)
             }
             else {
@@ -202,7 +202,7 @@ class FeatureController {
             }
         }
         else {
-            flash.message = "${message(code: 'default.not.found.message', args: [message(code: 'feature.label', default: 'Feature'), params.id])}"
+            flash.message = "The requested feature could not be found."
             redirect(action: "list")
         }
     }

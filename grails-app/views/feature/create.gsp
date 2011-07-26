@@ -3,8 +3,7 @@
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
         <meta name="layout" content="main"/>
-        <g:set var="entityName" value="${message(code: 'feature.label', default: 'Feature')}"/>
-        <title><g:message code="default.create.label" args="[entityName]"/></title>
+        <title>Create a new feature</title>
     </head>
 
     <body>
@@ -19,7 +18,7 @@
             <li><g:link class="import" controller="feature" action="import">Import</g:link></li>
             <li><g:link class="list" controller="featureGroup">List feature groups</g:link></li>
         </content>
-        <h1><g:message code="default.create.label" args="[entityName]"/></h1>
+        <h1>Create a new feature</h1>
 
         <div class="data">
             You will be able to add additional detail to this feature by choosing the 'Create and edit' option.

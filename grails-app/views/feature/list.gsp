@@ -3,8 +3,7 @@
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
         <meta name="layout" content="main"/>
-        <g:set var="entityName" value="${message(code: 'feature.label', default: 'Feature')}"/>
-        <title><g:message code="default.list.label" args="[entityName]"/></title>
+        <title>Feature list</title>
         <script type="text/javascript">
             $(document).ready(function() {
                 $('#fList').dataTable();
@@ -37,7 +36,7 @@
             <li><g:link class="import" controller="feature" action="import">Import</g:link></li>
             <li><g:link class="list" controller="featureGroup">List feature groups</g:link></li>
         </content>
-        <h1><g:message code="default.list.label" args="[entityName]"/></h1>
+        <h1>Feature list</h1>
 
         <div class="data">
             <dt:dataTable id="fList" class="paginate sortable filter selectMulti serverside" rel="${g.createLink( controller: 'feature', action: 'datatables_list' )}">
@@ -82,7 +81,7 @@
             </dt:dataTable>
             <br />
             <ul class="data_nav buttons">
-                    <li><a href="#" class="delete" onclick="if(confirm('${message(code: 'default.button.delete.confirm.message', default: 'Are you sure?')}')) {submitPaginatedForm('fList','delete', 'No rows selected');} else {return false;}">Delete all marked features</a></li>
+                    <li><a href="#" class="delete" onclick="if(confirm('Are you sure?')) {submitPaginatedForm('fList','delete', 'No rows selected');} else {return false;}">Delete all marked features</a></li>
             </ul>
         </div>
     </body>

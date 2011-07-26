@@ -2,8 +2,7 @@
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
         <meta name="layout" content="main"/>
-        <g:set var="entityName" value="${message(code: 'measurement.label', default: 'Measurement')}"/>
-        <title><g:message code="default.list.label" args="[entityName]"/></title>
+        <title>Measurement list</title>
     </head>
 
     <body>
@@ -12,7 +11,7 @@
             <li><g:link class="create" controller="measurement" action="create">Create new measurement</g:link></li>
             <li><g:link class="import" controller="measurement" action="importData">Import</g:link></li>
         </content>
-        <h1><g:message code="default.list.label" args="[entityName]"/></h1>
+        <h1>Measurement list</h1>
 
         <div class="data">
             <dt:dataTable id="mList" class="paginate sortable filter selectMulti">
@@ -54,7 +53,7 @@
             </dt:dataTable>
             <br />
             <ul class="data_nav buttons">
-                <li><a href="#" class="delete" onclick="if(confirm('${message(code: 'default.button.delete.confirm.message', default: 'Are you sure?')}')) {submitPaginatedForm('mList','delete', 'No rows selected');} else {return false;}">Delete all marked measurements</a></li>
+                <li><a href="#" class="delete" onclick="if(confirm('Are you sure?')) {submitPaginatedForm('mList','delete', 'No rows selected');} else {return false;}">Delete all marked measurements</a></li>
             </ul>
         </div>
     </body>

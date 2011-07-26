@@ -4,8 +4,7 @@
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
         <meta name="layout" content="main"/>
-        <g:set var="entityName" value="${message(code: 'feature.label', default: 'Feature')}"/>
-        <title><g:message code="default.edit.label" args="[entityName]"/></title>
+        <title>Edit feature ${featureInstance.name}</title>
         <script type="text/javascript">
             $(document).ready(function() {
                 new SelectAddMore().init({
@@ -68,7 +67,7 @@
             <li><g:link class="import" controller="feature" action="import">Import</g:link></li>
             <li><g:link class="list" controller="featureGroup">List feature groups</g:link></li>
         </content>
-        <h1><g:message code="default.edit.label" args="[entityName]"/></h1>
+        <h1>Edit feature ${featureInstance.name}</h1>
 
         <div class="data">
             <g:form class="Feature" action="refreshEdit" name="edit" method="post">
@@ -144,7 +143,7 @@
 
                 <ul class="data_nav buttons">
                     <li><g:actionSubmit class="save" action="update" value="Update"/></li>
-                    <li><g:actionSubmit class="delete" action="delete" value="Delete" onclick="return confirm('${message(code: 'default.button.delete.confirm.message', default: 'Are you sure?')}');"/></li>
+                    <li><g:actionSubmit class="delete" action="delete" value="Delete" onclick="return confirm('Are you sure?');"/></li>
                     <li><g:link controller="feature" action="list" class="cancel">Cancel</g:link></li>
                 </ul>
             </g:form>

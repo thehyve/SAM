@@ -3,8 +3,7 @@
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
         <meta name="layout" content="main"/>
-        <g:set var="entityName" value="${message(code: 'featureGroup.label', default: 'FeatureGroup')}"/>
-        <title><g:message code="default.list.label" args="[entityName]"/></title>
+        <title>FeatureGroup list</title>
         <script type="text/javascript">
             function deleteItems(){
                 var selected_boxes = $("input[@name=fgMassDelete]:checked");
@@ -31,13 +30,13 @@
             <li><g:link class="create" controller="featureGroup" action="create">Create new group</g:link></li>
             <li><g:link class="list" controller="feature" action="list">List features</g:link></li>
         </content>
-        <h1><g:message code="default.list.label" args="[entityName]"/></h1>
+        <h1>FeatureGroup list</h1>
         <div class="data">
             <dt:dataTable id="fgList" class="paginate sortable filter selectMulti">
                 <thead>
                     <tr>
 
-                        <th>${message(code: 'featureGroup.name.label', default: 'Name')}</th>
+                        <th>Name</th>
 
                         <th>Does this group contain features?</th>
 
@@ -78,7 +77,7 @@
             </dt:dataTable>
             <br />
             <ul class="data_nav buttons">
-                    <li><a href="#" class="delete" onclick="if(confirm('${message(code: 'default.button.delete.confirm.message', default: 'Are you sure?')}')) {submitPaginatedForm('fgList','delete', 'No rows selected');} else {return false;}">Delete all marked groups</a></li>
+                    <li><a href="#" class="delete" onclick="if(confirm('Are you sure?')) {submitPaginatedForm('fgList','delete', 'No rows selected');} else {return false;}">Delete all marked groups</a></li>
             </ul>
         </div>
     </body>
