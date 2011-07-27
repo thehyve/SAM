@@ -346,19 +346,12 @@ class MeasurementController {
                     flow.comments = [:]
                 }
 
-                println "\n\n\n\n\nparams: "
-                params.each {
-                    println it.key+" -> "+it.value+"\t\t\t\t"+it.value.class
-                }
-                println "\n\n\n\n\n"
-
                 // Generate extra information about cell contents and fold the user's selections into our data storage object flow.edited_text
                 if(!flow.edited_text){
                     flow.edited_text = new Object[flow.text.size()][flow.text[0].size()]
                     for(int i = 0; i < flow.text.size(); i++){
                         for(int j = 0; j < flow.text[i].size(); j++){
                             if(params[i+','+j]){
-                                println params[i+','+j]+"   "+params[i+','+j].class
                                 // Here we are catching a user's feature or sample selection from the previous page and incorporating it into our new dataset
                                 // We receive an object's id and use this to add the object to the flow.edited_text
                                 if(params[i+','+j] == 'null'){
