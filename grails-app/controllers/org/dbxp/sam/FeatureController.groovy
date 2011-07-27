@@ -149,6 +149,10 @@ class FeatureController {
         }
     }
 
+    def minimalShow = {
+        [featureInstance: params.featureInstance]
+    }
+    
     def edit = {
         def featureInstance = Feature.get(params.id)
         session.featureInstance = featureInstance
