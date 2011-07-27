@@ -53,7 +53,7 @@
 
                     </tr>
                 </thead>
-                <!-- 
+                 
                 <tbody>
                     <g:each in="${featureInstanceList}" status="i" var="featureInstance">
                         <tr class="${(i % 2) == 0 ? 'odd' : 'even'}" id="rowid_${featureInstance.id}">
@@ -77,7 +77,7 @@
                         </tr>
                     </g:each>
                 </tbody>
-                 -->
+
             </dt:dataTable>
             <br />
             <ul class="data_nav buttons">
