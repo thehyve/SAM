@@ -296,8 +296,9 @@ class MeasurementController {
                     }
                 } else {
                     flow.features = Feature.list().sort(){it.name}
-                    flow.timepoints = ["1d", "2d", "3d"]
-                    flow.subjects = ["subject 1", "subject 2", "subject 3"]
+                    def samples = flow.assay.samples
+                    flow.timepoints = samples.eventStartTime.unique()
+                    flow.subjects = samples.subjectName
 
                     // Try to match first row to features
                     flow.feature_matches = [:]
@@ -329,10 +330,6 @@ class MeasurementController {
                             flow.subject_matches[flow.text[i][0]] = 0
                         }
                     }
-                    println flow.subjects
-                    println flow.subject_matches
-                    println flow.timepoints
-                    println flow.timepoint_matches
                 }
 			}.to "selectColumns"
 			on("previous") {}.to "uploadData"
@@ -349,108 +346,63 @@ class MeasurementController {
                     flow.comments = [:]
                 }
 
+                println "\n\n\n\n\nparams: "
+                params.each {
+                    println it.key+" -> "+it.value+"\t\t\t\t"+it.value.class
+                }
+                println "\n\n\n\n\n"
+
                 // Generate extra information about cell contents and fold the user's selections into our data storage object flow.edited_text
-                if(flow.layout=="sample_layout"){
-                    if(!flow.edited_text){
-                        flow.edited_text = new Object[flow.text.size()][flow.text[0].size()]
-                        for(int i = 0; i < flow.text.size(); i++){
-                            for(int j = 0; j < flow.text[i].size(); j++){
-                                if(params[i+','+j]){
-                                    println params[i+','+j]+"   "+params[i+','+j].class
-                                    // Here we are catching a user's feature or sample selection from the previous page and incorporating it into our new dataset
-                                    // We receive an object's id and use this to add the object to the flow.edited_text
-                                    if(params[i+','+j] == 'null'){
-                                        // We didn't actually receive a proper id, so set the field to null
-                                        flow.edited_text[i][j] = null
-                                        continue;
-                                    }
-                                    if(i==0){
-                                        flow.edited_text[i][j] = Feature.findById(params[i+','+j])
-                                        continue;
-                                    }
+                if(!flow.edited_text){
+                    flow.edited_text = new Object[flow.text.size()][flow.text[0].size()]
+                    for(int i = 0; i < flow.text.size(); i++){
+                        for(int j = 0; j < flow.text[i].size(); j++){
+                            if(params[i+','+j]){
+                                println params[i+','+j]+"   "+params[i+','+j].class
+                                // Here we are catching a user's feature or sample selection from the previous page and incorporating it into our new dataset
+                                // We receive an object's id and use this to add the object to the flow.edited_text
+                                if(params[i+','+j] == 'null'){
+                                    // We didn't actually receive a proper id, so set the field to null
+                                    flow.edited_text[i][j] = null
+                                    continue;
+                                }
+                                if(i==0){
+                                    flow.edited_text[i][j] = Feature.findById(params[i+','+j])
+                                    continue;
+                                }
+
+                                if(flow.layout=="sample_layout"){
                                     if(j==0){
                                         flow.edited_text[i][j] = SAMSample.findById(params[i+','+j])
                                         continue;
                                     }
                                 } else {
-                                    flow.edited_text[i][j] = flow.text[i][j]
-                                    def txt = flow.edited_text[i][j]
-                                    if(i>0 && j>0 && txt!=null && txt!=""){
-                                        txt = txt.trim()
-                                        if(!txt.isDouble()){
-                                            // Apparently the value is not a valid double
-
-                                            // Is the first character a valid operator?
-                                            if(Measurement.validOperators.contains(txt.substring(0,1)) && txt.substring(1).trim().isDouble()){
-                                                // Apparently, it is.
-                                                flow.operator.put(i+","+j,txt.substring(0,1).trim())
-                                                flow.edited_text[i][j] = Double.valueOf(txt.substring(1).trim())
-                                            } else {
-                                                // Apparently it is not.
-                                                // We'll use the comments field instead.
-                                                flow.comments.put(i+","+j,flow.edited_text[i][j])
-                                                flow.edited_text[i][j] = ""
-                                            }
-                                        } else {
-                                            // This is a simple double value
-                                            // We don't need to save more information than contained in flow.edited_text
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                } else {
-                    if(!flow.edited_text){
-                        flow.edited_text = new Object[flow.text.size()][flow.text[0].size()]
-                        for(int i = 0; i < flow.text.size(); i++){
-                            for(int j = 0; j < flow.text[i].size(); j++){
-                                if(params[i+','+j]){
-                                    println params[i+','+j]+"   "+params[i+','+j].class
-                                    // Here we are catching a user's feature, timepoint or subject selection from the previous page and incorporating it into our new dataset
-                                    // We receive an object's id and use this to add the object to the flow.edited_text
-                                    if(params[i+','+j] == 'null'){
-                                        // We didn't actually receive a proper id, so set the field to null
-                                        flow.edited_text[i][j] = null
-                                        continue;
-                                    }
-                                    if(i==0){
-                                        flow.edited_text[i][j] = Feature.findById(params[i+','+j])
-                                        continue;
-                                    }
-                                    if(i==1){
-                                        // Not yet implemented properly
+                                    if(i==1 || j==0){
                                         flow.edited_text[i][j] = params[i+','+j]
                                         continue;
                                     }
-                                    if(j==0){
-                                        // Not yet implemented properly
-                                        flow.edited_text[i][j] = params[i+','+j]
-                                        continue;
-                                    }
-                                } else {
-                                    flow.edited_text[i][j] = flow.text[i][j]
-                                    def txt = flow.edited_text[i][j]
-                                    if(i>0 && j>0 && txt!=null && txt!=""){
-                                        txt = txt.trim()
-                                        if(!txt.isDouble()){
-                                            // Apparently the value is not a valid double
+                                }                            } else {
+                                flow.edited_text[i][j] = flow.text[i][j]
+                                def txt = flow.edited_text[i][j]
+                                if(i>0 && j>0 && txt!=null && txt!=""){
+                                    txt = txt.trim()
+                                    if(!txt.isDouble()){
+                                        // Apparently the value is not a valid double
 
-                                            // Is the first character a valid operator?
-                                            if(Measurement.validOperators.contains(txt.substring(0,1)) && txt.substring(1).trim().isDouble()){
-                                                // Apparently, it is.
-                                                flow.operator.put(i+","+j,txt.substring(0,1).trim())
-                                                flow.edited_text[i][j] = Double.valueOf(txt.substring(1).trim())
-                                            } else {
-                                                // Apparently it is not.
-                                                // We'll use the comments field instead.
-                                                flow.comments.put(i+","+j,flow.edited_text[i][j])
-                                                flow.edited_text[i][j] = ""
-                                            }
+                                        // Is the first character a valid operator?
+                                        if(Measurement.validOperators.contains(txt.substring(0,1)) && txt.substring(1).trim().isDouble()){
+                                            // Apparently, it is.
+                                            flow.operator.put(i+","+j,txt.substring(0,1).trim())
+                                            flow.edited_text[i][j] = Double.valueOf(txt.substring(1).trim())
                                         } else {
-                                            // This is a simple double value
-                                            // We don't need to save more information than contained in flow.edited_text
+                                            // Apparently it is not.
+                                            // We'll use the comments field instead.
+                                            flow.comments.put(i+","+j,flow.edited_text[i][j])
+                                            flow.edited_text[i][j] = ""
                                         }
+                                    } else {
+                                        // This is a simple double value
+                                        // We don't need to save more information than contained in flow.edited_text
                                     }
                                 }
                             }
@@ -465,98 +417,71 @@ class MeasurementController {
                     flow.edited_text = new Object[flow.text.size()][flow.text[0].size()]
                 }
                 
-                if(flow.layout=="sample_layout"){
-                    // Fold the user's selections into our flow.feature_matches and flow.sample_matches
-                    for(int i = 0; i < flow.text.size(); i++){
-                        for(int j = 0; j < flow.text[i].size(); j++){
-                            if(params[i+','+j]){
-                                // Here we are catching a user's feature or sample selection from the previous page and incorporating it into our new dataset
-                                // We receive an object's id and use this to the object to the flow.edited_text
+                // Fold the user's selections into our flow.feature_matches and flow.sample_matches
+                for(int i = 0; i < flow.text.size(); i++){
+                    for(int j = 0; j < flow.text[i].size(); j++){
+                        if(params[i+','+j]){
+                            // Here we are catching a user's feature or sample selection from the previous page and incorporating it into our new dataset
+                            // We receive an object's id and use this to the object to the flow.edited_text
 
-                                if(params[i+','+j] == 'null'){
-                                    // We didn't actually receive a proper id, so set the field to null
-                                    flow.edited_text[i][j] = null
-                                    continue;
-                                }
-                                if(i==0){
-                                    flow.edited_text[i][j] = Feature.findById(params[i+','+j])
-                                    continue;
-                                }
+                            if(params[i+','+j] == 'null'){
+                                // We didn't actually receive a proper id, so set the field to null
+                                flow.edited_text[i][j] = null
+                                continue;
+                            }
+                            if(i==0){
+                                flow.edited_text[i][j] = Feature.findById(params[i+','+j])
+                                continue;
+                            }
+                            if(flow.layout=="sample_layout"){
                                 if(j==0){
                                     flow.edited_text[i][j] = SAMSample.findById(params[i+','+j])
                                     continue;
                                 }
-                            }
-                        }
-                    }
-                } else {
-                    // Fold the user's selections into our flow.feature_matches, flow.timepoint_matches and flow.subject_matches
-                    for(int i = 0; i < flow.text.size(); i++){
-                        for(int j = 0; j < flow.text[i].size(); j++){
-                            if(params[i+','+j]){
-                                // Here we are catching a user's feature or sample selection from the previous page and incorporating it into our new dataset
-                                // We receive an object's id and use this to the object to the flow.edited_text
-
-                                if(params[i+','+j] == 'null'){
-                                    // We didn't actually receive a proper id, so set the field to null
-                                    flow.edited_text[i][j] = null
-                                    continue;
-                                }
-                                if(i==0){
-                                    flow.edited_text[i][j] = Feature.findById(params[i+','+j])
-                                    continue;
-                                }
-                                if(i==1){
-                                    // Not yet implemented properly
-                                    flow.edited_text[i][j] = params[i+','+j]
-                                    continue;
-                                }
-                                if(j==0){
-                                    // Not yet implemented properly
+                            } else {
+                                if(i==1 || j==0){
                                     flow.edited_text[i][j] = params[i+','+j]
                                     continue;
                                 }
                             }
                         }
                     }
-                }
+                    }
 			}.to "selectLayout"
 		}
+
 		checkInput {
 			on("save").to "saveData"
 			on("previous"){
                 // Save edits into the flow.edited_text object
-                if(flow.layout=="sample_layout"){
-                    for(int i = 1; i < flow.edited_text.size(); i++){
-                        for(int j = 1; j < flow.edited_text[0].size(); j++){
-                            def txt = params?.get('valueHidden'+i+','+j)
-                            def comm = params?.get('commentHidden'+i+','+j)
-                            def op = params?.get('operatorHidden'+i+','+j)
-                            if(txt.class==java.lang.String){
-                                flow.edited_text[i][j] = txt
-                            }
-                            if(op.class==java.lang.String){
-                                if(op==""){
-                                    flow.operator.remove(i+","+j)
-                                } else {
-                                    flow.operator.put(i+","+j,op)
-                                }
-                            }
-                            if(comm.class==java.lang.String){
-                                if(comm==""){
-                                    flow.comments.remove(i+","+j)
-                                } else {
-                                    flow.comments.put(i+","+j,comm)
-                                }
-                            }
-
+                for(int i = 1; i < flow.edited_text.size(); i++){
+                    for(int j = 1; j < flow.edited_text[0].size(); j++){
+                        def txt = params?.get('valueHidden'+i+','+j)
+                        def comm = params?.get('commentHidden'+i+','+j)
+                        def op = params?.get('operatorHidden'+i+','+j)
+                        if(txt.class==java.lang.String){
+                            flow.edited_text[i][j] = txt
                         }
+                        if(op.class==java.lang.String){
+                            if(op==""){
+                                flow.operator.remove(i+","+j)
+                            } else {
+                                flow.operator.put(i+","+j,op)
+                            }
+                        }
+                        if(comm.class==java.lang.String){
+                            if(comm==""){
+                                flow.comments.remove(i+","+j)
+                            } else {
+                                flow.comments.put(i+","+j,comm)
+                            }
+                        }
+
                     }
-                } else {
-                    println "subject layout not implemented yet..."
                 }
             }.to "selectColumns"
 		}
+
 		saveData {
 			action {
 				// Save data into the database
@@ -582,21 +507,37 @@ class MeasurementController {
                             }
                         }
                     }
-
-                    Measurement.withTransaction {
-                        status ->
-                        measurementList.each {
-                            m ->
-                            if(!m.save(flush : true)){
-                                flash.message += "<br>"+m.getErrors().allErrors
-                                println m.getErrors().allErrors
-                                status.setRollbackOnly();
+                } else {
+                    for(int i = 1; i < flow.edited_text.size(); i++){
+                        if(flow.edited_text[i][0]!=null && flow.edited_text[i][0]!="null"){
+                            for(int j = 1; j < flow.edited_text[0].size(); j++){
+                                if(i>1 && flow.edited_text[0][j]!=null && flow.edited_text[0][j]!="null"){
+                                    // For a particular subject and a particular timepoint and thus a particular sample
+                                    SAMSample s = SAMSample.findByEventStartTimeAndSubjectName(flow.edited_text[1][j], flow.edited_text[i][0]);
+                                    // ... and a particular feature
+                                    Feature f = flow.edited_text[0][j]
+                                    // ... a measurement will be created
+                                    def txt = params?.get('valueHidden'+i+','+j)
+                                    def comm = params?.get('commentHidden'+i+','+j)
+                                    def op = params?.get('operatorHidden'+i+','+j)
+                                    flow.edited_text[i][j] = op+""+txt+" "+comm
+                                    measurementList.add(importerCreateMeasurement(s, f, txt, comm, op));
+                                }
                             }
                         }
                     }
-                } else {
-                    println "subject layout not implemented yet..."
-                    flash.message = "subject layout not implemented yet..."
+                }
+
+                Measurement.withTransaction {
+                    status ->
+                    measurementList.each {
+                        m ->
+                        if(!m.save(flush : true)){
+                            flash.message += "<br>"+m.getErrors().allErrors
+                            println m.getErrors().allErrors
+                            status.setRollbackOnly();
+                        }
+                    }
                 }
 
                 if(flash.message!=""){
@@ -609,10 +550,12 @@ class MeasurementController {
 			on("success").to "finishScreen"
 			on("error").to "errorSaving"
 		}
-		errorSaving {
+
+        errorSaving {
 			on("previous").to "checkInput"
 		}
-		finishScreen()
+
+        finishScreen()
 	}
 
     Measurement importerCreateMeasurement(SAMSample s, Feature f, def txt, def comm, def op) {
