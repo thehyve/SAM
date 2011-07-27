@@ -3,7 +3,6 @@ package org.dbxp.sam
 import org.dbxp.matriximporter.MatrixImporter
 import org.dbxp.moduleBase.Assay
 import org.dbxp.moduleBase.Auth
-import org.dbxp.moduleBase.Sample
 
 class MeasurementController {
     static allowedMethods = [save: "POST", update: "POST", delete: "POST"]
@@ -245,6 +244,7 @@ class MeasurementController {
                     // Do we already have some manual selections?
                     // If our text did not change, we can re-use them.
                     if(flow.edited_text != null && flow.text != text){
+                        // It appears we cannot reuse them
                         flow.edited_text = null
                         flow.operator = null
                         flow.comments = null
@@ -369,7 +369,7 @@ class MeasurementController {
                                         continue;
                                     }
                                     if(j==0){
-                                        flow.edited_text[i][j] = Sample.findById(params[i+','+j])
+                                        flow.edited_text[i][j] = SAMSample.findById(params[i+','+j])
                                         continue;
                                     }
                                 } else {
@@ -483,7 +483,7 @@ class MeasurementController {
                                     continue;
                                 }
                                 if(j==0){
-                                    flow.edited_text[i][j] = Sample.findById(params[i+','+j])
+                                    flow.edited_text[i][j] = SAMSample.findById(params[i+','+j])
                                     continue;
                                 }
                             }
@@ -567,7 +567,7 @@ class MeasurementController {
                     for(int i = 1; i < flow.edited_text.size(); i++){
                         // For a particular sample
                         if(flow.edited_text[i][0]!=null && flow.edited_text[i][0]!="null"){
-                            Sample s = flow.edited_text[i][0]
+                            SAMSample s = flow.edited_text[i][0]
                             for(int j = 1; j < flow.edited_text[0].size(); j++){
                                 // ... and a particular feature
                                 if(flow.edited_text[0][j]!=null && flow.edited_text[0][j]!="null"){
@@ -615,7 +615,7 @@ class MeasurementController {
 		finishScreen()
 	}
 
-    Measurement importerCreateMeasurement(Sample s, Feature f, def txt, def comm, def op) {
+    Measurement importerCreateMeasurement(SAMSample s, Feature f, def txt, def comm, def op) {
         def operator
         def comments
         def val

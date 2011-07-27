@@ -1,10 +1,8 @@
 package org.dbxp.sam
 
-import org.dbxp.moduleBase.Sample
-
 class Measurement {
 
-    static belongsTo = [sample:Sample, feature:Feature]
+    static belongsTo = [sample:SAMSample, feature:Feature]
     String operator // '<', '>' or '='
     Double value
     String comments

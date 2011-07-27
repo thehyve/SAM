@@ -29,7 +29,7 @@
                                             <td style="border: 1px solid lightgray;">
                                                 <g:if test="${column.length()>25}">
                                                     <div class="tooltip importerInteractiveCell">
-                                                        <img src="../plugins/famfamfam-1.0.1/images/icons/attach.png"/>${column.substring(0,19)} &hellip;
+                                                        ${column.substring(0,19)} &hellip;
                                                         <span>
                                                             ${column}
                                                         </span>
@@ -90,7 +90,7 @@
                                             <td style="border: 1px solid lightgray;">
                                                 <g:if test="${column.length()>25}">
                                                     <div class="tooltip importerInteractiveCell">
-                                                        <img src="../plugins/famfamfam-1.0.1/images/icons/attach.png"/>${column.substring(0,19)} &hellip;
+                                                        ${column.substring(0,19)} &hellip;
                                                         <span>
                                                             ${column}
                                                         </span>

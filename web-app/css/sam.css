@@ -86,7 +86,3 @@ ul.data_nav li { display: inline-block; *display: inline; zoom: 1; margin-right:
 .importerCommentCell {
     background-color: pink;
 }
-
-.buttons .import { 
-	background-image: url(../plugins/famfamfam-1.0.1/images/icons/page_white_add.png);
-} 

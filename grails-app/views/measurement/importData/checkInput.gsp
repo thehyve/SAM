@@ -33,7 +33,7 @@
                 obj.removeClass("importerOperatorCell importerCommentCell")
                 var content = ""+valA+""+valB+" "+valC
                 if(content.length>25){
-                    obj.html('<div class="tooltip importerInteractiveCell"><img src="../plugins/famfamfam-1.0.1/images/icons/attach.png"/>'+content.substring(0,19)+' &hellip;<span>'+content+'</span></div>');
+                    obj.html('<div class="tooltip importerInteractiveCell">'+content.substring(0,19)+' &hellip;<span>'+content+'</span></div>');
                 } else {
                     obj.html(content);
                 }
@@ -131,7 +131,7 @@
                                             <g:else>
                                                 <g:if test="${content.length()>25}">
                                                     <div class="tooltip importerInteractiveCell">
-                                                        <img src="../plugins/famfamfam-1.0.1/images/icons/attach.png"/>${content.substring(0,19)} &hellip;
+                                                        ${content.substring(0,19)} &hellip;
                                                         <span>
                                                             ${content}
                                                         </span>
@@ -219,7 +219,7 @@
                                             <g:else>
                                                 <g:if test="${content.length()>25}">
                                                     <div class="tooltip importerInteractiveCell">
-                                                        <img src="../plugins/famfamfam-1.0.1/images/icons/attach.png"/>${content.substring(0,19)} &hellip;
+                                                        ${content.substring(0,19)} &hellip;
                                                         <span>
                                                             ${content}
                                                         </span>

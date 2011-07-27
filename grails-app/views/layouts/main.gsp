@@ -7,6 +7,7 @@
             <script type="text/javascript" src="${resource(dir: 'js', file: 'SelectAddMore.js', plugin: 'gdt')}"></script>
             <script type="text/javascript" src="${resource(dir: 'js', file: 'removeWebFlowExecutionKey.js')}"></script>
             <link rel="stylesheet" href="${resource(dir: 'css', file: 'sam.css')}"/>
+            <link rel="stylesheet" href="${resource(dir: 'css', file: 'tooltip.css')}"/>
 	    </head>
 	    <body>
 			<content tag="topnav">
