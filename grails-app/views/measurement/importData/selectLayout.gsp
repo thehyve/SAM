@@ -45,7 +45,12 @@
                                                     }
                                                     if(i==0){
                                                         if(j==0 && text[i][j]!=null && text[i][j].length()!=0){
-                                                            content_sample_sample_layout += '<td style="border: 1px solid lightgray; color: black;" class="badcell"> This cell contains data ("'+text[i][j]+'"), this will be ignored.</td>'
+                                                            def tmp = 'Warning: This cell contains data ("'+text[i][j]+'"), this will be ignored.';
+                                                            if(tmp.length()>25){
+                                                                content_sample_sample_layout += '<td style="border: 1px solid lightgray; color: black;" class="badcell"><div class="tooltip importerInteractiveCell">'+tmp.substring(0,19)+' &hellip;<span>'+tmp+'</span></div></td>';
+                                                            } else {
+                                                                content_sample_sample_layout += '<td style="border: 1px solid lightgray; color: black;" class="badcell">'+tmp+'</td>'
+                                                            }
                                                         } else {
                                                             def colour = ""
                                                             if(j==1){colour = "darkgreen"}
@@ -112,7 +117,13 @@
                                                     }
                                                     if(i==0){
                                                         if(j==0 && text[i][j]!=null && text[i][j].length()!=0){
-                                                            content_sample_subject_layout += '<td style="border: 1px solid lightgray;color: black;" class="badcell"> This cell contains data ("'+text[i][j]+'"), this will be ignored.</td>'                                        } else {
+                                                            def tmp = 'Warning: This cell contains data ("'+text[i][j]+'"), this will be ignored.';
+                                                            if(tmp.length()>25){
+                                                                content_sample_subject_layout += '<td style="border: 1px solid lightgray; color: black;" class="badcell"><div class="tooltip importerInteractiveCell">'+tmp.substring(0,19)+' &hellip;<span>'+tmp+'</span></div></td>';
+                                                            } else {
+                                                                content_sample_subject_layout += '<td style="border: 1px solid lightgray; color: black;" class="badcell">'+tmp+'</td>'
+                                                            }
+                                                        } else {
                                                             content_sample_subject_layout += '<td style="border: 1px solid lightgray; color: darkgreen;">';
                                                             if(text[i][j]!=null && text[i][j].length()>25){
                                                                 content_sample_subject_layout += text[i][j].substring(0,19)+"&hellip;"
@@ -124,7 +135,12 @@
                                                     } else {
                                                         if(i==1){
                                                             if(j==0 && text[i][j]!=null && text[i][j].length()!=0){
-                                                                content_sample_subject_layout += '<td style="border: 1px solid lightgray; color: black;" class="badcell">This cell contains data ("'+text[i][j]+'"), this will be ignored.</td>'
+                                                                def tmp = 'Warning: This cell contains data ("'+text[i][j]+'"), this will be ignored.';
+                                                                if(tmp.length()>25){
+                                                                    content_sample_subject_layout += '<td style="border: 1px solid lightgray; color: black;" class="badcell"><div class="tooltip importerInteractiveCell">'+tmp.substring(0,19)+' &hellip;<span>'+tmp+'</span></div></td>';
+                                                                } else {
+                                                                    content_sample_subject_layout += '<td style="border: 1px solid lightgray; color: black;" class="badcell">'+tmp+'</td>'
+                                                                }
                                                             } else {
                                                                 content_sample_subject_layout += '<td style="border: 1px solid lightgray; color: peru;">';
                                                             if(text[i][j]!=null && text[i][j].length()>25){
