@@ -4,29 +4,6 @@
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
         <meta name="layout" content="main"/>
         <title>Feature list</title>
-        <r:script type="text/javascript" disposition="head">
-            $(document).ready(function() {
-                $('#fList').dataTable();
-            } );
-
-            function deleteItems(){
-                var selected_boxes = $("input[@name=fgMassDelete]:checked");
-                var num = selected_boxes.length;
-                var values = $(selected_boxes).val();
-                alert(num,+", "+values);
-            }
-
-            function submitForm(id, action) {
-                var form = $( 'form#' + id );
-
-                if( action != undefined ) {
-                    $( 'input[name=event]', form ).val( action );
-                    $( 'input[name=_eventId]', form ).val( action );
-                }
-
-                form.submit();
-            }
-        </r:script>
     </head>
 
     <body>
@@ -53,31 +30,6 @@
 
                     </tr>
                 </thead>
-                <!-- 
-                <tbody>
-                    <g:each in="${featureInstanceList}" status="i" var="featureInstance">
-                        <tr class="${(i % 2) == 0 ? 'odd' : 'even'}" id="rowid_${featureInstance.id}">
-
-                            <td>
-                                <g:link action="show" id="${featureInstance.id}">${fieldValue(bean: featureInstance, field: "name")}</g:link>
-                            </td>
-
-                            <td>${fieldValue(bean: featureInstance, field: "unit")}</td>
-
-                            <td>
-                                <g:each in="${FeaturesAndGroups.findAllByFeature(featureInstance)}" var="g">
-                                    <g:link action="show" controller="featuresAndGroups"
-                                        id="${g.id}">${fieldValue(bean: g.featureGroup, field: "name")}</g:link>
-                                    <br/>
-                                </g:each>
-                            </td>
-
-                            <dt:buttonsShowEditDelete controller="feature" id="${featureInstance.id}"/>
-
-                        </tr>
-                    </g:each>
-                </tbody>
-                 -->
             </dt:dataTable>
             <br />
             <ul class="data_nav buttons">
