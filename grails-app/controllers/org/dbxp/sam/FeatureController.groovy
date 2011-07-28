@@ -293,8 +293,11 @@ class FeatureController {
         }
         if(params?.newFeatureGroupID) {
             // Creating a new group
-            FeaturesAndGroups.create(FeatureGroup.get(params.newFeatureGroupID), session.featureInstance);
-			println "Association created"
+            if( FeaturesAndGroups.create(FeatureGroup.get(params.newFeatureGroupID), session.featureInstance, true ) ) {
+			    println "Association created"
+            } else {
+                println "Association already existed"
+            }
         }
 
         // This featureInstance is only used to display an accurate list
