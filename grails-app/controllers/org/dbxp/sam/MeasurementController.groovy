@@ -339,6 +339,9 @@ class MeasurementController {
 			// Step 3: Choose which features in the database match which column in the uploaded file
 			on("next") {
 				// Save data of this step and make some more information available about the contents of the cells
+
+                flow.blnPassedSelectColumns = true;
+
                 if(!flow.operator){
                     flow.operator = [:]
                 }

@@ -39,6 +39,11 @@
             <p>
                 You have chosen the <g:if test="${layout=='sample_layout'}">sample layout</g:if><g:if test="${layout=='subject_layout'}">subject layout</g:if>. On this page, we have tried to match your data with our data. You must double check these matches, and confirm your final choice.
             </p>
+            <g:if test="${blnPassedSelectColumns==true}">
+                <p class='message'>
+                    Please note: changes that have been made on the next page ('Confirm Input') are not reflected on this page. However, they will be available to you again on the next page. On this page the original file contents are being shown.
+                </p>
+            </g:if>
             <form method="post">
                 <g:if test="${layout=='sample_layout'}">
                     <table style="width: auto">
