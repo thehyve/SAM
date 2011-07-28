@@ -34,7 +34,7 @@
                         <tr class="${(i % 2) == 0 ? 'odd' : 'even'}" id="rowid_${measurementInstance.id}">
 
                             <td>
-                                <g:link action="show" id="${measurementInstance.id}">${fieldValue(bean: measurementInstance, field: "value")}</g:link>
+                                <g:link action="show" id="${measurementInstance.id}">${measurementInstance.value}</g:link>
                             </td>
 
                             <td>${fieldValue(bean: measurementInstance, field: "operator")}</td>

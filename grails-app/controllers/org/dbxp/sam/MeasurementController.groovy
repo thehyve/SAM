@@ -24,7 +24,14 @@ class MeasurementController {
     }
 
     def save = {
-        def measurementInstance = new Measurement(params)
+        def measurementInstance = new Measurement( params )
+		
+		// Unfortunately, grails is unable to handle double values correctly. If
+		// one enters 10.20, the value of 1020.0 is stored in the database. For that
+		// reason, we convert the value ourselves
+		if( params.value?.isDouble() )
+			measurementInstance.value = params.value as Double
+		
         if (measurementInstance.save(flush: true)) {
             flash.message = "The measurement has been created."
             redirect(action: "show", id: measurementInstance.id)
@@ -69,6 +76,13 @@ class MeasurementController {
                 }
             }
             measurementInstance.properties = params
+			
+			// Unfortunately, grails is unable to handle double values correctly. If
+			// one enters 10.20, the value of 1020.0 is stored in the database. For that
+			// reason, we convert the value ourselves
+			if( params.value?.isDouble() )
+				measurementInstance.value = params.value as Double
+			
             if (!measurementInstance.hasErrors() && measurementInstance.save(flush: true)) {
                 flash.message = "The measurement has been updated."
                 redirect(action: "show", id: measurementInstance.id)

@@ -31,7 +31,7 @@
                                 <label for="value"><g:message code="measurement.value.label" default="Value"/></label>
                             </td>
                             <td valign="top" class="value ${hasErrors(bean: measurementInstance, field: 'value', 'errors')}">
-                                <g:textField name="value" value="${fieldValue(bean: measurementInstance, field: 'value')}"/>
+                                <g:textField name="value" value="${measurementInstance.value}"/>
                             </td>
                         </tr>
 

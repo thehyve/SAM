@@ -48,6 +48,7 @@
             <ul class="data_nav buttons">
                 <g:form>
                     <g:hiddenField name="id" value="${featureGroupInstance?.id}"/>
+                    <g:hiddenField name="ids" value="${featureGroupInstance?.id}"/>
                     <li><g:actionSubmit class="edit" action="edit" value="Edit"/></li>
                     <li><g:actionSubmit class="delete" action="delete" value="Delete" onclick="return confirm('Are you sure?');"/></li>
                     <li><g:link controller="featureGroup" action="list" class="cancel">Back to list</g:link></li>

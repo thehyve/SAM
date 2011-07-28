@@ -20,7 +20,7 @@
 
         <div class="data">
             <g:form method="post">
-                <g:hiddenField name="id" value="${measurementInstance?.id}"/>
+                <g:hiddenField name="ids" value="${measurementInstance?.id}"/>
                 <g:hiddenField name="version" value="${measurementInstance?.version}"/>
                 <div class="dialog">
                     <table>
@@ -36,7 +36,7 @@
                         <tr class="prop">
                             <td valign="top" class="name"><g:message code="measurement.value.label" default="Value"/></td>
 
-                            <td valign="top" class="value">${fieldValue(bean: measurementInstance, field: "value")}</td>
+                            <td valign="top" class="value">${measurementInstance.value}</td>
 
                         </tr>
 
