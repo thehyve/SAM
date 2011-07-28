@@ -3,7 +3,7 @@
     <head>
         <meta name="layout" content="main"/>
         <title>Measurement importer</title>
-        <script type="text/javascript">
+        <r:script type="text/javascript" disposition="head">
 
             $(document).ready(function() {
                 $("#dialog").dialog({
@@ -50,7 +50,7 @@
                 $("#dialog").html("");
                 $("#dialog").dialog('close');
             }
-        </script>
+        </r:script>
     </head>
     <body>
         <content tag="contextmenu">
