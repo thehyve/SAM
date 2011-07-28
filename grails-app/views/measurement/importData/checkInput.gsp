@@ -4,7 +4,6 @@
         <meta name="layout" content="main"/>
         <title>Measurement importer</title>
         <r:script type="text/javascript" disposition="head">
-
             $(document).ready(function() {
                 $("#dialog").dialog({
                     width: 'auto',
@@ -92,7 +91,17 @@
                                         <g:else>
                                             <td style="border: 1px solid lightgray;">
                                                 <g:if test="${column.class!=java.lang.String}">
-                                                    ${column.name}
+                                                    <g:if test="${column.class==org.dbxp.sam.Feature}">
+                                                        <div class="tooltip importerInteractiveCell">
+                                                            ${column.name}
+                                                            <span>
+                                                                <g:include controller="feature" action="minimalShow" params="['featureInstance': column]"/>
+                                                            </span>
+                                                        </div>
+                                                    </g:if>
+                                                    <g:else>
+                                                        ${column.name}
+                                                    </g:else>
                                                 </g:if>
                                                 <g:else>
                                                     ${column}

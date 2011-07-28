@@ -1,8 +1,32 @@
 <%@ page import="org.dbxp.moduleBase.Study; org.dbxp.moduleBase.Assay" %>
 <html>
     <head>
-      <meta name="layout" content="main"/>
-      <title>Measurement importer</title>
+        <meta name="layout" content="main"/>
+        <title>Measurement importer</title>
+        <script type="text/javascript">
+            $(document).ready(function() {
+                new SelectAddMore().init({
+                    rel  : 'featureSelector',
+                    url  : baseUrl + '/feature/minimalCreate',
+                    label   : 'Create a new feature',
+                    style   : 'modify',
+                    onClose : function(scope) {
+                        $.getJSON(
+                            baseUrl+"/feature/retrieveMissingOption?currentOptions=${features.id}",
+                            function(j){
+                                var options = '';
+                                for (var i = 0; i < j.length; i++) {
+                                    options += '<option value="' + j[i].id + '">' + j[i].name + '</option>';
+                                }
+                                $("select[rel*='featureSelector']").each(function() {
+                                    $(this).prepend(options);
+                                });
+                            }
+                        );
+                    }
+                });
+            });
+        </script>
     </head>
     <body>
         <content tag="contextmenu">
@@ -15,6 +39,11 @@
             <p>
                 You have chosen the <g:if test="${layout=='sample_layout'}">sample layout</g:if><g:if test="${layout=='subject_layout'}">subject layout</g:if>. On this page, we have tried to match your data with our data. You must double check these matches, and confirm your final choice.
             </p>
+            <g:if test="${blnPassedSelectColumns==true}">
+                <p class='message'>
+                    Please note: changes that have been made on the next page ('Confirm Input') are not reflected on this page. However, they will be available to you again on the next page. On this page the original file contents are being shown.
+                </p>
+            </g:if>
             <form method="post">
                 <g:if test="${layout=='sample_layout'}">
                     <table style="width: auto">
@@ -42,14 +71,14 @@
                                                     <!-- Feature row -->
                                                     <g:if test="${edited_text!=null}">
                                                         <g:if test="${edited_text[i][j]!=null}">
-                                                            <g:select name="${i},${j}" from="${features}" value="${edited_text[i][j].id}" optionKey="id" optionValue="name" noSelection="[null:'Discard']"/>
+                                                            <g:select rel="featureSelector" name="${i},${j}" from="${features}" value="${edited_text[i][j].id}" optionKey="id" optionValue="name" noSelection="[null:'Discard']"/>
                                                         </g:if>
                                                         <g:else>
-                                                            <g:select name="${i},${j}" from="${features}" value="" optionKey="id" optionValue="name" noSelection="[null:'Discard']"/>
+                                                            <g:select rel="featureSelector" name="${i},${j}" from="${features}" value="" optionKey="id" optionValue="name" noSelection="[null:'Discard']"/>
                                                         </g:else>
                                                     </g:if>
                                                     <g:else>
-                                                        <g:select name="${i},${j}" from="${features}" value="${features[feature_matches[column]].id}" optionKey="id" optionValue="name" noSelection="[null:'Discard']"/>
+                                                        <g:select rel="featureSelector" name="${i},${j}" from="${features}" value="${features[feature_matches[column]].id}" optionKey="id" optionValue="name" noSelection="[null:'Discard']"/>
                                                     </g:else>
                                                 </g:if>
                                                 <g:if test="${j==0}">
@@ -103,14 +132,14 @@
                                                     <!-- Feature row -->
                                                     <g:if test="${edited_text!=null}">
                                                         <g:if test="${edited_text[i][j]!=null}">
-                                                            <g:select name="${i},${j}" from="${features}" value="${edited_text[i][j].id}" optionKey="id" optionValue="name" noSelection="[null:'Discard']"/>
+                                                            <g:select rel="featureSelector" name="${i},${j}" from="${features}" value="${edited_text[i][j].id}" optionKey="id" optionValue="name" noSelection="[null:'Discard']"/>
                                                         </g:if>
                                                         <g:else>
-                                                            <g:select name="${i},${j}" from="${features}" value="" optionKey="id" optionValue="name" noSelection="[null:'Discard']"/>
+                                                            <g:select rel="featureSelector" name="${i},${j}" from="${features}" value="" optionKey="id" optionValue="name" noSelection="[null:'Discard']"/>
                                                         </g:else>
                                                     </g:if>
                                                     <g:else>
-                                                        <g:select name="${i},${j}" from="${features}" value="${features[feature_matches[column]].id}" optionKey="id" optionValue="name" noSelection="[null:'Discard']"/>
+                                                        <g:select rel="featureSelector" name="${i},${j}" from="${features}" value="${features[feature_matches[column]].id}" optionKey="id" optionValue="name" noSelection="[null:'Discard']"/>
                                                     </g:else>
                                                 </g:if>
                                                 <g:if test="${i==1&&j>0}">

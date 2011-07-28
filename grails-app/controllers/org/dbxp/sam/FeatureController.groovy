@@ -130,7 +130,15 @@ class FeatureController {
             if(params?.nextPage=="edit"){
                 redirect(action: "edit", id: featureInstance.id, featureInstance: featureInstance)
             } else {
-                redirect(action: "list")
+                if(params?.nextPage=="minimalCreate"){
+                    redirect(action: "minimalCreate")
+                } else {
+                    if(params?.nextPage=="minimalEdit"){
+                        redirect(action: "minimalEdit", id: featureInstance.id, featureInstance: featureInstance)
+                    } else {
+                        redirect(action: "list")
+                    }
+                }
             }
         }
         else {
@@ -262,6 +270,7 @@ class FeatureController {
     }
 
     def refreshEdit = {
+        println "\n\n\n\n\n\n\n\n\n\n\n"+params
         // Used to refresh the edit page after a change of template
         if(!session.featureInstance.isAttached()){
             session.featureInstance.attach()
@@ -273,8 +282,11 @@ class FeatureController {
                 session.featureInstance.setProperty(it.name, params[it.name])
             }
         }
+
+        if(params.template!=""){
+            updateTemplate()
+        }
         
-        updateTemplate()
         render(view: "edit", model: [featureInstance: session.featureInstance])
     }
 
@@ -285,8 +297,11 @@ class FeatureController {
         }
         if(params?.newFeatureGroupID) {
             // Creating a new group
-            FeaturesAndGroups.create(FeatureGroup.get(params.newFeatureGroupID), session.featureInstance);
-			println "Association created"
+            if( FeaturesAndGroups.create(FeatureGroup.get(params.newFeatureGroupID), session.featureInstance, true ) ) {
+			    println "Association created"
+            } else {
+                println "Association already existed"
+            }
         }
 
         // This featureInstance is only used to display an accurate list
@@ -322,34 +337,33 @@ class FeatureController {
 
 	def updateTemplate = {
         // A different template has been selected, so all the template fields have to be removed, added or updated with their previous values (they start out empty)
-       if(!session.featureInstance.isAttached()){
+        if(!session.featureInstance.isAttached()){
            session.featureInstance.attach()
-       }
-       try {
+        }
+        try {
             if(params.template==""){
                 println "Removing template..."
                 session.featureInstance.template = null
             } else if(params?.template && session?.featureInstance.template?.name != params.get('template')) {
-               // set the template
+                // set the template
                 println "params.template : "+params.template
-               session.featureInstance.template = Template.findByName(params.template)
-           }
-
+                session.featureInstance.template = Template.findByName(params.template)
+            }
             println "Updating template..."
-           // does the study have a template set?
-           if (session.featureInstance.template && session.featureInstance.template instanceof Template) {
-               // yes, iterate through template fields
-               session.featureInstance.giveFields().each() {
-                   // and set their values
-                   session.featureInstance.setFieldValue(it.name, params.get(it.escapedName()))
-               }
-           }
-       } catch (Exception e){
+            // does the study have a template set?
+            if (session.featureInstance.template && session.featureInstance.template instanceof Template) {
+                // yes, iterate through template fields
+                session.featureInstance.giveFields().each() {
+                    // and set their values
+                    session.featureInstance.setFieldValue(it.name, params.get(it.escapedName()))
+                }
+            }
+        } catch (Exception e){
            log.error(e)
             e.printStackTrace()
            // TODO: Make this more informative
            flash.message = "An error occurred while updating this feature's template. Please try again.<br>${e}"
-       }
+        }
    }
 
     def removeFromGroup = {
@@ -392,4 +406,24 @@ class FeatureController {
 		showFaGList( featureInstance );
     }
 
+    def retrieveMissingOption = {
+        // Used by an AJAX call to enable refreshing part of a page
+        def ret = []
+        Feature.list().each {
+            if(!params.currentOptions.contains(it.id.toString())){
+                ret.add(['id':it.id, 'name':it.name])
+            }
+        }
+        render ret as JSON
+    }
+
+    def minimalCreate = {
+        def featureInstance = new Feature()
+        featureInstance.properties = params
+        return [featureInstance: featureInstance]
+    }
+
+    def minimalShow = {
+        [featureInstance: params.featureInstance]
+    }
 }

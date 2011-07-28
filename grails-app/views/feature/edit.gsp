@@ -14,19 +14,13 @@
                     label   : 'add / modify',
                     style   : 'modify',
                     onClose : function(scope) {
-                        handleTemplateChange();
+                        handleTemplateChange('edit');
                     }
                 });
             });
 
             function handleTemplateChange(id){
-                // Filtering out the add/modify button
-                // This can't be done with the .val because it is empty, as is the empty option
-                if($('#template option:selected').text()!='add / modify'){
-					$( 'form#' + id ).submit();
-                } else {
-                    location.replace(baseUrl + "/feature/edit?id=${featureInstance.id}");
-                }
+                $( 'form#' + id ).submit();
             }
 
             function addToFeatureGroup(){
