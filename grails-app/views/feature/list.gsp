@@ -4,7 +4,7 @@
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
         <meta name="layout" content="main"/>
         <title>Feature list</title>
-        <script type="text/javascript">
+        <r:script type="text/javascript" disposition="head">
             $(document).ready(function() {
                 $('#fList').dataTable();
             } );
@@ -26,7 +26,7 @@
 
                 form.submit();
             }
-        </script>
+        </r:script>
     </head>
 
     <body>

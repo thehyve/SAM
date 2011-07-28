@@ -5,7 +5,7 @@
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
         <meta name="layout" content="main"/>
         <title>Edit feature ${featureInstance.name}</title>
-        <script type="text/javascript">
+        <r:script type="text/javascript" disposition="head">
             $(document).ready(function() {
                 new SelectAddMore().init({
                     rel  : 'template',
@@ -52,7 +52,7 @@
                 });
             }            
             
-        </script>
+        </r:script>
     </head>
 
     <body>

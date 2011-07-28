@@ -4,7 +4,7 @@
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
         <meta name="layout" content="main"/>
         <title>FeatureGroup list</title>
-        <script type="text/javascript">
+        <r:script type="text/javascript" disposition="head">
             function deleteItems(){
                 var selected_boxes = $("input[@name=fgMassDelete]:checked");
                 var num = selected_boxes.length;
@@ -22,7 +22,7 @@
 
                 form.submit();
             }
-        </script>
+        </r:script>
     </head>
     <body>
         <content tag="contextmenu">
