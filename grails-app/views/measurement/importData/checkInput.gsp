@@ -4,7 +4,6 @@
         <meta name="layout" content="main"/>
         <title>Measurement importer</title>
         <script type="text/javascript">
-
             $(document).ready(function() {
                 $("#dialog").dialog({
                     width: 'auto',

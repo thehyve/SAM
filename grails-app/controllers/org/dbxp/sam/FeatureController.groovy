@@ -130,7 +130,15 @@ class FeatureController {
             if(params?.nextPage=="edit"){
                 redirect(action: "edit", id: featureInstance.id, featureInstance: featureInstance)
             } else {
-                redirect(action: "list")
+                if(params?.nextPage=="minimalCreate"){
+                    redirect(action: "minimalCreate")
+                } else {
+                    if(params?.nextPage=="minimalEdit"){
+                        redirect(action: "minimalEdit", id: featureInstance.id, featureInstance: featureInstance)
+                    } else {
+                        redirect(action: "list")
+                    }
+                }
             }
         }
         else {
@@ -149,10 +157,6 @@ class FeatureController {
         }
     }
 
-    def minimalShow = {
-        [featureInstance: params.featureInstance]
-    }
-    
     def edit = {
         def featureInstance = Feature.get(params.id)
         session.featureInstance = featureInstance
@@ -396,4 +400,24 @@ class FeatureController {
 		showFaGList( featureInstance );
     }
 
+    def retrieveMissingOption = {
+        // Used by an AJAX call to enable refreshing part of a page
+        def ret = []
+        Feature.list().each {
+            if(!params.currentOptions.contains(it.id.toString())){
+                ret.add(['id':it.id, 'name':it.name])
+            }
+        }
+        render ret as JSON
+    }
+
+    def minimalCreate = {
+        def featureInstance = new Feature()
+        featureInstance.properties = params
+        return [featureInstance: featureInstance]
+    }
+
+    def minimalShow = {
+        [featureInstance: params.featureInstance]
+    }
 }
