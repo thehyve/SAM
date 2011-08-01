@@ -19,7 +19,7 @@
                                     options += '<option value="' + j[i].id + '">' + j[i].name + '</option>';
                                 }
                                 $("select[rel*='featureSelector']").each(function() {
-                                    $(this).prepend(options);
+                                    $(this).append(options);
                                 });
                             }
                         );

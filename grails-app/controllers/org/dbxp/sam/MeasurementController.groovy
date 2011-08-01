@@ -373,34 +373,39 @@ class MeasurementController {
                 }
 
                 // Generate extra information about cell contents and fold the user's selections into our data storage object flow.edited_text
-                if(!flow.edited_text){
+                def fresh // Is this a 'fresh start'?
+                if(!flow.edited_text){ // This is a 'fresh start'.
                     flow.edited_text = new Object[flow.text.size()][flow.text[0].size()]
-                    for(int i = 0; i < flow.text.size(); i++){
-                        for(int j = 0; j < flow.text[i].size(); j++){
-                            if(params[i+','+j]){
-                                // Here we are catching a user's feature or sample selection from the previous page and incorporating it into our new dataset
-                                // We receive an object's id and use this to add the object to the flow.edited_text
-                                if(params[i+','+j] == 'null'){
-                                    // We didn't actually receive a proper id, so set the field to null
-                                    flow.edited_text[i][j] = null
-                                    continue;
-                                }
-                                if(i==0){
-                                    flow.edited_text[i][j] = Feature.findById(params[i+','+j])
-                                    continue;
-                                }
+                    fresh = true;
+                }
+                for(int i = 0; i < flow.text.size(); i++){
+                    for(int j = 0; j < flow.text[i].size(); j++){
+                        if(params[i+','+j]){
+                            // Here we are catching a user's feature or sample selection from the previous page and incorporating it into our new dataset
+                            // We receive an object's id and use this to add the object to the flow.edited_text
+                            if(params[i+','+j] == 'null'){
+                                // We didn't actually receive a proper id, so set the field to null
+                                flow.edited_text[i][j] = null
+                                continue;
+                            }
+                            if(i==0){
+                                flow.edited_text[i][j] = Feature.findById(params[i+','+j])
+                                continue;
+                            }
 
-                                if(flow.layout=="sample_layout"){
-                                    if(j==0){
-                                        flow.edited_text[i][j] = SAMSample.findById(params[i+','+j])
-                                        continue;
-                                    }
-                                } else {
-                                    if(i==1 || j==0){
-                                        flow.edited_text[i][j] = params[i+','+j]
-                                        continue;
-                                    }
-                                }                            } else {
+                            if(flow.layout=="sample_layout"){
+                                if(j==0){
+                                    flow.edited_text[i][j] = SAMSample.findById(params[i+','+j])
+                                    continue;
+                                }
+                            } else {
+                                if(i==1 || j==0){
+                                    flow.edited_text[i][j] = params[i+','+j]
+                                    continue;
+                                }
+                            }
+                        } else {
+                            if(fresh){
                                 flow.edited_text[i][j] = flow.text[i][j]
                                 def txt = flow.edited_text[i][j]
                                 if(i>0 && j>0 && txt!=null && txt!=""){
@@ -498,6 +503,9 @@ class MeasurementController {
 
                     }
                 }
+
+                // Update feature list in case the user has created new features on their previous visit to the selectColumns page
+                flow.features = Feature.list().sort(){it.name}
             }.to "selectColumns"
 		}
 
