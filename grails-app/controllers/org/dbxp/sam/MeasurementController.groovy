@@ -273,6 +273,14 @@ class MeasurementController {
                     flow.message = 'Make sure to add a file using the upload field below. The file upload field cannot be empty.'
                     return error()
                 }
+
+                def tmp1 = flow.assay.samples.eventStartTime.unique()
+                def tmp2 = flow.assay.samples.subjectName.unique()
+                if(tmp1.size()==0 || tmp1.contains(null) ||  tmp2.size()==0 || tmp2.contains(null)){
+                    // No start times? No subject names? Cannot select subject layout then!
+                    flow.disableSubjectLayout = true
+                    flow.layoutguess = 'sample_layout'
+                }
             }
             on("success").to "selectLayout"
             on("error").to "uploadData"

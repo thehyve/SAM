@@ -92,7 +92,7 @@
                                             <td style="border: 1px solid lightgray;">
                                                 <g:if test="${column.class!=java.lang.String}">
                                                     <g:if test="${column.class==org.dbxp.sam.Feature}">
-                                                        <div class="tooltip importerInteractiveCell">
+                                                        <div class="tooltip">
                                                             ${column.name}
                                                             <span>
                                                                 <g:include controller="feature" action="minimalShow" params="['featureInstance': column]"/>
@@ -115,10 +115,10 @@
                                         <g:hiddenField name="valueHidden${i},${j}" value="${column}"/>
                                         <td id="${i},${j}" onclick="newInputForm($(this), '${i},${j}');" style="border: 1px solid lightgray;"
                                         <g:if test="${op!=null && co==null}">
-                                            class="importerOperatorCell"
+                                            class="importerInteractiveCell importerOperatorCell"
                                         </g:if>
                                         <g:if test="${co!=null}">
-                                            class="importerCommentCell"
+                                            class="importerInteractiveCell importerCommentCell"
                                         </g:if>
                                         >
                                         <%
@@ -145,7 +145,7 @@
                                         </g:if>
                                         <g:else>
                                             <g:if test="${content.length()>25}">
-                                                <div class="tooltip importerInteractiveCell">
+                                                <div class="tooltip">
                                                     ${content.substring(0,19)} &hellip;
                                                     <span>
                                                         ${content}
