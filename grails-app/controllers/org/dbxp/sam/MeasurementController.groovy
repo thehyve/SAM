@@ -197,6 +197,7 @@ class MeasurementController {
                         new File( "./tempfolder/" ).mkdirs()
                         f.transferTo( new File( "./tempfolder/" + File.separatorChar + f.getOriginalFilename() ) )
                         File file = new File("./tempfolder/" + File.separatorChar + f.getOriginalFilename())
+                        flow.inputfile = file
                         text = MatrixImporter.getInstance().importFile(file);
                     } catch(Exception e){
                         // Something went wrong with the file...
