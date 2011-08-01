@@ -67,6 +67,7 @@
             <g:form class="Feature" action="refreshEdit" name="edit" method="post">
                 <%-- <input type="hidden" name="_eventId" value="refreshEdit" /> --%>
                 <g:hiddenField name="id" value="${featureInstance?.id}"/>
+                <g:hiddenField name="ids" value="${featureInstance?.id}"/>
                 <g:hiddenField name="version" value="${featureInstance?.version}"/>
                 <div class="dialog">
                     <table>
