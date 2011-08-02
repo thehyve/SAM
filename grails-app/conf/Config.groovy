@@ -94,8 +94,7 @@ log4j = {
            'net.sf.ehcache.hibernate',
 		   
 		   'grails.app.service.org.grails.plugin.resource.ResourceService',
-		   'grails.app.tagLib.org.grails.plugin.resource.ResourceTaglib',
-		   'grails.app.groovy.org.grails.plugin.resource'
+		   'grails.app.tagLib.org.grails.plugin.resource.ResourceTagLib'
 
     warn   'org.mortbay.log'
 
