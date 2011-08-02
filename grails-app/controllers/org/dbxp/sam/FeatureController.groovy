@@ -164,6 +164,10 @@ class FeatureController {
             redirect(action: "list")
         }
         else {
+			// Store session template id, so it will show up correctly after
+			// opening the template editor. See also _determineTemplate
+			session.templateId = featureInstance.template?.id
+			
             return [featureInstance: featureInstance]
         }
     }
@@ -175,7 +179,7 @@ class FeatureController {
                 def version = params.version.toLong()
                 if (featureInstance.version > version) {
 
-                    featureInstance.errors.rejectValue("Another user has updated this feature while you were editing. Because of this, your changes have not been saved to the database.")
+                    featureInstance.errors.rejectValue("", "Another user has updated this feature while you were editing. Because of this, your changes have not been saved to the database.")
                     render(view: "edit", model: [featureInstance: featureInstance])
                     return
                 }
@@ -267,23 +271,7 @@ class FeatureController {
 		
 		redirect(action: "list")
     }
-
-    def refreshEdit = {
-        println "\n\n\n\n\nparams: "+params
-        def featureInstance = Feature.get(params.id)
-        featureInstance.getDomainFields().each {
-            if(params[it?.name]!=null){
-                featureInstance.setProperty(it.name, params[it.name])
-            }
-        }
-
-        if(params.template!=""){
-            updateTemplate()
-        }
-        
-        render(view: "edit", model: [featureInstance: featureInstance])
-    }
-
+	
     def confirmNewFeatureGroup = {
         // Used to add a new FeaturesAndGroups connection and to refresh the edit page's feature group list
         def featureInstance = Feature.get(params.id)
@@ -311,46 +299,53 @@ class FeatureController {
 		render(view: "FaGList", model: [groupList: groupList, remainingGroups: remainingGroups])
 	}
 
-    def templateSpecific = {
-        def featureInstance = Feature.get(params.id)
-        render(view: "templateSpecific", model: [featureInstance: featureInstance])
-    }
-
     def templateSelection = {
-        // Get a template selector
-        def featureInstance = Feature.get(params.id)
-        def template = featureInstance?.template
-        render(view: "templateSelection", model: [template: template])
+        render(template: "templateSelection", model: [template: _determineTemplate()])
     }
 
     def returnUpdatedTemplateSpecificFields = {
-        // A different template has been selected, so all the template fields have to be removed, added or updated with their previous values (they start out empty)
-        if(params.templateEditorHasBeenOpened!='true'){
-            try {
-                def featureInstance = Feature.get(params.id)
-                if(params.template==""){
-                    featureInstance.template = null
-                } else if(params?.template && featureInstance.template?.name != params.get('template')) {
-                    // set the template
-                    featureInstance.template = Template.findByName(params.template)
-                }
-                // does the study have a template set?
-                if (featureInstance.template && featureInstance.template instanceof Template) {
-                    // yes, iterate through template fields
-                    featureInstance.giveFields().each() {
-                        // and set their values
-                        featureInstance.setFieldValue(it.name, params.get(it.escapedName()))
-                    }
-                }
-            } catch (Exception e){
-               log.error(e)
-                e.printStackTrace()
-               // TODO: Make this more informative
-               flash.message = "An error occurred while updating this feature's template. Please try again.<br>${e}"
-            }
-        }
-        render(view: "templateSpecific", model: [featureInstance: featureInstance])
+		def template = _determineTemplate();
+		def values = [:];
+		
+		// Set the correct value of all domain fields and template fields (if template exists) 
+		try {
+			if( template ) {
+				template.fields.each {
+					values[it.name] = params.get(it.escapedName());
+				}
+			}
+		} catch( Exception e ) {
+			log.error( e );
+		}
+
+		render(template: "templateSpecific", model: [template: template, values: values])
     }
+	
+	/**
+	 * Returns the template that should be shown on the screen
+	 */
+	def _determineTemplate = {
+		def template = null;
+		
+		if( params.templateEditorHasBeenOpened == 'true') {
+			// If the template editor has been opened (and closed), we should use
+			// the template that we stored previously
+			if( session.templateId ) {
+				template = Template.get( session.templateId );
+			} 
+		} else {
+			// Otherwise, we should use the template that the user selected.
+			if( params.template ) {
+				return Template.findByName(params.template)
+			}
+		}
+		
+		// Store the template id in session, so the system will know the previously
+		// selected template
+		session.templateId = template?.id
+		
+		return template;
+	}
 
 	def updateTemplate = {
         // A different template has been selected, so all the template fields have to be removed, added or updated with their previous values (they start out empty)

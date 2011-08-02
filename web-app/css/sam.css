@@ -86,3 +86,5 @@ ul.data_nav li { display: inline-block; *display: inline; zoom: 1; margin-right:
 .importerCommentCell {
     background-color: pink;
 }
+
+.fieldName { width: 25%; }
