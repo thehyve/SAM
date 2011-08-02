@@ -95,6 +95,7 @@
             </g:else>
                 <form method="post" enctype="multipart/form-data">
                     <h2>Locate the file on your computer:</h2>
+                    <p>Make sure to add a comma-separated values based or Excel based file using the upload field below.</p>
                     <input id="file" type="file" id="fileUpload" name="fileUpload"/>
                     <br>
                     <br>
