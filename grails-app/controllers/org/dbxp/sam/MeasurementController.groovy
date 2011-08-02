@@ -197,6 +197,13 @@ class MeasurementController {
                         return error()
                     }
 
+                    // What did the MatrixImporter return?
+                    if(text==null){
+                        // Apparently the MatrixImporter was unable to read this file
+                        flow.message = 'Make sure to add a comma-separated values based or Excel based file using the upload field below. The file you uploaded could not be read.'
+                        return error()
+                    }
+
                     // In the following section we will try to find out what layout the data in this file has
                     def sampl = 0
                     def subj = 0
