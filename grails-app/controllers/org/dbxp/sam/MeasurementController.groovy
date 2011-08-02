@@ -152,18 +152,10 @@ class MeasurementController {
 
         startUp {
             action{
-                flow.assayList = [:]
-                flow.studyList = [:]
-                Auth.findAllByUser(session.getValue('user')).each{
-                    it.study.each { it2 ->
-                        if(it2.canWrite(session.getValue('user'))){
-                            it2.assays.each { assay ->
-                                flow.assayList.put(assay.assayToken, assay.name)
-                                flow.studyList.put(assay.assayToken, it2.name)
-                            }
-                        }
-                    }
-                }
+				synchronizationService.initSynchronization( session.sessionToken, session.user );
+				synchronizationService.synchronizeChangedStudies()
+				
+                flow.assayList = Assay.giveWritableAssays( session.user );
             }
             on("success").to "chooseAssay"
         }
@@ -171,8 +163,8 @@ class MeasurementController {
 		chooseAssay {
 			// Step 1: choose study and assay (update assay dropdown based on the study selected)
 			on("next") {
-                flow.assay = Assay.findByAssayToken(params.assay)
-                flow.studyName = params.study
+                flow.assay = Assay.get(params.assay)
+                flow.studyName = flow.assay.study.name
 			}.to "uploadData"
 		}
 
