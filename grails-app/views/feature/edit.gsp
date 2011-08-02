@@ -103,9 +103,7 @@
 									<tr class="prop ${(featureInstance.giveDomainFields().size() % 2) == 0 ? 'odd' : 'even'}">
 										<td>Template</td>
 			                            <td id="templateSelection">
-			                                <%-- Unfortunately this gives problems with the template editor
-			                                <g:include action="templateSelection" params="['id' : featureInstance.id]"/> --%>
-			                                <af:templateElement name="template" rel="template" description="" value="${featureInstance?.template}" error="template" entity="${Feature}" ontologies="${featureInstance.giveDomainFields()}" addDummy="true" onChange="if(!\$( 'option:selected', \$(this) ).hasClass( 'modify' )){ handleTemplateChange('edit');}"></af:templateElement>
+                                            <g:include action="templateSelection" params="['id' : featureInstance.id]"/>
 			                            </td>
 			                           </tr>                                    
                                 </table>

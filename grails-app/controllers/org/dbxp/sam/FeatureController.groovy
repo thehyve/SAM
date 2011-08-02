@@ -159,7 +159,6 @@ class FeatureController {
 
     def edit = {
         def featureInstance = Feature.get(params.id)
-        session.featureInstance = featureInstance
         if (!featureInstance) {
             flash.message = "The requested feature could not be found."
             redirect(action: "list")
@@ -270,9 +269,11 @@ class FeatureController {
     }
 
     def refreshEdit = {
-        session.featureInstance.getDomainFields().each {
+        println "\n\n\n\n\nparams: "+params
+        def featureInstance = Feature.get(params.id)
+        featureInstance.getDomainFields().each {
             if(params[it?.name]!=null){
-                session.featureInstance.setProperty(it.name, params[it.name])
+                featureInstance.setProperty(it.name, params[it.name])
             }
         }
 
@@ -280,22 +281,21 @@ class FeatureController {
             updateTemplate()
         }
         
-        render(view: "edit", model: [featureInstance: session.featureInstance])
+        render(view: "edit", model: [featureInstance: featureInstance])
     }
 
     def confirmNewFeatureGroup = {
         // Used to add a new FeaturesAndGroups connection and to refresh the edit page's feature group list
+        def featureInstance = Feature.get(params.id)
         if(params?.newFeatureGroupID) {
             // Creating a new group
-            if( FeaturesAndGroups.create(FeatureGroup.get(params.newFeatureGroupID), session.featureInstance, true ) ) {
+            if( FeaturesAndGroups.create(FeatureGroup.get(params.newFeatureGroupID), featureInstance, true ) ) {
 			    println "Association created"
             } else {
                 println "Association already existed"
             }
         }
 
-        // This featureInstance is only used to display an accurate list
-        def featureInstance = Feature.get(params.id)
 		showFaGList( featureInstance );
     }
 	
@@ -312,35 +312,65 @@ class FeatureController {
 	}
 
     def templateSpecific = {
-        render(view: "templateSpecific", model: [featureInstance: session.featureInstance])
+        def featureInstance = Feature.get(params.id)
+        render(view: "templateSpecific", model: [featureInstance: featureInstance])
     }
 
     def templateSelection = {
         // Get a template selector
-        // Actually using this in a .gsp does not seem to lead to a working template editor
-        // TODO: fix this so that add/modify does not have to lead to a page refresh
         def featureInstance = Feature.get(params.id)
-        render(view: "templateSelection", model: [featureInstance: featureInstance])
+        def template = featureInstance?.template
+        render(view: "templateSelection", model: [template: template])
+    }
+
+    def returnUpdatedTemplateSpecificFields = {
+        // A different template has been selected, so all the template fields have to be removed, added or updated with their previous values (they start out empty)
+        if(params.templateEditorHasBeenOpened!='true'){
+            try {
+                def featureInstance = Feature.get(params.id)
+                if(params.template==""){
+                    featureInstance.template = null
+                } else if(params?.template && featureInstance.template?.name != params.get('template')) {
+                    // set the template
+                    featureInstance.template = Template.findByName(params.template)
+                }
+                // does the study have a template set?
+                if (featureInstance.template && featureInstance.template instanceof Template) {
+                    // yes, iterate through template fields
+                    featureInstance.giveFields().each() {
+                        // and set their values
+                        featureInstance.setFieldValue(it.name, params.get(it.escapedName()))
+                    }
+                }
+            } catch (Exception e){
+               log.error(e)
+                e.printStackTrace()
+               // TODO: Make this more informative
+               flash.message = "An error occurred while updating this feature's template. Please try again.<br>${e}"
+            }
+        }
+        render(view: "templateSpecific", model: [featureInstance: featureInstance])
     }
 
 	def updateTemplate = {
         // A different template has been selected, so all the template fields have to be removed, added or updated with their previous values (they start out empty)
         try {
+            def featureInstance = Feature.get(params.id)
             if(params.template==""){
                 //println "Removing template..."
-                session.featureInstance.template = null
-            } else if(params?.template && session?.featureInstance.template?.name != params.get('template')) {
+                featureInstance.template = null
+            } else if(params?.template && featureInstance.template?.name != params.get('template')) {
                 // set the template
                 //println "params.template : "+params.template
-                session.featureInstance.template = Template.findByName(params.template)
+                featureInstance.template = Template.findByName(params.template)
             }
             //println "Updating template..."
             // does the study have a template set?
-            if (session.featureInstance.template && session.featureInstance.template instanceof Template) {
+            if (featureInstance.template && featureInstance.template instanceof Template) {
                 // yes, iterate through template fields
-                session.featureInstance.giveFields().each() {
+                featureInstance.giveFields().each() {
                     // and set their values
-                    session.featureInstance.setFieldValue(it.name, params.get(it.escapedName()))
+                    featureInstance.setFieldValue(it.name, params.get(it.escapedName()))
                 }
             }
         } catch (Exception e){
