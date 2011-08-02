@@ -279,6 +279,8 @@ class MeasurementController {
                     // No start times? No subject names? Cannot select subject layout then!
                     flow.disableSubjectLayout = true
                     flow.layoutguess = 'sample_layout'
+                } else {
+                    flow.disableSubjectLayout = false;
                 }
             }
             on("success").to "selectLayout"
