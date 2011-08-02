@@ -130,13 +130,26 @@ class AssayController {
 	
 	
     def show = {
-        def studyInstance = Study.get(params.id)
-        if (!studyInstance) {
-            flash.message = "${message(code: 'default.not.found.message', args: [message(code: 'study.label', default: 'Study'), params.id])}"
+		def hideEmpty = params.hideEmpty ? Boolean.parseBoolean( params.hideEmpty ) : true
+        def assayInstance = Assay.get(params.id)
+		
+        if (!assayInstance) {
+            flash.message = "${message(code: 'default.not.found.message', args: [message(code: 'assay.label', default: 'Assay'), params.id])}"
             redirect(action: "list")
+			return
         }
-        else {
-            [studyInstance: studyInstance]
-        }
+		
+		def samples = SAMSample.findAll( "from SAMSample s WHERE s.assay = :assay ORDER BY s.name", [ assay: assayInstance ] );
+		def measurements = [];
+		def features = [];
+		
+		if( samples ) {
+			measurements = Measurement.findAll( "from Measurement m WHERE m.sample IN (:samples)", [ samples: samples ] );
+			if( measurements ) {
+				features = Feature.findAll( "from Feature f WHERE EXISTS( FROM Measurement m WHERE m IN (:measurements) )", [ measurements: measurements ] )
+			}
+		}
+		
+		return [assayInstance: assayInstance, samples: samples, features: features, measurements: measurements, hideEmpty: hideEmpty] 
     }
 }

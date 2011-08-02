@@ -1,101 +1,74 @@
-
 <%@ page import="org.dbxp.moduleBase.Study" %>
 <html>
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
         <meta name="layout" content="main" />
         <g:set var="entityName" value="${message(code: 'study.label', default: 'Study')}" />
-        <title><g:message code="default.show.label" args="[entityName]" /></title>
+        <title>Show assay ${assayInstance.name}</title>
     </head>
     <body>
-        <div class="nav">
-            <span class="menuButton"><a class="home" href="${createLink(uri: '/')}"><g:message code="default.home.label"/></a></span>
-            <span class="menuButton"><g:link class="list" action="list"><g:message code="default.list.label" args="[entityName]" /></g:link></span>
-            <span class="menuButton"><g:link class="create" action="create"><g:message code="default.new.label" args="[entityName]" /></g:link></span>
-        </div>
-        <div class="body">
-            <h1><g:message code="default.show.label" args="[entityName]" /></h1>
-
-            <form method="post" enctype="multipart/form-data" action="">
-                <input id="file" type="file" id="fileUpload" name="fileUpload"/>
-                <g:actionSubmit class="upload" value="Upload" action="upload" />
-            </form>
-
-            <div class="dialog">
-                <table>
-                    <tbody>
-                    
-                        <tr class="prop">
-                            <td valign="top" class="name"><g:message code="study.id.label" default="Id" /></td>
-                            
-                            <td valign="top" class="value">${fieldValue(bean: studyInstance, field: "id")}</td>
-                            
-                        </tr>
-                    
-                        <tr class="prop">
-                            <td valign="top" class="name"><g:message code="study.studyToken.label" default="Study Token" /></td>
-                            
-                            <td valign="top" class="value">${fieldValue(bean: studyInstance, field: "studyToken")}</td>
-                            
-                        </tr>
-                    
-                        <tr class="prop">
-                            <td valign="top" class="name"><g:message code="study.isDirty.label" default="Is Dirty" /></td>
-                            
-                            <td valign="top" class="value"><g:formatBoolean boolean="${studyInstance?.isDirty}" /></td>
-                            
-                        </tr>
-                    
-                        <tr class="prop">
-                            <td valign="top" class="name"><g:message code="study.assays.label" default="Assays" /></td>
-                            
-                            <td valign="top" style="text-align: left;" class="value">
-                                <ul>
-                                <g:each in="${studyInstance.assays}" var="a">
-                                    <li><g:link controller="assay" action="show" id="${a.id}">${a?.encodeAsHTML()}</g:link></li>
-                                </g:each>
-                                </ul>
-                            </td>
-                            
-                        </tr>
-                    
-                        <tr class="prop">
-                            <td valign="top" class="name"><g:message code="study.auth.label" default="Auth" /></td>
-                            
-                            <td valign="top" style="text-align: left;" class="value">
-                                <ul>
-                                <g:each in="${studyInstance.auth}" var="a">
-                                    <li><g:link controller="auth" action="show" id="${a.id}">${a?.encodeAsHTML()}</g:link></li>
-                                </g:each>
-                                </ul>
-                            </td>
-                            
-                        </tr>
-                    
-                        <tr class="prop">
-                            <td valign="top" class="name"><g:message code="study.gscfVersion.label" default="Gscf Version" /></td>
-                            
-                            <td valign="top" class="value">${fieldValue(bean: studyInstance, field: "gscfVersion")}</td>
-                            
-                        </tr>
-                    
-                        <tr class="prop">
-                            <td valign="top" class="name"><g:message code="study.name.label" default="Name" /></td>
-                            
-                            <td valign="top" class="value">${fieldValue(bean: studyInstance, field: "name")}</td>
-                            
-                        </tr>
-                    
-                    </tbody>
-                </table>
-            </div>
-            <div class="buttons">
-                <g:form>
-                    <g:hiddenField name="id" value="${studyInstance?.id}" />
-                    <span class="button"><g:actionSubmit class="edit" action="edit" value="${message(code: 'default.button.edit.label', default: 'Edit')}" /></span>
-                    <span class="button"><g:actionSubmit class="delete" action="delete" value="${message(code: 'default.button.delete.label', default: 'Delete')}" onclick="return confirm('${message(code: 'default.button.delete.confirm.message', default: 'Are you sure?')}');" /></span>
-                </g:form>
-            </div>
-        </div>
+		<h1>${assayInstance.name} / ${assayInstance.study.name}</h1>
+		
+		<g:if test="${measurements.size() > 0}">
+			<table>
+				<thead>
+					<tr>
+						<th></th>
+						<g:each var="feature" in="${features}">
+							<th>${feature.name}</th>
+						</g:each>
+					</tr>
+				</thead>
+				<tbody>
+					<% def emptySamples = 0; %>
+					<g:each var="sample" in="${samples}">
+						<% def sampleFilled = measurements.any { it.sample.id == sample.id } %>
+						<g:if test="${!hideEmpty || sampleFilled}">
+							<tr>
+								<td>${sample.name}</td>
+								
+								<g:each var="feature" in="${features}">
+									<% def found = measurements.find { it.sample.id == sample.id && it.feature.id == feature.id } %>
+									<td class="${found?.comments ? 'comments tooltip' : ''}">
+										<g:if test="${found}">
+											<g:if test="${found.operator}">${found.operator}</g:if>
+											${found.value}
+											
+											<g:if test="${found.comments}">
+												<span>
+													${found.comments.encodeAsHTML()}
+												</span>
+											</g:if>
+										</g:if>
+									</td>
+								</g:each>
+							</tr>
+						</g:if>
+						<g:else>
+							<% emptySamples++ %>
+						</g:else>
+					</g:each>
+				</tbody>
+			</table>
+			<g:if test="${hideEmpty}">
+				<g:if test="${emptySamples > 0}">
+					<p>
+						${emptySamples} sample(s) are now shown because they have no measurements. 
+						Click <g:link action="show" params="['id': assayInstance.id, 'hideEmpty': false]">here</g:link> to show all.
+					</p>
+				</g:if>
+			</g:if>
+			<g:else>
+				<p>
+					Click <g:link action="show" params="['id': assayInstance.id, 'hideEmpty': true]">here</g:link> to hide samples without measurements.
+				</p>
+			</g:else>
+		</g:if>
+		<g:else>
+			<p>
+				No measurements were found for this assay. Use the <g:link controller="measurement" action="importData">importer</g:link> 
+				to import your data	or add your measurements <g:link controller="measurement" action="create">manually</g:link>.
+			</p>
+		</g:else>
     </body>
 </html>
