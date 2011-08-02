@@ -270,14 +270,7 @@ class FeatureController {
     }
 
     def refreshEdit = {
-        println "\n\n\n\n\n\n\n\n\n\n\n"+params
-        // Used to refresh the edit page after a change of template
-        if(!session.featureInstance.isAttached()){
-            session.featureInstance.attach()
-        }
-
         session.featureInstance.getDomainFields().each {
-            println it
             if(params[it?.name]!=null){
                 session.featureInstance.setProperty(it.name, params[it.name])
             }
@@ -292,9 +285,6 @@ class FeatureController {
 
     def confirmNewFeatureGroup = {
         // Used to add a new FeaturesAndGroups connection and to refresh the edit page's feature group list
-        if(!session.featureInstance.isAttached()){
-            session.featureInstance.attach()
-        }
         if(params?.newFeatureGroupID) {
             // Creating a new group
             if( FeaturesAndGroups.create(FeatureGroup.get(params.newFeatureGroupID), session.featureInstance, true ) ) {
@@ -322,9 +312,7 @@ class FeatureController {
 	}
 
     def templateSpecific = {
-        // Get a list of template specific fields
-        def featureInstance = Feature.get(params.id)
-        render(view: "templateSpecific", model: [featureInstance: featureInstance])
+        render(view: "templateSpecific", model: [featureInstance: session.featureInstance])
     }
 
     def templateSelection = {
@@ -337,19 +325,16 @@ class FeatureController {
 
 	def updateTemplate = {
         // A different template has been selected, so all the template fields have to be removed, added or updated with their previous values (they start out empty)
-        if(!session.featureInstance.isAttached()){
-           session.featureInstance.attach()
-        }
         try {
             if(params.template==""){
-                println "Removing template..."
+                //println "Removing template..."
                 session.featureInstance.template = null
             } else if(params?.template && session?.featureInstance.template?.name != params.get('template')) {
                 // set the template
-                println "params.template : "+params.template
+                //println "params.template : "+params.template
                 session.featureInstance.template = Template.findByName(params.template)
             }
-            println "Updating template..."
+            //println "Updating template..."
             // does the study have a template set?
             if (session.featureInstance.template && session.featureInstance.template instanceof Template) {
                 // yes, iterate through template fields
@@ -368,10 +353,7 @@ class FeatureController {
 
     def removeFromGroup = {
         // Used to delete a FeaturesAndGroups connection
-        if(!session.featureInstance.isAttached()){
-            session.featureInstance.attach()
-        }
-		
+
         // Clear message so no message will be shown if everything is OK
         flash.FGError = "";
 		
