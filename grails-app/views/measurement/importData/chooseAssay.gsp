@@ -2,11 +2,6 @@
     <head>
         <meta name="layout" content="main"/>
         <title>Measurement importer</title>
-        <script type="text/javascript">
-            $(document).ready(function() {
-                $('#aList').dataTable();
-            } );
-        </script>
     </head>
     <body>
         <content tag="contextmenu">
@@ -27,12 +22,12 @@
                     </thead>
                     <tbody>
                     <g:each in="${assayList}" status="i" var="assayInstance">
-                        <tr class="${(i % 2) == 0 ? 'odd' : 'even'}" id="rowid_${assayInstance.key}" onclick="$('#assay').val('${assayInstance.key}');$('#study').val('${studyList.get(assayInstance.key)}'); $('#_eventId_next').removeAttr('disabled'); return false;">
+                        <tr class="${(i % 2) == 0 ? 'odd' : 'even'}" id="rowid_${assayInstance.id}" onclick="$('#assay').val('${assayInstance.id}'); $( 'input[type=radio]', this).attr( 'checked', true ); $('#_eventId_next').removeAttr('disabled'); return false;">
                             <td>
-                                ${assayInstance.value}
+                                ${assayInstance.name}
                             </td>
                             <td>
-                                ${studyList.get(assayInstance.key)}
+                                ${assayInstance.study.name}
                             </td>
                         </tr>
                     </g:each>
@@ -40,16 +35,13 @@
                 </dt:dataTable>
             </div>
             <g:form method="post" name="importData" action="importData">
-                <g:if test="${assay!=null && studyName!=null}">
-                    <g:hiddenField name="assay" value="${assay.assayToken}"/>
-                    <g:hiddenField name="study" value="${studyName}"/>
-                    <g:submitButton name="next" value="Next" action="next"/>
-                </g:if>
-                <g:else>
-                    <g:hiddenField name="assay" value=""/>
-                    <g:hiddenField name="study" value=""/>
-                    <g:submitButton name="next" value="Next" action="next" disabled='true'/>
-                </g:else>
+            	<%-- 
+            		If an assay has been selected before, and the user returns here, we don't select that assay. That has two reasons:
+            		- the datatables scripts don't support a checkbox or radio being selected on load
+            		- the user does want to select another assay, so the current selection is not important
+            	 --%>
+				<g:hiddenField name="assay" value=""/>
+				<g:submitButton name="next" value="Next" action="next" disabled='true'/>
             </g:form>
         </div>
     </body>
