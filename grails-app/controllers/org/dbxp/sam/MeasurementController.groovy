@@ -3,6 +3,7 @@ package org.dbxp.sam
 import org.dbxp.matriximporter.MatrixImporter
 import org.dbxp.moduleBase.Assay
 import org.dbxp.moduleBase.Auth
+import org.dbxp.moduleBase.Sample
 
 class MeasurementController {
     static allowedMethods = [save: "POST", update: "POST", delete: "POST"]
@@ -24,14 +25,19 @@ class MeasurementController {
     }
 
     def save = {
-        def measurementInstance = new Measurement( params )
+        def measurementInstance = Measurement.findByFeatureAndSample(Feature.get(params.feature.id), Sample.get(params.sample.id))
+        if(measurementInstance!=null){
+            bindData(measurementInstance, params)
+        } else {
+            measurementInstance = new Measurement( params )
+        }
 		
 		// Unfortunately, grails is unable to handle double values correctly. If
 		// one enters 10.20, the value of 1020.0 is stored in the database. For that
 		// reason, we convert the value ourselves
 		if( params.value?.isDouble() )
 			measurementInstance.value = params.value as Double
-		
+
         if (measurementInstance.save(flush: true)) {
             flash.message = "The measurement has been created."
             redirect(action: "show", id: measurementInstance.id)
@@ -560,10 +566,22 @@ class MeasurementController {
                     status ->
                     measurementList.each {
                         m ->
-                        if(!m.save(flush : true)){
-                            flash.message += "<br>"+m.getErrors().allErrors
-                            println m.getErrors().allErrors
-                            status.setRollbackOnly();
+                        def measurementInstance = Measurement.findByFeatureAndSample(m.feature, m.sample)
+                        if(measurementInstance!=null){
+                            measurementInstance.value = m.value
+                            measurementInstance.operator = m.operator
+                            measurementInstance.comments = m.comments
+                            if(!measurementInstance.save(flush : true)){
+                                flash.message += "<br>"+measurementInstance.getErrors().allErrors
+                                println measurementInstance.getErrors().allErrors
+                                status.setRollbackOnly();
+                            }
+                        } else {
+                            if(!m.save(flush : true)){
+                                flash.message += "<br>"+m.getErrors().allErrors
+                                println m.getErrors().allErrors
+                                status.setRollbackOnly();
+                            }
                         }
                     }
                 }
