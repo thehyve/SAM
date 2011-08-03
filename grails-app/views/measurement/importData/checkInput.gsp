@@ -60,7 +60,7 @@
         <div class="data">
             <h1>Confirm input</h1>
             <p>
-                Please check your input. Use the 'Previous' button to make changes when necessary.
+                Please check your input. Use the 'Previous' button to make changes when necessary. A cell with a white background contains only a number. <span class="importerOperatorCell">A cell with this color background</span> contains an operator, and <span class="importerCommentCell">a cell with this color background</span> contains at least a comment. To change the contents of special cells, such as those containing features, please go to the previous page. Clicking on a regular cell allows you to edit it's contents.
             </p>
             <form method="post">
                 <%

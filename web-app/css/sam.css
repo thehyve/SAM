@@ -68,6 +68,7 @@ ul.data_nav li { display: inline-block; *display: inline; zoom: 1; margin-right:
 .layoutchoice {
     border: 1px solid lightgray;
     margin:  15px 0px 15px 0px;
+    padding:  6px 5px 6px 5px;
     text-align: left;
 }
 
@@ -85,4 +86,27 @@ ul.data_nav li { display: inline-block; *display: inline; zoom: 1; margin-right:
 
 .importerCommentCell {
     background-color: pink;
+}
+
+.importerCell {
+    border: 1px solid lightgray;
+    text-align: center;
+}
+
+.importerHeader {
+    border: 1px solid lightgray;
+    text-align: left;
+}
+
+.importerSelect {
+    width: 148px;
+}
+
+.importerSelectBackground {
+    display: inline-block;
+    #background-color: lightgray;
+    border-top: solid lightgray 1px;
+    padding-top: 3px;
+    #padding: 1px 2px 1px 1px;
+    margin-top: 2px;
 }

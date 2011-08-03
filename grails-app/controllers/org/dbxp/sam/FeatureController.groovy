@@ -133,16 +133,16 @@ class FeatureController {
                 if(params?.nextPage=="minimalCreate"){
                     redirect(action: "minimalCreate")
                 } else {
-                    if(params?.nextPage=="minimalEdit"){
-                        redirect(action: "minimalEdit", id: featureInstance.id, featureInstance: featureInstance)
-                    } else {
-                        redirect(action: "list")
-                    }
+                    redirect(action: "list")
                 }
             }
         }
         else {
-            render(view: "create", model: [featureInstance: featureInstance])
+            if(params?.nextPage=="minimalCreate"){
+                render(view: "minimalCreate", model: [featureInstance: featureInstance])
+            } else {
+                render(view: "create", model: [featureInstance: featureInstance])
+            }
         }
     }
 

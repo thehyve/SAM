@@ -11,7 +11,7 @@
         </content>
         <div class="data">
             <h1>The importing process has finished.</h1>
-            <p>If successful, the data should now be available.</p>
+            <p>Your data has been successfully imported and is available now.</p>
             <g:if test="${message}">
 				<p class="message">${message.toString()}</p>
 			</g:if>
