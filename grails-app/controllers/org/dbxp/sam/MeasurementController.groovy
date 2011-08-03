@@ -200,7 +200,7 @@ class MeasurementController {
                     // What did the MatrixImporter return?
                     if(text==null){
                         // Apparently the MatrixImporter was unable to read this file
-                        flow.message = 'Make sure to add a comma-separated values based or Excel based file using the upload field below. The file you uploaded could not be read.'
+                        flow.message += ' Make sure to add a comma-separated values based or Excel based file using the upload field below.'
                         return error()
                     }
 

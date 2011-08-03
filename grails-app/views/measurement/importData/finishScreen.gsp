@@ -11,7 +11,7 @@
         </content>
         <div class="data">
             <h1>The importing process has finished.</h1>
-            <p>Your data has been successfully imported and is available now.</p>
+            <p>Your data has been successfully imported and is available now. It can be seen on the <g:link controller="assay" action="show" id="${assay.id}">${assay.name}</g:link> overview page. If you wish to add more data you can do so <g:link controller="measurement" action="importData">by clicking here</g:link>.</p>
             <g:if test="${message}">
 				<p class="message">${message.toString()}</p>
 			</g:if>
