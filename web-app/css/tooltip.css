@@ -1,9 +1,11 @@
-div.tooltip {
+/*
+.tooltip {
     background: url(../plugins/famfamfam-1.0.1/images/icons/attach.png) no-repeat scroll 0px 0px;
     padding: 2px 2px 2px 20px;
 }
+*/
 
-div.tooltip span {
+.tooltip span {
     border-radius: 5px 5px 5px 5px;
     box-shadow: 5px 5px rgba(0, 0, 0, 0.1);
     display:none;
@@ -16,7 +18,7 @@ div.tooltip span {
     width:250px;
 }
 
-div.tooltip:hover span{
+.tooltip:hover span{
     display:inline;
     position:absolute;
 }  

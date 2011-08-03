@@ -22,7 +22,7 @@
                     </thead>
                     <tbody>
                     <g:each in="${assayList}" status="i" var="assayInstance">
-                        <tr class="${(i % 2) == 0 ? 'odd' : 'even'}" id="rowid_${assayInstance.id}" onclick="$('#assay').val('${assayInstance.id}'); $( 'input[type=radio]', this).attr( 'checked', true ); $('#_eventId_next').removeAttr('disabled'); return false;">
+                        <tr class="${(i % 2) == 0 ? 'odd' : 'even'}" id="rowid_${assayInstance.id}">
                             <td>
                                 ${assayInstance.name}
                             </td>
@@ -41,7 +41,14 @@
             		- the user does want to select another assay, so the current selection is not important
             	 --%>
 				<g:hiddenField name="assay" value=""/>
-				<g:submitButton name="next" value="Next" action="next" disabled='true'/>
+				<g:submitButton name="next" value="Next" action="next" onClick="
+					if( elementsSelected == undefined || elementsSelected[ 'fList_table' ] == undefined || elementsSelected[ 'fList_table' ].length == 0 ) {
+						return false;
+					} else {
+						\$( '#assay' ).val( elementsSelected[ 'fList_table' ][ 0] );
+						return true;
+					}
+				"/>
             </g:form>
         </div>
     </body>

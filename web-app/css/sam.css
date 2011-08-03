@@ -76,6 +76,7 @@ ul.data_nav li { display: inline-block; *display: inline; zoom: 1; margin-right:
 	background-image: url(../plugins/famfamfam-1.0.1/images/icons/page_white_add.png);
 }
 
+/* Color of cells in the importer */
 .importerInteractiveCell {
     cursor: pointer;
 }
@@ -110,3 +111,9 @@ ul.data_nav li { display: inline-block; *display: inline; zoom: 1; margin-right:
     #padding: 1px 2px 1px 1px;
     margin-top: 2px;
 }
+
+/* Width of a field name in the edit feature editor */
+.fieldName { width: 25%; }
+
+/* Comments field in the assay overview */
+td.comments { background-color: pink; }
