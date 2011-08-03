@@ -1,6 +1,7 @@
 package org.dbxp.sam
 
 import org.dbnp.gdt.*
+import org.apache.log4j.Logger
 
 class Feature extends TemplateEntity {
 
@@ -55,14 +56,28 @@ class Feature extends TemplateEntity {
 	]
 
 
-    def static deleteMultipleFeatures(toDeleteList){
+    def static delete(toDeleteList){
         def hasBeenDeletedList = []
         def return_map = [:]
 
+        String strMessage = ""
+        boolean error = false;
+        Logger log
         for( it in toDeleteList) {
+            def name
             try{
                 def featureInstance = Feature.get(it)
-                def name = featureInstance.name
+                name = featureInstance.toString()
+                if(Measurement.findByFeature(featureInstance)){
+                    if(error==false){
+                        log = Logger.getLogger(Feature)
+                        error = true
+                    } else {
+                        strMessage += "<br>"
+                    }
+                    strMessage += "Feature "+name+" cannot be deleted at this moment because it is still referenced by measurements."
+                    continue;
+                }
                 def FaGList = FeaturesAndGroups.findAllByFeature(featureInstance)
                 if(FaGList.size()==0){
                     featureInstance.delete(flush: true)
@@ -73,25 +88,35 @@ class Feature extends TemplateEntity {
                     featureInstance.delete(flush: true)
                 }
                 hasBeenDeletedList.push(name);
-                return_map.put("message", "The following features were succesfully deleted: "+hasBeenDeletedList.toString())
-                return_map.put("action", "list")
             } catch(Exception e){
-                return_map["error"] = e
-                return_map["message"] = "Something went wrong when trying to delete "
-                //return_map.put("message", "Something went wrong when trying to delete ")
-                if(toDeleteList.size()==1){
-                    return_map.put("message", return_map.get("message")+" the feature. The probable cause is that the feature was already deleted.<br>"+e)
+                if(error==false){
+                    log = Logger.getLogger(Feature)
+                    error = true
                 } else {
-                    if(hasBeenDeletedList.size()==0){
-                        return_map.put("message", return_map.get("message")+" one or more features. The probable cause is that these were already deleted.<br>"+e)
-                    } else {
-                        return_map.put("message", " the features.<br>The following features were succesfully deleted: "+hasBeenDeletedList.toString()+"<br>"+e)
-                    }
+                    strMessage += "<br>"
                 }
-                return_map.put("action", "list")
-                return return_map
+                log.error e
+                strMessage += "Something went wrong when trying to delete "
+                if(name!=null && name!=""){
+                    strMessage += name+". The probable cause is that the feature was already deleted."
+                } else {
+                    strMessage += "a feature. The probable cause is that the feature was already deleted."
+                }
             }
         }
+        if(!error){
+            if(hasBeenDeletedList.size()==1){
+                return_map["message"] = "The feature "+hasBeenDeletedList[0]+" has been deleted."
+            } else {
+                return_map["message"] = "The following features have been deleted: "+hasBeenDeletedList.toString()
+            }
+        } else {
+            if(hasBeenDeletedList.size()!=0){
+                strMessage += "<br><br>The following features have been deleted: "+hasBeenDeletedList.toString()
+            }
+            return_map["message"] = strMessage
+        }
+        return_map["action"] = "list"
         return return_map
     }
 }

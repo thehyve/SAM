@@ -2,7 +2,6 @@ package org.dbxp.sam
 
 import grails.converters.JSON
 import org.dbnp.gdt.Template
-import org.codehaus.groovy.grails.commons.ConfigurationHolder
 
 class FeatureController {
 
@@ -225,51 +224,17 @@ class FeatureController {
 			response.sendError( 404 );
 			return;
 		}
-		
-		def numDeleted = 0;
-		def numErrors = 0;
-		def numNotFound = 0;
-		
-		ids.each { id ->
-			def featureInstance = Feature.get(id)
-	        if (featureInstance) {
-	            def FaGList = FeaturesAndGroups.findAllByFeature(featureInstance)
-	            try {
-	                if(FaGList.size()!=0){
-	                    FaGList.each {
-	                        it.delete(flush: true)
-	                    }
-	                }
-	                featureInstance.delete(flush: true)
-					numDeleted++;
-	            }
-	            catch (org.springframework.dao.DataIntegrityViolationException e) {
-	                log.error(e)
-					numErrors++;
-	            }
-	        }
-	        else {
-				numNotFound++;
-	        }
-		}
-		
-		if( numDeleted == 1  )
-			flash.message = "1 feature has been deleted from the database"
-		if( numDeleted > 1 )
-			flash.message = numDeleted + " features have been deleted from the database"
-		
-		flash.error = ""
-		if( numNotFound == 1 )
-			flash.error += "1 feature has been deleted before." 
-		if( numNotFound > 1 )
-			flash.error += numNotFound+ " features have been deleted before." 
 
-		if( numErrors == 1 )
-			flash.error += "1 feature could not be deleted. Please try again" 
-		if( numErrors > 1 )
-			flash.error += numErrors + " features could not be deleted. Please try again" 
-		
-		redirect(action: "list")
+        def return_map = [:]
+        return_map = Feature.delete(ids)
+        if(return_map["message"]){
+            flash.message = return_map["message"]
+        }
+        if(return_map["action"]){
+            redirect(action: return_map["action"])
+        } else {
+            redirect(action:list)
+        }
     }
 	
     def confirmNewFeatureGroup = {
