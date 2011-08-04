@@ -109,11 +109,19 @@ td.errors input, td.errors select { background-color: #fcc; }
 
 .importerSelectBackground {
     display: inline-block;
-    #background-color: lightgray;
     border-top: solid lightgray 1px;
     padding-top: 3px;
-    #padding: 1px 2px 1px 1px;
     margin-top: 2px;
+}
+
+.importerDiscarded {
+    background-color: white;
+    color: silver;
+}
+
+.importerDiscarded:hover {
+    background-color: white;
+    color: black;
 }
 
 /* Width of a field name in the edit feature editor */

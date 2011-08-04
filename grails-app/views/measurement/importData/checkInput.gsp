@@ -78,7 +78,7 @@
                                     %>
                                     <g:if test="${i==0 || j==0}">
                                         <g:if test="${column==null}">
-                                            <td style="border: 1px solid lightgray;">Discarded</td>
+                                            <td style="border: 1px solid lightgray;" class="importerDiscarded">Discarded</td>
                                             <%
                                                 if(i==0){
                                                     discard_j.add(j)
@@ -113,14 +113,20 @@
                                         <g:hiddenField name="operatorHidden${i},${j}" value="${op}"/>
                                         <g:hiddenField name="commentHidden${i},${j}" value="${co}"/>
                                         <g:hiddenField name="valueHidden${i},${j}" value="${column}"/>
-                                        <td id="${i},${j}" onclick="newInputForm($(this), '${i},${j}');" style="border: 1px solid lightgray;"
-                                        <g:if test="${op!=null && co==null}">
-                                            class="importerInteractiveCell importerOperatorCell"
+                                        <g:if test="${discard_i.contains(i) || discard_j.contains(j)}">
+                                            <td id="${i},${j}" style="border: 1px solid lightgray;" class="importerDiscarded">
                                         </g:if>
-                                        <g:if test="${co!=null}">
-                                            class="importerInteractiveCell importerCommentCell"
-                                        </g:if>
-                                        >
+                                        <g:else>
+                                            <td id="${i},${j}" onclick="newInputForm($(this), '${i},${j}');" style="border: 1px solid lightgray;"
+
+                                            <g:if test="${op!=null && co==null}">
+                                                class="importerInteractiveCell importerOperatorCell"
+                                            </g:if>
+                                            <g:if test="${co!=null}">
+                                                class="importerInteractiveCell importerCommentCell"
+                                            </g:if>
+                                            >
+                                        </g:else>
                                         <%
                                             def content = ""
                                             if(op!=null){
@@ -134,31 +140,17 @@
                                             }
                                             content = content.trim()
                                         %>
-                                        <g:if test="${discard_i.contains(i) || discard_j.contains(j)}">
-                                        &nbsp;<del>
-                                            <g:if test="${content.length()>25}">
+                                        <g:if test="${content.length()>25}">
+                                            <div class="tooltip">
                                                 ${content.substring(0,19)} &hellip;
-                                            </g:if>
-                                            <g:else>
-                                                ${content}
-                                            </g:else>
+                                                <span>
+                                                    ${content}
+                                                </span>
+                                            </div>
                                         </g:if>
                                         <g:else>
-                                            <g:if test="${content.length()>25}">
-                                                <div class="tooltip">
-                                                    ${content.substring(0,19)} &hellip;
-                                                    <span>
-                                                        ${content}
-                                                    </span>
-                                                </div>
-                                            </g:if>
-                                            <g:else>
-                                                ${content}
-                                            </g:else>
+                                            ${content}
                                         </g:else>
-                                        <g:if test="${discard_i.contains(i) || discard_j.contains(j)}">
-                                        &nbsp;</del>
-                                        </g:if>
                                         </td>
                                     </g:else>
                                 </g:if>
