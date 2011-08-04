@@ -20,33 +20,64 @@
 					</tr>
 				</thead>
 				<tbody>
-					<% def emptySamples = 0; %>
+					<g:set var="measurementIndex" value="${0}" />
 					<g:each var="sample" in="${samples}">
-						<% def sampleFilled = measurements.any { it.sample.id == sample.id } %>
-						<g:if test="${!hideEmpty || sampleFilled}">
-							<tr>
-								<td>${sample.name}</td>
+						<tr>
+							<td>${sample.name}</td>
+							
+							<g:each var="feature" in="${features}">
+								<%--
+									In every table cell, we should lookup the measurement that belongs to this sample and feature.
+									Because the measurements are ordered in the same way as they are outputted to the screen 
+									( sample.name, feature.name ), we can easily check whether the 'current' measurement belongs 
+									to this cell. If not, we keep this cell empty.
+									
+									Because there might be multiple measurements for one cell, we first find all measurements for this cell.
+									We show always the value/operator of the first measurement, but show all data in the comments field.
+								--%>
+								<g:set var="cellMeasurements" value="${[]}" />
+								<g:set var="currentMeasurement" value="${measurements[ measurementIndex ]}" />
+								<g:while test="${currentMeasurement?.sample?.id == sample.id && currentMeasurement?.feature?.id == feature.id}">
+									<% cellMeasurements << currentMeasurement; %>
+									<g:set var="currentMeasurement" value="${measurements[ ++measurementIndex ]}" />
+								</g:while>
 								
-								<g:each var="feature" in="${features}">
-									<% def found = measurements.find { it.sample.id == sample.id && it.feature.id == feature.id } %>
-									<td class="${found?.comments ? 'comments tooltip' : ''}">
-										<g:if test="${found}">
-											<g:if test="${found.operator}">${found.operator}</g:if>
-											${found.value}
-											
-											<g:if test="${found.comments}">
-												<span>
-													${found.comments.encodeAsHTML()}
-												</span>
-											</g:if>
+								<%-- 
+									Now we know all measurements for this cell and the measurementIndex points to the 
+									next measurement. If there are multiple measurements, we combine the data.
+								--%>
+								<g:if test="${cellMeasurements.size() > 0}">
+									<% def comments = cellMeasurements[ 0 ].comments?.encodeAsHTML(); %>
+									<g:if test="${cellMeasurements.size() > 1}">
+										<%  
+											comments = cellMeasurements.collect {
+												def description = ""
+												
+												if( it.value )
+													description += (it.operator ?: "") + it.value;
+													
+												if( it.comments )
+													description += ( description ? "<br />" : "" ) + "<span class='comments'>" + it.comments.encodeAsHTML() + "</span>";
+													 
+											}.join( "<hr>" );
+										%>
+									</g:if>
+									<td class="${comments ? 'comments tooltip' : ''}">
+										<g:if test="${cellMeasurements[0].operator}">${cellMeasurements[0].operator}</g:if>
+										${cellMeasurements[0].value}
+										
+										<g:if test="${comments}">
+											<span>
+												${comments}
+											</span>
 										</g:if>
-									</td>
-								</g:each>
-							</tr>
-						</g:if>
-						<g:else>
-							<% emptySamples++ %>
-						</g:else>
+									</td>									
+								</g:if>
+								<g:else>
+									<td></td>
+								</g:else>
+							</g:each>
+						</tr>
 					</g:each>
 				</tbody>
 			</table>

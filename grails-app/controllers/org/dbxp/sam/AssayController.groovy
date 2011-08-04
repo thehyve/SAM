@@ -139,14 +139,29 @@ class AssayController {
 			return
         }
 		
-		def samples = SAMSample.findAll( "from SAMSample s WHERE s.assay = :assay ORDER BY s.name", [ assay: assayInstance ] );
+		// Lookup all samples for this assay
+		def numberOfSamples = SAMSample.countByAssay( assayInstance );
+		def samples;
+		
+		// If samples without measurements should be hidden, we don't retrieve them from the database at all
+		if( hideEmpty ) {
+			samples = SAMSample.findAll( "from SAMSample s WHERE s.assay = :assay AND EXISTS( FROM Measurement m WHERE m.sample = s ) ORDER BY s.name", [ assay: assayInstance ] );
+		} else {
+			samples = SAMSample.findAll( "from SAMSample s WHERE s.assay = :assay ORDER BY s.name", [ assay: assayInstance ] );
+		} 
+		
+		// Compute the number of samples without measurements
+		def emptySamples = numberOfSamples - samples.size();
+		
 		def measurements = [];
 		def features = [];
 		
 		if( samples ) {
-			measurements = Measurement.findAll( "from Measurement m WHERE m.sample IN (:samples)", [ samples: samples ] );
+			// If samples are found lookup all measurements. They are ordered by sample name and after that feature name.
+			// This order ensures that we can easily walk through the list when showing them on screen
+			measurements = Measurement.findAll( "from Measurement m WHERE m.sample IN (:samples) ORDER BY m.sample.name, m.feature.name", [ samples: samples ] );
 			if( measurements ) {
-				features = Feature.findAll( "from Feature f WHERE EXISTS( FROM Measurement m WHERE m IN (:measurements) )", [ measurements: measurements ] )
+				features = Feature.findAll( "from Feature f WHERE EXISTS( FROM Measurement m WHERE m IN (:measurements) AND m.feature = f ) ORDER BY f.name", [ measurements: measurements ] )
 			}
 		}
 		
