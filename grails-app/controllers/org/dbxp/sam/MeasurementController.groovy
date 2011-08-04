@@ -185,7 +185,11 @@ class MeasurementController {
 			// Step 2: upload data and give the user a preview. The user then chooses which layout he wants
 			// to use.
 			on("next") {
-                flow.inputfile = request.getFile('fileUpload')
+                if(params.pasteField!=null) {
+                    flow.inputField = params.pasteField;
+                } else {
+                    flow.inputfile = request.getFile('fileUpload')
+                }
 			}.to "uploadDataCheck"
 			on("previous"){}.to "chooseAssay"
 		}
@@ -195,95 +199,101 @@ class MeasurementController {
             action {
                 def f = flow.inputfile
                 def text = ""
-                if(!f.empty) {
-                    // Save data of this step
-                    flow.message = "It appears this file cannot be read in." // In case we get an error before finishing
-                    try{
-                        new File( "./tempfolder/" ).mkdirs()
-                        f.transferTo( new File( "./tempfolder/" + File.separatorChar + f.getOriginalFilename() ) )
-                        File file = new File("./tempfolder/" + File.separatorChar + f.getOriginalFilename())
-                        flow.inputfile = file
-                        text = MatrixImporter.getInstance().importFile(file);
-                    } catch(Exception e){
-                        // Something went wrong with the file...
-                        flow.message += " The precise error is as follows: "+e
-                        return error()
-                    }
-
-                    // What did the MatrixImporter return?
-                    if(text==null){
-                        // Apparently the MatrixImporter was unable to read this file
-                        flow.message += ' Make sure to add a comma-separated values based or Excel based file using the upload field below.'
-                        return error()
-                    }
-
-                    // In the following section we will try to find out what layout the data in this file has
-                    def sampl = 0
-                    def subj = 0
-
-                    if(text[1][0]==null || text[1][0]==""){
-                        // Cell A2 empty? That would indicate subject layout.
-                        // It is also a pretty good sign that this is not a sample layout
-                        subj++
-                        sampl--
-                    } else {
-                        // IT cell A2 is not empty, it supports a conclusion of sample layout,
-                        // but it does not substract from a subject layout conclusion (there might be a comment there)
-                        sampl++
-                    }
-
-                    // If the second row contains only doubles, this makes it more likely to be a sample layout
-                    def double_rainbow = true
-                    for(int i = 1; i < text[1].size(); i++){
-                        if(i == 15){
-                            // Don't check everything
-                            break;
-                        }
-                        if(!text[1][i].isDouble()){
-                            double_rainbow = false
-                        }
-                    }
-                    if(double_rainbow){
-                        sampl++
-                    }
-
-                    // If the first row contains different features, this makes it more likely to be a sample layout
-                    // The opposite situation is also true
-                    def tmp = []
-                    for(int i = 1; i < text[0].size(); i++){
-                        if(i == 15){
-                            // Don't check everything
-                            break;
-                        }
-                        tmp.push(!text[0][i])
-                    }
-                    if(tmp.size()==tmp.unique().size()){
-                        sampl++
-                    } else {
-                        subj++
-                    }
-
-                    // Take a guess at the layout
-                    def guess = "sample_layout"
-                    if(subj>sampl) guess = "subject_layout"
-                    flow.layoutguess = guess
-
-                    // Do we already have some manual selections?
-                    // If our text did not change, we can re-use them.
-                    if(flow.edited_text != null && flow.text != text){
-                        // It appears we cannot reuse them
-                        flow.edited_text = null
-                        flow.operator = null
-                        flow.comments = null
-                    }
-
+                if(flow.inputField!=null) {
+                    text = MatrixImporter.getInstance().importString(flow.inputField,["delimiter":","]);
                     flow.text = text
-                    flow.message = null
-                    flow.input = [ "file": flow.inputfile, "originalFilename": f.getOriginalFilename()]
-                }
-                else {
-                    flow.message = 'Make sure to add a file using the upload field below. The file upload field cannot be empty.'
-                    return error()
+                    flow.layoutguess = "sample_layout";
+                } else {
+                    if(!f.empty) {
+                        // Save data of this step
+                        flow.message = "It appears this file cannot be read in." // In case we get an error before finishing
+                        try{
+                            new File( "./tempfolder/" ).mkdirs()
+                            f.transferTo( new File( "./tempfolder/" + File.separatorChar + f.getOriginalFilename() ) )
+                            File file = new File("./tempfolder/" + File.separatorChar + f.getOriginalFilename())
+                            flow.inputfile = file
+                            text = MatrixImporter.getInstance().importFile(file);
+                        } catch(Exception e){
+                            // Something went wrong with the file...
+                            flow.message += " The precise error is as follows: "+e
+                            return error()
+                        }
+
+                        // What did the MatrixImporter return?
+                        if(text==null){
+                            // Apparently the MatrixImporter was unable to read this file
+                            flow.message += ' Make sure to add a comma-separated values based or Excel based file using the upload field below.'
+                            return error()
+                        }
+
+                        // In the following section we will try to find out what layout the data in this file has
+                        def sampl = 0
+                        def subj = 0
+
+                        if(text[1][0]==null || text[1][0]==""){
+                            // Cell A2 empty? That would indicate subject layout.
+                            // It is also a pretty good sign that this is not a sample layout
+                            subj++
+                            sampl--
+                        } else {
+                            // IT cell A2 is not empty, it supports a conclusion of sample layout,
+                            // but it does not substract from a subject layout conclusion (there might be a comment there)
+                            sampl++
+                        }
+
+                        // If the second row contains only doubles, this makes it more likely to be a sample layout
+                        def double_rainbow = true
+                        for(int i = 1; i < text[1].size(); i++){
+                            if(i == 15){
+                                // Don't check everything
+                                break;
+                            }
+                            if(!text[1][i].isDouble()){
+                                double_rainbow = false
+                            }
+                        }
+                        if(double_rainbow){
+                            sampl++
+                        }
+
+                        // If the first row contains different features, this makes it more likely to be a sample layout
+                        // The opposite situation is also true
+                        def tmp = []
+                        for(int i = 1; i < text[0].size(); i++){
+                            if(i == 15){
+                                // Don't check everything
+                                break;
+                            }
+                            tmp.push(!text[0][i])
+                        }
+                        if(tmp.size()==tmp.unique().size()){
+                            sampl++
+                        } else {
+                            subj++
+                        }
+
+                        // Take a guess at the layout
+                        def guess = "sample_layout"
+                        if(subj>sampl) guess = "subject_layout"
+                        flow.layoutguess = guess
+
+                        // Do we already have some manual selections?
+                        // If our text did not change, we can re-use them.
+                        if(flow.edited_text != null && flow.text != text){
+                            // It appears we cannot reuse them
+                            flow.edited_text = null
+                            flow.operator = null
+                            flow.comments = null
+                        }
+
+                        flow.text = text
+                        flow.message = null
+                        flow.input = [ "file": flow.inputfile, "originalFilename": f.getOriginalFilename()]
+                    }
+                    else {
+                        flow.message = 'Make sure to add a file using the upload field below. The file upload field cannot be empty.'
+                        return error()
+                    }
                 }
 
                 def tmp1 = flow.assay.samples.eventStartTime.unique()

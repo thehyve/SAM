@@ -3,6 +3,15 @@
     <head>
         <meta name="layout" content="main"/>
         <title>Measurement importer</title>
+
+        <r:script type="text/javascript" disposition="head">
+        function createTextfield(id) {
+            $( "#"+id ).html("<br /><br /><textarea id='"+id+"' name='"+id+"' rows='5' cols='20'></textarea>");
+            $( "#"+id ).resizable({
+                handles: "se"
+            });
+        }
+        </r:script>
     </head>
     <body>
         <content tag="contextmenu">
@@ -39,7 +48,7 @@
             </g:else>
                     <h2>Locate the file on your computer:</h2>
                     <p>Make sure to add a comma-separated values based or Excel based file using the upload field below.</p>
-                    <input id="file" type="file" id="fileUpload" name="fileUpload"/>
+                    <input id="file" type="file" id="fileUpload" name="fileUpload"/> <span id="pasteField">or <a href="#" onclick="createTextfield('pasteField'); return false;">paste in textfield</a></span>
                 </div>
                 <div style="display: block;">
                     <g:submitButton name="previous" value="Choose a different assay" action="previous"/>

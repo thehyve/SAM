@@ -435,39 +435,49 @@ class FeatureController {
 
             on("next") {
                 flow.templateFields = null;
-                flow.inputfile = request.getFile('fileUpload')
+                if(params.pasteField!=null) {
+                    flow.inputField = params.pasteField;
+                } else {
+                    flow.inputfile = request.getFile('fileUpload')
+                }
             }.to "uploadDataCheck"
         }
 
         uploadDataCheck {
             // Check to make sure we actually received a file.
             action {
-                def f = flow.inputfile
-                def text = ""
-                if(!f.empty) {
-                    // Save data of this step
-                    flow.message = "It appears this file cannot be read in." // In case we get an error before finishing
-                    try{
-                        new File( "./tempfolder/" ).mkdirs()
-                        f.transferTo( new File( "./tempfolder/" + File.separatorChar + f.getOriginalFilename() ) )
-                        File file = new File("./tempfolder/" + File.separatorChar + f.getOriginalFilename())
-                        flow.inputfile = file
-                        text = MatrixImporter.getInstance().importFile(file);
-                    } catch(Exception e){
-                        // Something went wrong with the file...
-                        flow.message += " The precise error is as follows: "+e
-                        return error()
-                    }
 
-                    if(text==null){
-                        // Apparently the MatrixImporter was unable to read this file
-                        flow.message += ' Make sure to add a comma-separated values based or Excel based file using the upload field below.'
+                def text = "";
+
+                if(flow.inputField!=null) {
+                    text = MatrixImporter.getInstance().importString(flow.inputField,["delimiter":","]);
+                } else {
+                    def f = flow.inputfile
+                    if(!f.empty) {
+                        // Save data of this step
+                        flow.message = "It appears this file cannot be read in." // In case we get an error before finishing
+                        try{
+                            new File( "./tempfolder/" ).mkdirs()
+                            f.transferTo( new File( "./tempfolder/" + File.separatorChar + f.getOriginalFilename() ) )
+                            File file = new File("./tempfolder/" + File.separatorChar + f.getOriginalFilename())
+                            flow.inputfile = file
+                            text = MatrixImporter.getInstance().importFile(file);
+                        } catch(Exception e){
+                            // Something went wrong with the file...
+                            flow.message += " The precise error is as follows: "+e
+                            return error()
+                        }
+
+                        if(text==null){
+                            // Apparently the MatrixImporter was unable to read this file
+                            flow.message += ' Make sure to add a comma-separated values based or Excel based file using the upload field below.'
+                            return error()
+                        }
+                        flow.input = [ "file": flow.inputfile, "originalFilename": f.getOriginalFilename()]
+                    } else {
+                        flow.message += ' Make sure to add a file using the upload field below. The file upload field cannot be empty.'
                         return error()
                     }
-                    flow.input = [ "file": flow.inputfile, "originalFilename": f.getOriginalFilename()]
-                } else {
-                    flow.message += ' Make sure to add a file using the upload field below. The file upload field cannot be empty.'
-                    return error()
                 }
 
                 flow.message = null;

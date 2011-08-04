@@ -52,7 +52,9 @@
         </content>
         <div class="data">
             <h1>Importer wizard</h1>
-            <p>The file <b>${input.originalFilename}</b> has been successfully read in.</p>
+            <g:if test="${input!=null}">
+                <p>The file <b>${input.originalFilename}</b> has been successfully read in.</p>
+            </g:if>
             <g:form method="post" name="importData" action="importData">
 
                 <table style="width: auto">

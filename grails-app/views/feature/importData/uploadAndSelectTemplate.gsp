@@ -17,6 +17,13 @@
                     }
                 });
             });
+
+            function createTextfield(id) {
+                $( "#"+id ).html("<br /><br /><textarea id='"+id+"' name='"+id+"' rows='5' cols='20'></textarea>");
+                $( "#"+id ).resizable({
+                    handles: "se"
+                });
+            }
         </r:script>
     </head>
     <body>
@@ -39,7 +46,7 @@
                         <tbody>
                             <tr>
                                 <td width="100px">Choose your Excel file to import:</td>
-                                <td width="100px"><input type="file" id="fileUpload" name="fileUpload"/></td>
+                                <td width="100px"><input type="file" id="fileUpload" name="fileUpload"/> <span id="pasteField">or <a href="#" onclick="createTextfield('pasteField'); return false;">paste in textfield</a></span></td>
                             </tr>
                             <tr>
                                 <td><div id="datatemplate">Choose type of data template: </div></td>
