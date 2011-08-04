@@ -11,8 +11,17 @@
                     label   : 'Create a new feature',
                     style   : 'modify',
                     onClose : function(scope) {
+						// Check the option ids of the options currently in the database
+						ids = new Array();
+
+						$.each( $( 'option', $( "select[rel*=featureSelector]" ).first() ), function(index, element) {
+							if( !$(element).hasClass( 'modify' ) && $(element).attr( 'value' ) != null && $(element).attr( 'value' ) != "" ) {
+								ids[ ids.length ] = "currentOptions=" + $(element).attr( 'value' );
+							}
+						});
+							
                         $.getJSON(
-                            baseUrl + "/feature/retrieveMissingOption?currentOptions=${features.id}",
+                            baseUrl + "/feature/retrieveMissingOptions?" + ids.join( "&" ),
                             function(j){
                                 var options = '';
                                 for (var i = 0; i < j.length; i++) {
@@ -62,6 +71,7 @@
             <li><g:link class="create" controller="measurement" action="create">Create new measurement</g:link></li>
             <li><g:link class="import" controller="measurement" action="importData">Import</g:link></li>
         </content>
+        <h1>${test}</h1>
         <div class="data">
             <h1>Confirm matches</h1>
             <p>
@@ -72,6 +82,15 @@
                     Please note: changes that have been made on the next page ('Confirm Input') are not reflected on this page. However, they will be available to you again on the next page. On this page the original file contents are being shown.
                 </p>
             </g:if>
+            
+            <%--
+            	Unfortunately, within the webflow, we cannot pass variables to the view (as you do 
+            	normally by render( view: '', model: [...])). For that reason, we retrieve the list of
+            	features from the database here. That way, if the user refreshes the page, all features
+            	are read from the database (also the ones previously added).
+             --%>
+             <% features = org.dbxp.sam.Feature.list( sort: "name" ); %>
+            
             <form method="post">
                 <g:if test="${layout=='sample_layout'}">
                     <table style="width: auto">

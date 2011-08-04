@@ -298,11 +298,11 @@ class MeasurementController {
 			on("next") {
 				// Save data of this step
                 flow.layout = params.layoutselector
-
+				flow.features = Feature.list( sort: "name" )
+				
                 def possible_matches = [:]
                 if(params.layoutselector=="sample_layout"){
-                    flow.features = Feature.list().sort(){it.name}
-                    flow.samples = flow.assay.samples.sort(){it.name}
+                    flow.samples = Sample.findAllByAssay( flow.assay, [ sort: "name" ] )
 
                     // Try to match first row to features
                     flow.feature_matches = [:]
@@ -325,7 +325,6 @@ class MeasurementController {
                         }
                     }
                 } else {
-                    flow.features = Feature.list().sort(){it.name}
                     def samples = flow.assay.samples
                     flow.timepoints = samples.eventStartTime.unique()
                     flow.subjects = samples.subjectName
@@ -364,7 +363,6 @@ class MeasurementController {
 			}.to "selectColumns"
 			on("previous") {}.to "uploadData"
         }
-
 		selectColumns {
 			// Step 3: Choose which features in the database match which column in the uploaded file
 			on("next") {

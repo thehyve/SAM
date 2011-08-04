@@ -378,15 +378,22 @@ class FeatureController {
 		showFaGList( featureInstance );
     }
 
-    def retrieveMissingOption = {
-        // Used by an AJAX call to enable refreshing part of a page
-        def ret = []
-        Feature.list().each {
-            if(!params.currentOptions.contains(it.id.toString())){
-                ret.add(['id':it.id, 'name':it.name])
-            }
-        }
-        render ret as JSON
+    /**
+     * Returns a list of options to be added to a select
+     * @param currentOptions	List of ids of the options already in the select. These options will not be returned.
+     * @return	JSON list of options not present in the select option
+     */
+	def retrieveMissingOptions = {
+		def currentOptions = params.list( 'currentOptions' ).findAll { it.isLong() }.collect { it.toLong() };
+		def featureList;
+		
+		if( currentOptions?.size() ) {
+			featureList = Feature.findAll( "FROM Feature f WHERE f.id NOT IN (:current)", [ "current": currentOptions ] ); 
+		} else {
+			featureList = Feature.list();
+		}
+		
+        render featureList.collect { return [ 'id': it.id, 'name': it.name ] } as JSON
     }
 
     def minimalCreate = {

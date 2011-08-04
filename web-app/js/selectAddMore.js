@@ -94,7 +94,7 @@ SelectAddMore.prototype = {
         // and bind and onChange event
         e.bind('change', function() {
             // was our magic option selected?
-            if (this.selectedIndex == s) {
+            if ($(this.options[this.selectedIndex]).hasClass( 'modify')) {
                 // yeah, launch the dialog associated with this select
                 // note that HTML5 options are being used to make
                 // the dialog integrate with the application!
