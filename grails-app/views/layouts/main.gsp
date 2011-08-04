@@ -12,8 +12,20 @@
 			<content tag="topnav">
 				<% /* Insert only li tags for the top navigation, without surrounding ul */ %>
 				<li><a href="${resource(dir: '')}">Home</a></li>
-				<li><g:link controller="feature">Features</g:link></li>
-    			<li><g:link controller="measurement">Measurements</g:link></li>
+				<li>
+					<a href="#">Browse</a>
+					<ul class="subnav">
+						<li><g:link controller="feature">Features</g:link></li>
+		    			<li><g:link controller="measurement">Measurements</g:link></li>
+		    		</ul>
+		    	</li>
+				<li>
+					<a href="#">Import</a>
+					<ul class="subnav">
+						<li><g:link controller="feature" action="importData">Features</g:link></li>
+		    			<li><g:link controller="measurement" action="importData">Measurements</g:link></li>
+		    		</ul>
+		    	</li>
 				<li><g:link url="${org.codehaus.groovy.grails.commons.ConfigurationHolder.config.gscf.baseURL}">Go to GSCF</g:link></li>
 			</content>
 			<div id="contextmenu" class="buttons">
