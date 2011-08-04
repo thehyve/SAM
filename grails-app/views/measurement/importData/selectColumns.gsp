@@ -12,18 +12,13 @@
                     style   : 'modify',
                     onClose : function(scope) {
                         $.getJSON(
-                            baseUrl+"/feature/retrieveMissingOption?currentOptions=${features.id}",
+                            baseUrl + "/feature/retrieveMissingOption?currentOptions=${features.id}",
                             function(j){
                                 var options = '';
                                 for (var i = 0; i < j.length; i++) {
                                     options += '<option value="' + j[i].id + '">' + j[i].name + '</option>';
                                 }
-                                $("select[rel*='featureSelector']").each(function() {
-                                    //var magicSelect = $(this).find('option:contains(Create a new feature)')
-                                    //$(this).find('option:contains(Create a new feature)').remove();
-                                    $(this).append(options);
-                                    //$(this).append(magicSelect);
-                                });
+                                $("select[rel*='featureSelector'] .modify").before( options );
                             }
                         );
                     }
