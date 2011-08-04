@@ -149,7 +149,9 @@ class MeasurementController {
 		
 		redirect(action: "list")
     }
-	
+
+    def nofeatures = {}
+    
 	def importData = {
 		redirect( action: 'importDataFlow' )
 	}
@@ -160,7 +162,12 @@ class MeasurementController {
             action{
 				synchronizationService.initSynchronization( session.sessionToken, session.user );
 				synchronizationService.synchronizeChangedStudies()
-				
+
+                println "Feature.count()="+Feature.count()
+                if(Feature.count()==0){
+                    redirect(action: 'nofeatures')
+                }
+
                 flow.assayList = Assay.giveWritableAssays( session.user );
             }
             on("success").to "chooseAssay"
