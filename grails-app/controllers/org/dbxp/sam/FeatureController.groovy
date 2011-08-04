@@ -2,6 +2,10 @@ package org.dbxp.sam
 
 import grails.converters.JSON
 import org.dbnp.gdt.Template
+import org.dbxp.moduleBase.Auth
+import org.dbxp.moduleBase.Assay
+import org.dbxp.matriximporter.MatrixImporter
+import org.dbnp.gdt.TemplateField
 
 class FeatureController {
 
@@ -158,6 +162,7 @@ class FeatureController {
 
     def edit = {
         def featureInstance = Feature.get(params.id)
+        session.featureInstance = featureInstance
         if (!featureInstance) {
             flash.message = "The requested feature could not be found."
             redirect(action: "list")
@@ -229,6 +234,11 @@ class FeatureController {
         return_map = Feature.delete(ids)
         if(return_map["message"]){
             flash.message = return_map["message"]
+            session.featureInstance.attach()
+        }
+
+        session.featureInstance.getDomainFields().each {
+            println it
         }
         if(return_map["action"]){
             redirect(action: return_map["action"])
@@ -239,16 +249,20 @@ class FeatureController {
 	
     def confirmNewFeatureGroup = {
         // Used to add a new FeaturesAndGroups connection and to refresh the edit page's feature group list
-        def featureInstance = Feature.get(params.id)
+        if(!session.featureInstance.isAttached()){
+            session.featureInstance.attach()
+        }
         if(params?.newFeatureGroupID) {
             // Creating a new group
-            if( FeaturesAndGroups.create(FeatureGroup.get(params.newFeatureGroupID), featureInstance, true ) ) {
+            if( FeaturesAndGroups.create(FeatureGroup.get(params.newFeatureGroupID), session.featureInstance, true ) ) {
 			    println "Association created"
             } else {
                 println "Association already existed"
             }
         }
 
+        // This featureInstance is only used to display an accurate list
+        def featureInstance = Feature.get(params.id)
 		showFaGList( featureInstance );
     }
 	
@@ -264,11 +278,11 @@ class FeatureController {
 		render(view: "FaGList", model: [groupList: groupList, remainingGroups: remainingGroups])
 	}
 
+        // Get a list of template specific fields
     def templateSelection = {
         render(template: "templateSelection", model: [template: _determineTemplate()])
-    }
-
-    def returnUpdatedTemplateSpecificFields = {
+        // Actually using this in a .gsp does not seem to lead to a working template editor
+        // TODO: fix this so that add/modify does not have to lead to a page refresh
 		def template = _determineTemplate();
 		def values = [:];
 		
@@ -312,25 +326,27 @@ class FeatureController {
 		return template;
 	}
 
-	def updateTemplate = {
+    def updateTemplate = {
         // A different template has been selected, so all the template fields have to be removed, added or updated with their previous values (they start out empty)
+        if(!session.featureInstance.isAttached()){
+           session.featureInstance.attach()
+        }
         try {
-            def featureInstance = Feature.get(params.id)
             if(params.template==""){
-                //println "Removing template..."
-                featureInstance.template = null
-            } else if(params?.template && featureInstance.template?.name != params.get('template')) {
+                println "Removing template..."
+                session.featureInstance.template = null
+            } else if(params?.template && session?.featureInstance.template?.name != params.get('template')) {
                 // set the template
-                //println "params.template : "+params.template
-                featureInstance.template = Template.findByName(params.template)
+                println "params.template : "+params.template
+                session.featureInstance.template = Template.findByName(params.template)
             }
-            //println "Updating template..."
+            println "Updating template..."
             // does the study have a template set?
-            if (featureInstance.template && featureInstance.template instanceof Template) {
+            if (session.featureInstance.template && session.featureInstance.template instanceof Template) {
                 // yes, iterate through template fields
-                featureInstance.giveFields().each() {
+                session.featureInstance.giveFields().each() {
                     // and set their values
-                    featureInstance.setFieldValue(it.name, params.get(it.escapedName()))
+                    session.featureInstance.setFieldValue(it.name, params.get(it.escapedName()))
                 }
             }
         } catch (Exception e){
@@ -339,11 +355,14 @@ class FeatureController {
            // TODO: Make this more informative
            flash.message = "An error occurred while updating this feature's template. Please try again.<br>${e}"
         }
-   }
+    }
 
     def removeFromGroup = {
         // Used to delete a FeaturesAndGroups connection
-
+        if(!session.featureInstance.isAttached()){
+            session.featureInstance.attach()
+        }
+		
         // Clear message so no message will be shown if everything is OK
         flash.FGError = "";
 		
@@ -397,5 +416,197 @@ class FeatureController {
 
     def minimalShow = {
         [featureInstance: params.featureInstance]
+    }
+
+    def importData = {
+		redirect( action: 'importDataFlow' )
+	}
+
+    def importDataFlow = {
+
+        startUp {
+            action{
+                // init actions
+            }
+            on("success").to "uploadAndSelectTemplate"
+        }
+
+        uploadAndSelectTemplate {
+
+            on("next") {
+                flow.templateFields = null;
+                flow.inputfile = request.getFile('fileUpload')
+            }.to "uploadDataCheck"
+        }
+
+        uploadDataCheck {
+            // Check to make sure we actually received a file.
+            action {
+                def f = flow.inputfile
+                def text = ""
+                if(!f.empty) {
+                    // Save data of this step
+                    flow.message = "It appears this file cannot be read in." // In case we get an error before finishing
+                    try{
+                        new File( "./tempfolder/" ).mkdirs()
+                        f.transferTo( new File( "./tempfolder/" + File.separatorChar + f.getOriginalFilename() ) )
+                        File file = new File("./tempfolder/" + File.separatorChar + f.getOriginalFilename())
+                        flow.inputfile = file
+                        text = MatrixImporter.getInstance().importFile(file);
+                    } catch(Exception e){
+                        // Something went wrong with the file...
+                        flow.message += " The precise error is as follows: "+e
+                        return error()
+                    }
+
+                    if(text==null){
+                        // Apparently the MatrixImporter was unable to read this file
+                        flow.message += ' Make sure to add a comma-separated values based or Excel based file using the upload field below.'
+                        return error()
+                    }
+                    flow.input = [ "file": flow.inputfile, "originalFilename": f.getOriginalFilename()]
+                } else {
+                    flow.message += ' Make sure to add a file using the upload field below. The file upload field cannot be empty.'
+                    return error()
+                }
+
+                flow.message = null;
+
+                flow.template = params.template;
+
+                Template objTempl = Template.findByName(params.template).refresh();
+
+                flow.templateFields = Feature.giveDomainFields()+objTempl.fields;
+
+                flow.text = text;
+            }
+            on("success").to "matchColumns"
+            on("error").to "uploadAndSelectTemplate"
+        }
+
+        matchColumns {
+            on("next") {
+                flow.message = null;
+                String newMessage = "";
+
+                // Get the rows that need to be discarded
+                flow.discardRow = [];
+                flow.featureList = [];
+                for(int i=1; i<flow.text.size(); i++) {
+                    if(!params.get("row_"+i)) {
+                        flow.discardRow.add(i);
+                    } else {
+                        Feature objFeature = new Feature();
+                        objFeature.changeTemplate(flow.template);
+
+                        for(int j=0; j<flow.text[0].size(); j++) {
+
+                            if(params.get("column_"+j)!="") {
+                                try {
+                                    objFeature.setFieldValue(params.get("column_"+j),flow.text[i][j],true);
+                                } catch (Exception e) {
+                                    if(newMessage.length()>0) newMessage += "<br />";
+                                    newMessage += "Row "+i+", column ["+params.get("column_"+j)+"] can't be set to ["+flow.text[i][j]+"]";
+                                }
+                            }
+                        }
+
+                        objFeature.validate();
+                        objFeature.getErrors().allErrors.each {
+                            if(newMessage.length()>0) newMessage += "<br />";
+                            newMessage += it;
+                        }
+
+                        if(newMessage.length()>0) flow.message = newMessage;
+                        flow.featureList.add(objFeature);
+                    }
+                }
+
+                // Get the columns that need to be discarded
+                flow.discardColumn = [];
+                flow.columnField = [:];
+                for(int j=0; j<flow.text[0].size(); j++) {
+                    if(params.get("column_"+j)=="") {
+                        flow.discardColumn.add(j);
+                    } else {
+                        for(int i=0; i<flow.templateFields.size(); i++) {
+                            if(flow.templateFields[i].name==params.get("column_"+j)) {
+                                flow.columnField.put(j,flow.templateFields[i]);
+                                break;
+                            }
+                        }
+                    }
+                }
+
+            }.to "checkInput"
+            on("previous").to "uploadAndSelectTemplate"
+
+        }
+
+        checkInput {
+            on("save") {
+                //flow.inputfile = request.getFile('fileUpload')
+            }.to "saveData"
+            on("previous").to "matchColumns"
+        }
+
+        saveData {
+            action {
+                flow.message = null;
+                String newMessage = "";
+                def newFeatureList = [];
+
+                for(int i=0; i<flow.featureList.size; i++) {
+
+                    Feature objFeature = flow.featureList[i];
+                    String strIdent = objFeature.getIdentifier();
+
+                    // Set all variables from POST var
+                    for(int j=0; j<flow.templateFields.size(); j++) {
+                        String strFieldVal = params.get("entity_"+strIdent+"_"+flow.templateFields[j].name.toLowerCase());
+                        if(flow.templateFields[j].required && strFieldVal==null) {
+                            if(newMessage.length()>0) newMessage += "<br />";
+                            newMessage += "Column ["+flow.templateFields[j]+"] is required";
+                        } else {
+                            try {
+                                objFeature.setFieldValue(flow.templateFields[j].name,strFieldVal,true)
+                                //println("\n\n["+flow.templateFields[j].name+"] set to ["+strFieldVal+"]\n\n");
+                            } catch (Exception e) {
+                                if(newMessage.length()>0) newMessage += "<br />";
+                                newMessage += "Column ["+flow.templateFields[j]+"] can't be set to ["+strFieldVal+"]";
+                            }
+                        }
+                    }
+
+                    objFeature.validate();
+                    objFeature.getErrors().allErrors.each {
+                        if(newMessage.length()>0) newMessage += "<br />";
+                        newMessage += it;
+                    }
+
+                    newFeatureList.add(objFeature);
+                }
+
+                if(newMessage.length()>0) {
+                    flow.featureList = newFeatureList;
+                    flow.message = newMessage;
+                    return error();
+                } else {
+                    // SAVE DATA
+                    for(int i=0; i<newFeatureList.size(); i++) {
+                        Feature objFeature = newFeatureList[i];
+                        objFeature.save();
+                    }
+                }
+            }
+            on("success").to "finishScreen"
+			on("error").to "errorSaving"
+		}
+
+        errorSaving {
+			on("previous").to "checkInput"
+		}
+
+        finishScreen()
     }
 }
