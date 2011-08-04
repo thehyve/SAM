@@ -36,7 +36,7 @@
                         </tbody>
                     </table>
                 </div>
-                <g:submitButton name="create" class="save" value="Create" onclick="\$('#nextPage').val('minimalCreate');"/>
+                <g:submitButton name="create" class="save" value="Create"/>
             </g:form>
         </div>
     </body>
