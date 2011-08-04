@@ -12,10 +12,12 @@
         </content>
         <div class="data">
             <h1>Select layout</h1>
-            <p>
-                The file <b>${input.originalFilename}</b> has been successfully read in.
-                Now we need to know which layout the file uses. There are two layouts you can choose from:
-            </p>
+            <g:if test="${input!=null}">
+                <p>
+                    The file <b>${input.originalFilename}</b> has been successfully read in.
+                    Now we need to know which layout the file uses. There are two layouts you can choose from:
+                </p>
+            </g:if>
             <form method="post">
                 <div class='layoutchoice'>
                     <div style="vertical-align: middle; text-align:center;">
