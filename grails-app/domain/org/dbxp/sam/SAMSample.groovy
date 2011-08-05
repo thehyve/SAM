@@ -4,11 +4,17 @@ class SAMSample extends org.dbxp.moduleBase.Sample {
 	String subjectName
 	Long eventStartTime
 
+	static hasMany = [measurements: Measurement]
+	
 	static constraints = {
 		subjectName(nullable: true)
 		eventStartTime(nullable: true)
 	}
-		
+	
+	static mapping = {
+		measurements cascade: "all-delete-orphan"
+	}
+	
 	/**
 	 * Sets the properties of this object, based on the JSON object given by GSCF
 	 * @param jsonObject	Object with sample data from GSCF
@@ -23,7 +29,7 @@ class SAMSample extends org.dbxp.moduleBase.Sample {
 			this.subjectName = jsonObject.subjectObject.name.toString();
 		}
 
-		if( !jsonObject.eventObject || !jsonObject.eventObject.startTime  || jsonObject.eventObject.startTime == "null" ) {
+		if( jsonObject.eventObject == null || jsonObject.eventObject.startTime == null || jsonObject.eventObject.startTime == "null" ) {
 			this.eventStartTime = null
 		} else {
 			if( jsonObject.eventObject.startTime.toString().isLong() ) {

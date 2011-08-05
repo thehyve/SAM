@@ -1,19 +1,20 @@
 package org.dbxp.sam
 
 import grails.converters.JSON
-import org.dbxp.moduleBase.Assay;
+import org.dbxp.moduleBase.*;
 import org.dbxp.matriximporter.*
 
+@NoAuthenticationRequired
 class AssayController {
 
     static allowedMethods = [save: "POST", update: "POST", delete: "POST"]
 	
 	def synchronizationService
 	
-    def index = {
+	def index = {
         redirect(action: "list", params: params)
     }
-	
+		
 	def synchronize = {
 		synchronizationService.initSynchronization( session.sessionToken, session.user ) ;
 		synchronizationService.fullSynchronization();
