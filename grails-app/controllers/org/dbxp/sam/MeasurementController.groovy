@@ -325,6 +325,15 @@ class MeasurementController {
         selectLayout {
             // Step x: Choose layout, preview data
 			on("next") {
+				// We first check whether the user has selected a layout before. If he has, he might also have 
+				// matched columns etc. If he selects the same layout, we keep his changes. Otherwise, these changes 
+				// are removed again
+				if( flow.layout && flow.layout != params.layoutselector ) {
+					flow.edited_text = null
+					flow.operator = null
+					flow.comments = null
+				}
+				
 				// Save data of this step
                 flow.layout = params.layoutselector
 				flow.features = Feature.list( sort: "name" )
@@ -355,8 +364,8 @@ class MeasurementController {
                     }
                 } else {
                     def samples = flow.assay.samples
-                    flow.timepoints = samples.eventStartTime.unique()
-                    flow.subjects = samples.subjectName
+                    flow.timepoints = samples*.eventStartTime.unique()
+                    flow.subjects = samples*.subjectName.unique()
 
                     // Try to match first row to features
                     flow.feature_matches = [:]
