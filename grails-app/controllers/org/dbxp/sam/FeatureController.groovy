@@ -6,6 +6,7 @@ import org.dbxp.moduleBase.Auth
 import org.dbxp.moduleBase.Assay
 import org.dbxp.matriximporter.MatrixImporter
 import org.dbnp.gdt.TemplateField
+import org.springframework.validation.FieldError
 
 class FeatureController {
 
@@ -539,7 +540,11 @@ class FeatureController {
                         objFeature.validate();
                         objFeature.getErrors().allErrors.each {
                             if(newMessage.length()>0) newMessage += "<br />";
-                            newMessage += it;
+                            if(it.code=="unique") {
+                                newMessage += "A feature with the name ["+it.rejectedValue+"] already excists.";
+                            } else {
+                                newMessage += "Errorcode ["+it.code+"] on field ["+it.field+"] with value ["+it.rejectedValue+"]";
+                            }
                         }
 
                         if(newMessage.length()>0) flow.message = newMessage;
@@ -606,7 +611,11 @@ class FeatureController {
                     objFeature.validate();
                     objFeature.getErrors().allErrors.each {
                         if(newMessage.length()>0) newMessage += "<br />";
-                        newMessage += it;
+                        if(it.code=="unique") {
+                            newMessage += "A feature with the name ["+it.rejectedValue+"] already excists.";
+                        } else {
+                            newMessage += "Errorcode ["+it.code+"] on field ["+it.field+"] with value ["+it.rejectedValue+"]";
+                        }
                     }
 
                     newFeatureList.add(objFeature);
