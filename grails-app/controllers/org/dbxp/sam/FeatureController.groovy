@@ -442,9 +442,12 @@ class FeatureController {
 
             on("next") {
                 flow.templateFields = null;
+                // Check if the user used the textarea
                 if(params.pasteField!=null && params.pasteField!="") {
+                    // The textarea is used
                     flow.inputField = params.pasteField;
                 } else {
+                    // The uploaded files is used
                     flow.inputfile = request.getFile('fileUpload')
                 }
             }.to "uploadDataCheck"
@@ -456,18 +459,25 @@ class FeatureController {
 
                 def text = "";
 
+                // Check if the user used the textarea
                 if(flow.inputField!=null && flow.inputField!="") {
+                    // Parse the content of the textarea using the Matriximporter
                     text = MatrixImporter.getInstance().importString(flow.inputField,["delimiter":"\t"]);
                 } else {
+                    // Save the uploaded file into a variable
                     def f = flow.inputfile
                     if(!f.empty) {
                         // Save data of this step
                         flow.message = "It appears this file cannot be read in." // In case we get an error before finishing
                         try{
+                            // Make the tempfolder (if it doesn't excist)
                             new File( "./tempfolder/" ).mkdirs()
+                            // Transfer the file to the tempfolder
                             f.transferTo( new File( "./tempfolder/" + File.separatorChar + f.getOriginalFilename() ) )
+                            // Get a variable for the transfered file and save it in the flow
                             File file = new File("./tempfolder/" + File.separatorChar + f.getOriginalFilename())
                             flow.inputfile = file
+                            // Get the content of the transfered file
                             text = MatrixImporter.getInstance().importFile(file);
                         } catch(Exception e){
                             // Something went wrong with the file...
@@ -475,11 +485,13 @@ class FeatureController {
                             return error()
                         }
 
+                        // Check if the uploaded file had any content
                         if(text==null){
                             // Apparently the MatrixImporter was unable to read this file
                             flow.message += ' Make sure to add a comma-separated values based or Excel based file using the upload field below.'
                             return error()
                         }
+                        // Save some variables of the file into the flow
                         flow.input = [ "file": flow.inputfile, "originalFilename": f.getOriginalFilename()]
                     } else {
                         flow.message += ' Make sure to add a file using the upload field below. The file upload field cannot be empty.'
@@ -487,18 +499,24 @@ class FeatureController {
                     }
                 }
 
+                // If we've reached this point, the error message needs to be reset
                 flow.message = null;
 
+                // Store the domainfields in the flow
                 flow.templateFields = Feature.giveDomainFields()
 
+                // Store the selected template in the flow
                 flow.template = params.template;
 
+                // If a template is selected, store the templatefields in the flow
                 if(flow.template!="") {
+                    // Refresh the template because a user can have edited it
                     Template objTempl = Template.findByName(params.template).refresh();
 
                     flow.templateFields += objTempl.fields;
                 }
 
+                // Store the content of the textarea or the file in the flow
                 flow.text = text;
             }
             on("success").to "matchColumns"
