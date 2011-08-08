@@ -84,7 +84,7 @@
 			<g:if test="${hideEmpty}">
 				<g:if test="${emptySamples > 0}">
 					<p>
-						${emptySamples} sample(s) are now shown because they have no measurements. 
+						${emptySamples} sample(s) are not shown because they have no measurements. 
 						Click <g:link action="show" params="['id': assayInstance.id, 'hideEmpty': false]">here</g:link> to show all.
 					</p>
 				</g:if>
