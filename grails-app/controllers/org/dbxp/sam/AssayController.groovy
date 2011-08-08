@@ -83,11 +83,11 @@ class AssayController {
 	   
 	   // Search properties
 	   if( search ) {
-		   hqlParams[ "search" ] = "%" + search + "%"
+		   hqlParams[ "search" ] = "%" + search.toLowerCase() + "%"
 		   
 		   def hqlConstraints = [];
-		   hqlConstraints << "a.name LIKE :search"
-		   hqlConstraints << "a.study.name LIKE :search"
+		   hqlConstraints << "LOWER(a.name) LIKE :search"
+		   hqlConstraints << "LOWER(a.study.name) LIKE :search"
 		   
 		   whereHQL += "WHERE " + hqlConstraints.join( " OR " ) + " "
 	   }

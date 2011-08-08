@@ -68,15 +68,15 @@ class FeatureController {
 		
 		// Search properties
 		if( search ) {
-			hqlParams[ "search" ] = "%" + search + "%"
+			hqlParams[ "search" ] = "%" + search.toLowerCase() + "%"
 			
 			def hqlConstraints = [];
 			for( int i = 0; i < 2; i++ ) {
-				hqlConstraints << columns[ i ] + " LIKE :search"
+				hqlConstraints << "LOWER(" + columns[ i ] + ") LIKE :search"
 			}
 
 			// Group names should be searched separately
-			hqlConstraints << "EXISTS ( FROM FeatureGroup fg, FeaturesAndGroups fag WHERE fg = fag.featureGroup AND fag.feature = f AND fg.name LIKE :search)";
+			hqlConstraints << "EXISTS ( FROM FeatureGroup fg, FeaturesAndGroups fag WHERE fg = fag.featureGroup AND fag.feature = f AND LOWER(fg.name) LIKE :search)";
 			
 			hql += "WHERE " + hqlConstraints.join( " OR " ) + " "
 
