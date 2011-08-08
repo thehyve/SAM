@@ -10,7 +10,7 @@
         <h1>Assay list</h1>
 
         <div class="data">
-            <dt:dataTable id="fList" class="paginate sortable filter selectMulti serverside" rel="${g.createLink( controller: 'assay', action: 'datatables_list' )}">
+            <dt:dataTable id="fList" class="paginate sortable filter serverside" rel="${g.createLink( controller: 'assay', action: 'datatables_list' )}">
                 <thead>
                     <tr>
 
