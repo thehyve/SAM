@@ -235,12 +235,8 @@ class FeatureController {
         return_map = Feature.delete(ids)
         if(return_map["message"]){
             flash.message = return_map["message"]
-            session.featureInstance.attach()
         }
 
-        session.featureInstance.getDomainFields().each {
-            println it
-        }
         if(return_map["action"]){
             redirect(action: return_map["action"])
         } else {
