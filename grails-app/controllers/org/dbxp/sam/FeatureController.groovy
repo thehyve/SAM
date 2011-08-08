@@ -278,9 +278,12 @@ class FeatureController {
 		render(view: "FaGList", model: [groupList: groupList, remainingGroups: remainingGroups])
 	}
 
-        // Get a list of template specific fields
+    // Get a list of template specific fields
     def templateSelection = {
         render(template: "templateSelection", model: [template: _determineTemplate()])
+    }
+	
+	def returnUpdatedTemplateSpecificFields = {
         // Actually using this in a .gsp does not seem to lead to a working template editor
         // TODO: fix this so that add/modify does not have to lead to a page refresh
 		def template = _determineTemplate();
