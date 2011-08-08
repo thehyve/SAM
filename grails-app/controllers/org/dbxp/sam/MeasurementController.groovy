@@ -19,6 +19,12 @@ class MeasurementController {
     }
 
     def create = {
+		// If no samples are present, we can't add measurements
+		if( Sample.count() == 0 ) {
+			flash.message = "No samples have been created in GSCF yet. Without samples, you can't add measurements."
+			redirect( controller: 'assay', action: 'list' );
+		}
+		
         def measurementInstance = new Measurement()
         measurementInstance.properties = params
         return [measurementInstance: measurementInstance]
@@ -153,6 +159,12 @@ class MeasurementController {
     def nofeatures = {}
     
 	def importData = {
+		// If no samples are present, we can't add measurements
+		if( Sample.count() == 0 ) {
+			flash.message = "No samples have been created in GSCF yet. Without samples, you can't import measurements."
+			redirect( controller: 'assay', action: 'list' );
+		}
+		
 		redirect( action: 'importDataFlow' )
 	}
 
