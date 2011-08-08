@@ -540,10 +540,15 @@ class FeatureController {
                         objFeature.validate();
                         objFeature.getErrors().allErrors.each {
                             if(newMessage.length()>0) newMessage += "<br />";
-                            if(it.code=="unique") {
-                                newMessage += "A feature with the name ["+it.rejectedValue+"] already excists.";
-                            } else {
-                                newMessage += "Errorcode ["+it.code+"] on field ["+it.field+"] with value ["+it.rejectedValue+"]";
+                            switch(it.code) {
+                                case "unique":
+                                    newMessage += "A feature with the name ["+it.rejectedValue+"] already excists.";
+                                    break;
+                                case "nullable":
+                                    newMessage += "The field ["+it.field+"] can't be null.";
+                                    break;
+                                default:
+                                    newMessage += "Errorcode ["+it.code+"] on field ["+it.field+"] with value ["+it.rejectedValue+"]";
                             }
                         }
 
@@ -611,10 +616,15 @@ class FeatureController {
                     objFeature.validate();
                     objFeature.getErrors().allErrors.each {
                         if(newMessage.length()>0) newMessage += "<br />";
-                        if(it.code=="unique") {
-                            newMessage += "A feature with the name ["+it.rejectedValue+"] already excists.";
-                        } else {
-                            newMessage += "Errorcode ["+it.code+"] on field ["+it.field+"] with value ["+it.rejectedValue+"]";
+                        switch(it.code) {
+                            case "unique":
+                                newMessage += "A feature with the name ["+it.rejectedValue+"] already excists.";
+                                break;
+                            case "nullable":
+                                newMessage += "The field ["+it.field+"] can't be null.";
+                                break;
+                            default:
+                                newMessage += "Errorcode ["+it.code+"] on field ["+it.field+"] with value ["+it.rejectedValue+"]";
                         }
                     }
 
