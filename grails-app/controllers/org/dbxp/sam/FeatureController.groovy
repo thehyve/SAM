@@ -445,7 +445,7 @@ class FeatureController {
 
             on("next") {
                 flow.templateFields = null;
-                if(params.pasteField!=null) {
+                if(params.pasteField!=null && params.pasteField!="") {
                     flow.inputField = params.pasteField;
                 } else {
                     flow.inputfile = request.getFile('fileUpload')
@@ -459,7 +459,7 @@ class FeatureController {
 
                 def text = "";
 
-                if(flow.inputField!=null) {
+                if(flow.inputField!=null && flow.inputField!="") {
                     text = MatrixImporter.getInstance().importString(flow.inputField,["delimiter":","]);
                 } else {
                     def f = flow.inputfile
@@ -492,13 +492,15 @@ class FeatureController {
 
                 flow.message = null;
 
+                flow.templateFields = Feature.giveDomainFields()
+
                 flow.template = params.template;
 
-                // Find the selected template in order to be able to retrieve the templateFields
-                Template objTempl = Template.findByName(params.template).refresh();
+                if(flow.template!="") {
+                    Template objTempl = Template.findByName(params.template).refresh();
 
-                // Store all fields (templateFields and domainFields)
-                flow.templateFields = Feature.giveDomainFields()+objTempl.fields;
+                    flow.templateFields += objTempl.fields;
+                }
 
                 flow.text = text;
             }
@@ -519,7 +521,8 @@ class FeatureController {
                         flow.discardRow.add(i);
                     } else {
                         Feature objFeature = new Feature();
-                        objFeature.changeTemplate(flow.template);
+                        if(flow.template!="")
+                            objFeature.changeTemplate(flow.template);
 
                         for(int j=0; j<flow.text[0].size(); j++) {
 

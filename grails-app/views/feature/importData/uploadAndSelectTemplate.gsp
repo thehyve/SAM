@@ -5,18 +5,27 @@
         <title>Feature importer</title>
         <r:script type="text/javascript" disposition="head">
             $(document).ready(function() {
+                insertSelectAddMore();
+            });
+
+            function insertSelectAddMore() {
                 new SelectAddMore().init({
                     rel  : 'template',
                     url  : baseUrl + '/templateEditor',
-                    vars        : 'entity,ontologies',
+                    vars    : 'entity,ontologies',
                     label   : 'add / modify',
                     style   : 'modify',
                     onClose : function(scope) {
-                        //handleTemplateChange('edit');
-                        //alert("done");
+                        $.ajax({
+                            url: baseUrl + "/feature/templateSelection",
+                            success: function( returnHTML, textStatus, jqXHR ) {
+                                $( "td#templateSelection" ).html( returnHTML );
+                                insertSelectAddMore();
+                            }
+                        });
                     }
                 });
-            });
+            }
 
             function createTextfield(id) {
                 $( "#"+id ).html("<br /><br /><textarea id='"+id+"' name='"+id+"' rows='5' cols='20'></textarea>");
@@ -24,6 +33,12 @@
                     handles: "se"
                 });
             }
+
+            function handleTemplateChange() {
+                // Javascript that is executed when a template is selected
+                // Do nothing
+            }
+
         </r:script>
     </head>
     <body>
@@ -50,7 +65,7 @@
                             </tr>
                             <tr>
                                 <td><div id="datatemplate">Choose type of data template: </div></td>
-                                <td>
+                                <td id="templateSelection">
                                     <af:templateElement name="template" rel="template" description="" entity="${Feature}" ontologies="" value="" error="template" addDummy="true" onChange="if(!\$( 'option:selected', \$(this) ).hasClass( 'modify' )){ }"></af:templateElement>
                                 </td>
                             </tr>
@@ -58,7 +73,7 @@
 
                     </table>
                     <br />
-                    <g:submitButton name="next" value="Upload file and continue importing" action="next"/>
+                    <g:submitButton name="next" value="Upload file and continue importing" onClick="return !\$('option:selected', \$('#template') ).hasClass( 'modify' );" action="next"/>
 
                 </g:form>
             </div>

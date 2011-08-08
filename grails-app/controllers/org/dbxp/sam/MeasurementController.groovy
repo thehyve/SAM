@@ -185,7 +185,7 @@ class MeasurementController {
 			// Step 2: upload data and give the user a preview. The user then chooses which layout he wants
 			// to use.
 			on("next") {
-                if(params.pasteField!=null) {
+                if(params.pasteField!=null && flow.inputField!="") {
                     flow.inputField = params.pasteField;
                 } else {
                     flow.inputfile = request.getFile('fileUpload')
