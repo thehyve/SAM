@@ -118,8 +118,10 @@ class AssayController {
 		   iTotalRecords: numTotalRecords,
 		   iTotalDisplayRecords: filteredRecords.size(),
 		   sEcho: params.int( 'sEcho' ),
-		   aaData: records.collect { 
-			   return ( it as List ) + dt.buttonShow( 'controller': "assay", 'id': it[ 0 ] ) 
+		   aaData: records.collect {
+               [
+                it[1], it[2], it[3],
+			    dt.buttonShow( 'controller': "assay", 'id': it[ 0 ] ) ]
 		   },
 		   aIds: filteredRecords
 	   ]
