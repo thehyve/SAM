@@ -602,23 +602,25 @@ class MeasurementController {
                     status ->
                     measurementList.each {
                         m ->
-                        def measurementInstance = Measurement.findByFeatureAndSample(m.feature, m.sample)
-                        if(measurementInstance!=null){
-                            measurementInstance.value = m.value
-                            measurementInstance.operator = m.operator
-                            measurementInstance.comments = m.comments
-                            if(!measurementInstance.save(flush : true)){
-                                flash.message += "<br>"+measurementInstance.getErrors().allErrors
-                                println measurementInstance.getErrors().allErrors
-                                status.setRollbackOnly();
-                            }
-                        } else {
-                            if(!m.save(flush : true)){
-                                flash.message += "<br>"+m.getErrors().allErrors
-                                println m.getErrors().allErrors
-                                status.setRollbackOnly();
-                            }
-                        }
+						if( m ) {
+	                        def measurementInstance = Measurement.findByFeatureAndSample(m.feature, m.sample)
+	                        if(measurementInstance!=null){
+	                            measurementInstance.value = m.value
+	                            measurementInstance.operator = m.operator
+	                            measurementInstance.comments = m.comments
+	                            if(!measurementInstance.save(flush : true)){
+	                                flash.message += "<br>"+measurementInstance.getErrors().allErrors
+	                                println measurementInstance.getErrors().allErrors
+	                                status.setRollbackOnly();
+	                            }
+	                        } else {
+	                            if(!m.save(flush : true)){
+	                                flash.message += "<br>"+m.getErrors().allErrors
+	                                println m.getErrors().allErrors
+	                                status.setRollbackOnly();
+	                            }
+	                        }
+						}
                     }
                 }
 
@@ -686,7 +688,11 @@ class MeasurementController {
             }
         }
 
-        return new Measurement(sample:s,feature:f,value:val,operator:operator,comments:comments)
+		// A measurement needs a value or a comments field
+		if( val != null || comments ) 
+        	return new Measurement(sample:s,feature:f,value:val,operator:operator,comments:comments)
+		else
+			return null
     }
 
 }
