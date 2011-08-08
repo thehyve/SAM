@@ -491,8 +491,10 @@ class FeatureController {
 
                 flow.template = params.template;
 
+                // Find the selected template in order to be able to retrieve the templateFields
                 Template objTempl = Template.findByName(params.template).refresh();
 
+                // Store all fields (templateFields and domainFields)
                 flow.templateFields = Feature.giveDomainFields()+objTempl.fields;
 
                 flow.text = text;
