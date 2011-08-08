@@ -457,7 +457,7 @@ class FeatureController {
                 def text = "";
 
                 if(flow.inputField!=null && flow.inputField!="") {
-                    text = MatrixImporter.getInstance().importString(flow.inputField,["delimiter":","]);
+                    text = MatrixImporter.getInstance().importString(flow.inputField,["delimiter":"\t"]);
                 } else {
                     def f = flow.inputfile
                     if(!f.empty) {

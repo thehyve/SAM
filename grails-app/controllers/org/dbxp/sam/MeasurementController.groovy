@@ -212,7 +212,7 @@ class MeasurementController {
                 def f = flow.inputfile
                 def text = ""
                 if(flow.inputField!=null) {
-                    text = MatrixImporter.getInstance().importString(flow.inputField,["delimiter":","]);
+                    text = MatrixImporter.getInstance().importString(flow.inputField,["delimiter":"\t"]);
                     flow.text = text
                     flow.layoutguess = "sample_layout";
                 } else {

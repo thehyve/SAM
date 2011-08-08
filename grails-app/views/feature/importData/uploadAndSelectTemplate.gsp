@@ -28,7 +28,7 @@
             }
 
             function createTextfield(id) {
-                $( "#"+id ).html("<br /><br /><textarea id='"+id+"' name='"+id+"' rows='5' cols='20'></textarea>");
+                $( "#"+id ).html("<br /><br /><span style='color: grey'>Add tab delimited data</span><br /><textarea id='"+id+"' name='"+id+"' rows='5' cols='20'></textarea>");
                 $( "#"+id ).resizable({
                     handles: "se"
                 });
