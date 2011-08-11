@@ -21,18 +21,18 @@
                 <dt:dataTable id="fList" class="paginate sortable filter selectOne" rel="${g.createLink( controller: 'feature', action: 'datatables_list' )}">
                     <thead>
                     <tr>
-                        <th>Assay</th>
                         <th>Study</th>
+                        <th>Assay</th>
                     </tr>
                     </thead>
                     <tbody>
                     <g:each in="${assayList}" status="i" var="assayInstance">
                         <tr class="${(i % 2) == 0 ? 'odd' : 'even'}" id="rowid_${assayInstance.id}">
                             <td>
-                                ${assayInstance.name}
+                                ${assayInstance.study.name}
                             </td>
                             <td>
-                                ${assayInstance.study.name}
+                                ${assayInstance.name}
                             </td>
                         </tr>
                     </g:each>

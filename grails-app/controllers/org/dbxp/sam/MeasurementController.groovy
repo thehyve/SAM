@@ -185,7 +185,7 @@ class MeasurementController {
 				synchronizationService.initSynchronization( session.sessionToken, session.user );
 				synchronizationService.synchronizeChangedStudies()
 
-                if(Feature.count()==0){
+                if(Feature.count() == 0){
                     redirect(action: 'nofeatures')
                 }
 
