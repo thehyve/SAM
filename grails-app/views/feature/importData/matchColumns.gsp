@@ -69,7 +69,7 @@
                             <tr>
                                 <td class="selectColumn">
                                     <g:if test="${i>0}">
-                                        <input type="checkbox" name="row_${i}" CHECKED/>
+                                        <input type="checkbox" name="row_${i}" ${!discardRow?.contains(i) ? "CHECKED" : ""}/>
                                     </g:if>
                                 </td>
 
@@ -88,13 +88,12 @@
                                         <g:else>
                                             ${column}
                                         </g:else>
-
                                         <g:if test="${i==0}">
                                             <br/>
                                             <select id="column_${j}" name="column_${j}" onChange="selectChange();">
-                                                <option value="">[Discard]</option>
+                                                <option value="" ${!discardColumn?.contains(i) ? "SELECTED" : ""}>[Discard]</option>
                                                 <g:each in="${templateFields}" var="tf" status="k">
-                                                    <option value="${tf.name}">${tf.name}</option>
+                                                    <option value="${tf.name}" ${columnField?.get(j)?.name.equals(tf.name) ? "SELECTED" : ""}>${tf.name}</option>
                                                 </g:each>
                                             </select>
                                         </g:if>

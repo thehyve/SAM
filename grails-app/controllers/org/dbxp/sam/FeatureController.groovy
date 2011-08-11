@@ -561,7 +561,7 @@ class FeatureController {
                             if(newMessage.length()>0) newMessage += "<br />";
                             switch(it.code) {
                                 case "unique":
-                                    newMessage += "A feature with the name ["+it.rejectedValue+"] already excists.";
+                                    newMessage += "A feature with the name ["+it.rejectedValue+"] already exists.";
                                     break;
                                 case "nullable":
                                     newMessage += "The field ["+it.field+"] can't be null.";
@@ -593,7 +593,9 @@ class FeatureController {
                 }
 
             }.to "checkInput"
-            on("previous").to "uploadAndSelectTemplate"
+            on("previous") {
+              flow.message = null;
+            }.to "uploadAndSelectTemplate"
 
         }
 
@@ -601,7 +603,9 @@ class FeatureController {
             on("save") {
                 //flow.inputfile = request.getFile('fileUpload')
             }.to "saveData"
-            on("previous").to "matchColumns"
+            on("previous"){
+                flow.message = null;
+            }.to "matchColumns"
         }
 
         saveData {
@@ -667,7 +671,9 @@ class FeatureController {
 		}
 
         errorSaving {
-			on("previous").to "checkInput"
+			on("previous"){
+                flow.message = null;
+            }.to "checkInput"
 		}
 
         finishScreen()
