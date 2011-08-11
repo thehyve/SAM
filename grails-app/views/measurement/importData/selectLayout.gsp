@@ -32,15 +32,15 @@
                         <g:if test="${layoutguess=='sample_layout'}">Our guess is that this file uses the sample layout. </g:if>Using the sample layout and the sample of the file contents, the data types would be as follows:
                         <%
                             def content_sample_sample_layout = "<table style='width: auto;'>"
-                            for(int i = 0; i < text.size(); i++){
+                            for(int i = 0; i < text?.size(); i++){
                                 if(i == 5){
                                     break;
                                 }
-                                if(text[i].size()==0){
+                                if(text[i]?.size()==0){
                                     content_sample_sample_layout += "<tr></tr>"
                                 } else {
                                     content_sample_sample_layout += "<tr>"
-                                    for(int j = 0; j < text[i].size(); j++){
+                                    for(int j = 0; j < text[i]?.size(); j++){
                                         if(j == 5){
                                             break;
                                         }

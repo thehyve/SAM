@@ -5,12 +5,12 @@
         <title>Measurement importer</title>
 
         <r:script type="text/javascript" disposition="head">
-        function createTextfield(id) {
-            $( "#"+id ).html("<br /><br /><span style='color: grey'>Add tab delimited data</span><br /><textarea id='"+id+"' name='"+id+"' rows='5' cols='20'></textarea>");
-            $( "#"+id ).resizable({
-                handles: "se"
-            });
-        }
+	        function createTextfield(id) {
+	            $( "#"+id ).html("<br /><br /><span style='color: grey'>Add tab delimited data</span><br /><textarea id='"+id+"' name='"+id+"' rows='5' cols='20'></textarea>");
+	            $( "#"+id ).resizable({
+	                handles: "se"
+	            });
+	        }
         </r:script>
         
         <r:require module="importer" />
@@ -27,32 +27,29 @@
 
             <g:if test="${message}">
                 <br>
-                <span class="errors">${message}</span>
+                	<span class="errors">${message}</span>
                 <br>
             </g:if>
-            <p>The assay you selected is the assay <b>${assay.name}</b> from the study <b>${studyName}</b>. On this page you can upload the file containing the data you wish to add to this assay. Please make sure that the file in question has a structure that corresponds to one of the following two layout examples.</p>
-            <!-- <div style="position:absolute; left: 0px; top: 120px;"> -->
-            <div style="display: inline-block;">
-                <h2>The sample layout:</h2>
-                <br>
-                <r:img uri="/images/samplelayout.png"/>
-            </div>
-            <!-- <div style="position:absolute; right: -150px; top: 120px;"> -->
-            <div style="display: inline-block;">
-                <h2>The subject layout:</h2>
-                <br>
-                <r:img uri="/images/subjectlayout.png"/>
-            </div>
+            
             <form method="post" enctype="multipart/form-data">
-            <g:if test="${message}">
-                <div class="errors" style="display: block;">
-            </g:if>
-            <g:else>
-                <div style="display: block;">
-            </g:else>
-                    <h2>Locate the file on your computer:</h2>
-                    <p>Make sure to add a comma-separated values based or Excel based file using the upload field below.</p>
-                    <input id="file" type="file" id="fileUpload" name="fileUpload"/> <span id="pasteField">or <a href="#" onclick="createTextfield('pasteField'); return false;">paste in textfield</a></span>
+
+	            <h2>Locate the file on your computer:</h2>
+	            <p class="fieldInfo">Make sure to add an <strong>excel</strong> or <strong>comma-separated file</strong> that has a structure that corresponds to one of the <a href="#" onClick="$( '#layouts' ).dialog( 'open' ); return false;">allowed layouts</a>.</p> 
+	            <input id="file" type="file" id="fileUpload" name="fileUpload"/> <span id="pasteField">or <a href="#" onclick="createTextfield('pasteField'); return false;">paste in textfield</a></span>
+            
+	            <div id="layouts">
+	            	<h3>Two layouts</h3>
+	            	You can upload your data file using two different layouts:<br />
+		            <div style="display: inline-block; margin: 5px;">
+		                <h2>The sample layout:</h2>
+		                <br>
+		                <r:img uri="/images/samplelayout.png"/>
+		            </div>
+		            <div style="display: inline-block; margin: 5px;">
+		                <h2>The subject layout:</h2>
+		                <br>
+		                <r:img uri="/images/subjectlayout.png"/>
+		            </div>
                 </div>
                 
                 <imp:importerFooter>
@@ -61,5 +58,15 @@
                 </imp:importerFooter>
             </form>
         </div>
+        
+        <r:script>
+        	$( '#layouts' ).dialog({
+        		autoOpen: false,
+        		modal: true,
+        		height: 400,
+        		width: 960,
+        		resizable: false
+        	});
+        </r:script>
     </body>
 </html>
