@@ -4,6 +4,7 @@ import org.dbxp.matriximporter.MatrixImporter
 import org.dbxp.moduleBase.Assay
 import org.dbxp.moduleBase.Auth
 import org.dbxp.moduleBase.Sample
+import org.dbnp.gdt.RelTime
 
 class MeasurementController {
     static allowedMethods = [save: "POST", update: "POST", delete: "POST"]
@@ -382,8 +383,12 @@ class MeasurementController {
                     }
                 } else {
                     def samples = flow.assay.samples
-                    flow.timepoints = samples*.eventStartTime.unique()
-                    flow.subjects = samples*.subjectName.unique()
+                    
+					// Retrieve timepoints and convert them to RelTime strings
+					flow.timepoints = samples*.eventStartTime.unique().collect { new RelTime( it ).toString() }
+                    
+					// TODO: retrieve the sorted subjects directly from the database for performance reasons
+					flow.subjects = samples*.subjectName.unique().sort()
 
                     // Try to match first row to features
                     flow.feature_matches = [:]
@@ -601,9 +606,15 @@ class MeasurementController {
                             for(int j = 1; j < flow.edited_text[0].size(); j++){
                                 if(i>1 && flow.edited_text[0][j]!=null && flow.edited_text[0][j]!="null"){
                                     // For a particular subject and a particular timepoint and thus a particular sample
-                                    SAMSample s = SAMSample.findByEventStartTimeAndSubjectName(flow.edited_text[1][j], flow.edited_text[i][0]);
+									
+									// In order for that to work, reconvert the timepoint into seconds
+									def timepoint = new RelTime( flow.edited_text[1][j] ).getValue();
+									
+                                    SAMSample s = SAMSample.findByEventStartTimeAndSubjectName(timepoint, flow.edited_text[i][0]);
+									
                                     // ... and a particular feature
                                     Feature f = flow.edited_text[0][j]
+									
                                     // ... a measurement will be created
                                     def txt = params?.get('valueHidden'+i+','+j)
                                     def comm = params?.get('commentHidden'+i+','+j)
