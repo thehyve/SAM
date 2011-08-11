@@ -197,7 +197,7 @@ class MeasurementController {
                     "selectLayout": "Select Layout",
                     "selectColumns": "Select Columns",
                     "checkInput": "Check Input",
-                    "saveDate": "Done"
+                    "saveData": "Done"
                 ]
             }
             on("success").to "chooseAssay"

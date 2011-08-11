@@ -169,7 +169,7 @@
                 
                 <imp:importerFooter>
                     <g:submitButton name="previous" value="« Previous" action="previous"/>
-                    <g:submitButton name="next" value="Save" action="save"/>
+                    <g:submitButton name="save" value="Save" action="save"/>
                 </imp:importerFooter>
             </form>
         </div>
