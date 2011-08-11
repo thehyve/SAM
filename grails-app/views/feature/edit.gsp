@@ -102,10 +102,7 @@
             </div>
         </g:hasErrors>
         <content tag="contextmenu">
-            <li><g:link class="list" controller="feature">List features</g:link></li>
-            <li><g:link class="create" controller="feature" action="create">Create new feature</g:link></li>
-            <li><g:link class="import" controller="feature" action="importData">Import</g:link></li>
-            <li><g:link class="list" controller="featureGroup">List feature groups</g:link></li>
+      		<g:render template="contextmenu" />
         </content>
         <h1>Edit feature ${featureInstance.name}</h1>
 

@@ -26,9 +26,7 @@
     </head>
     <body>
         <content tag="contextmenu">
-            <li><g:link class="list" controller="featureGroup">List feature groups</g:link></li>
-            <li><g:link class="create" controller="featureGroup" action="create">Create new group</g:link></li>
-            <li><g:link class="list" controller="feature" action="list">List features</g:link></li>
+      		<g:render template="contextmenu" />
         </content>
         <h1>FeatureGroup list</h1>
         <div class="data">

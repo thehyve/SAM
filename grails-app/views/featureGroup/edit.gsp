@@ -14,9 +14,7 @@
         </g:hasErrors>
         <h1>Edit featureGroup ${featureGroupInstance.name}</h1>
         <content tag="contextmenu">
-            <li><g:link class="list" controller="featureGroup">List feature groups</g:link></li>
-            <li><g:link class="create" controller="featureGroup" action="create">Create new group</g:link></li>
-            <li><g:link class="list" controller="feature" action="list">List features</g:link></li>
+      		<g:render template="contextmenu" />
         </content>
         <div class="data">
             <g:form method="post">
