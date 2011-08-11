@@ -81,6 +81,12 @@
 					</g:each>
 				</tbody>
 			</table>
+			
+            <br />
+            <ul class="data_nav buttons">
+            		<li><g:link class="delete" controller="measurement" action="deleteByAssay" id="${assayInstance.id}" onClick="return confirm('Are you sure?');">Delete all measurements</g:link></li>
+            </ul>
+            			
 			<g:if test="${hideEmpty}">
 				<g:if test="${emptySamples > 0}">
 					<p>

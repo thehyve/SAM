@@ -1,5 +1,7 @@
 package org.dbxp.sam
 
+import org.dbxp.moduleBase.Assay
+
 class Measurement {
 
     static belongsTo = [sample:SAMSample, feature:Feature]
@@ -24,4 +26,14 @@ class Measurement {
         sample(blank:false)
         feature(blank:false)
     }
+	
+	public static deleteByAssay( Assay a ) {
+		try {
+			Measurement.executeUpdate( "delete Measurement m WHERE m.sample IN( FROM Sample s where s.assay = :assay )", [ assay: a ] );
+			return true;
+		} catch( Exception e ) {
+			e.printStackTrace();
+			return false;
+		}
+	}
 }

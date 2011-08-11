@@ -170,4 +170,6 @@ class AssayController {
 		
 		return [assayInstance: assayInstance, samples: samples, features: features, measurements: measurements, hideEmpty: hideEmpty] 
     }
+	
+	
 }

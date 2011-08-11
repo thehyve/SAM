@@ -95,7 +95,7 @@
                                                         <div class="tooltip">
                                                             ${column.name}
                                                             <span>
-                                                                <g:include controller="feature" action="minimalShow" params="['featureInstance': column]"/>
+																<g:render template="featureExample" model="['featureInstance': column]" />
                                                             </span>
                                                         </div>
                                                     </g:if>

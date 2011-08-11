@@ -694,5 +694,34 @@ class MeasurementController {
 		else
 			return null
     }
+	
+	/**
+	 * Deletes all measurements from the given assay
+	 */
+	def deleteByAssay = {
+		def assayId = params.id
+		
+		if( !assayId || !assayId.isLong() ) {
+			flash.error = "No assay selected"
+			redirect( controller: "assay", view: "list" );
+			return;
+		}
+		
+		def assay = Assay.get( assayId.toLong() );
+		
+		if( !assay ) {
+			flash.error = "Incorrect assay Id given"
+			redirect( controller: "assay", view: "list" );
+			return;
+		}
+		
+		if( Measurement.deleteByAssay( assay ) ) {
+			flash.message = "Your measurements for assay " + assay + " have been deleted."
+		} else {
+			flash.error = "An error occurred while deleting measurements for this assay. Please try again or contact your system administrator."
+		}
+		
+		redirect( controller: "assay", view: "list" );
+	}
 
 }
