@@ -180,6 +180,7 @@ class MeasurementController {
 
         startUp {
             action{
+				// First synchronize all studies that have been changed
 				synchronizationService.initSynchronization( session.sessionToken, session.user );
 				synchronizationService.synchronizeChangedStudies()
 

@@ -4,6 +4,10 @@
         <meta name="layout" content="main"/>
         <title>Measurement importer</title>
         <script type="text/javascript">
+			// Associative array of booleans representing the state of the
+			// select boxes 
+    		var selectsOK = new Array();
+        	
             $(document).ready(function() {
                 new SelectAddMore().init({
                     rel  : 'featureSelector',
@@ -33,18 +37,22 @@
                     }
                 });
 
-                selectChange('featureSelect');
-                selectChange('sampleSelect');
-                selectChange('subjectSelect');
-                selectChange('timepointSelect');
+				<g:if test="${layout == 'sample_layout'}">
+	                selectChange('featureSelect');
+    	            selectChange('sampleSelect');
+    	        </g:if>
+    	        <g:else>
+	                selectChange('subjectSelect');
+    	        </g:else>
             });
 
             function selectChange(type) {
-                listSelects = $('select[class*='+type+']');
+                listSelects = $( 'select.' + type );
+                
                 var mapSelected = new Object();
                 for(i=0; i<listSelects.length; i++) {
                     val = listSelects[ i ].value;
-                    if(val!="" && val!="null") {
+                    if(val!="" && val != "null") {
                         if(mapSelected[val]==null) {
                             mapSelected[val] = 1;
                         } else {
@@ -53,15 +61,36 @@
                     }
                 }
 
+				var blnOK = true;
+                
+				// Loop through all selects and mark the ones red that have
+				// been selected multiple times
                 for(i=0; i<listSelects.length; i++) {
                     val = listSelects[ i ].value;
                     listSelects[ i ].style.color = '';
                     if(val!="" && val!="null") {
                         if(mapSelected[val]>1) {
                             listSelects[ i ].style.color = 'red';
+                            blnOK = false;
                         }
                     }
                 }
+
+                selectsOK[ type ] = blnOK;
+
+                toggleNextButton();
+            }
+
+            function toggleNextButton() {
+				var globalOK = true;
+				for( type in selectsOK ) {
+					if( !selectsOK[ type ] ) {
+						globalOK = false;
+						break;
+					}
+				}
+
+                $( '#_eventId_next' ).attr( 'disabled', !globalOK );
             }
         </script>
     </head>
@@ -126,15 +155,17 @@
                                                     <div class="importerSelectBackground">
                                                         <g:if test="${edited_text != null}">
                                                             <g:if test="${edited_text[i][j]!=null}">
-                                                                <g:select rel="featureSelector" name="${i},${j}" from="${features}" value="${edited_text[i][j].id}" optionKey="id" optionValue="name" noSelection="[null:'[Discard]']" class="importerSelect featureSelect" onchange="selectChange('featureSelect');"/>
+                                                            	<g:set var="featureValue" value="${edited_text[i][j].id}" />
                                                             </g:if>
                                                             <g:else>
-                                                                <g:select rel="featureSelector" name="${i},${j}" from="${features}" value="" optionKey="id" optionValue="name" noSelection="[null:'[Discard]']" class="importerSelect featureSelect" onchange="selectChange('featureSelect');"/>
+                                                            	<g:set var="featureValue" value="" />
                                                             </g:else>
                                                         </g:if>
                                                         <g:else>
-                                                            <g:select rel="featureSelector" name="${i},${j}" from="${features}" value="${features[feature_matches[column]].id}" optionKey="id" optionValue="name" noSelection="[null:'[Discard]']" class="importerSelect featureSelect" onchange="selectChange('featureSelect');"/>
+                                                           	<g:set var="featureValue" value="${features[feature_matches[column]].id}" />
                                                         </g:else>
+                                                        
+                                                        <g:select rel="featureSelector" name="${i},${j}" from="${features}" value="${featureValue}" optionKey="id" optionValue="name" noSelection="[null:'[Discard]']" class="importerSelect featureSelect" onchange="selectChange('featureSelect');"/>
                                                     </div>
                                                 </g:if>
                                                 <g:if test="${j==0}">
@@ -143,15 +174,18 @@
                                                     <div class="importerSelectBackground">
                                                         <g:if test="${edited_text!=null}">
                                                             <g:if test="${edited_text[i][j]!=null}">
-                                                                <g:select name="${i},${j}" from="${samples}" value="${edited_text[i][j].id}" optionKey="id" optionValue="name" noSelection="[null:'[Discard]']" class="importerSelect sampleSelect" onchange="selectChange('sampleSelect');"/>
+                                                            	<g:set var="sampleValue" value="${edited_text[i][j].id}" />
                                                             </g:if>
                                                             <g:else>
-                                                                <g:select name="${i},${j}" from="${samples}" value="" optionKey="id" optionValue="name" noSelection="[null:'[Discard]']" class="importerSelect sampleSelect" onchange="selectChange('sampleSelect');"/>
+                                                            	<g:set var="sampleValue" value="" />
                                                             </g:else>
                                                         </g:if>
                                                         <g:else>
-                                                            <g:select name="${i},${j}" from="${samples}" value="${samples[sample_matches[column]].id}" optionKey="id" optionValue="name" noSelection="[null:'[Discard]']" class="importerSelect sampleSelect" onchange="selectChange('sampleSelect');"/>
+                                                          	<g:set var="sampleValue" value="${samples[sample_matches[column]].id}" />
                                                         </g:else>
+
+                                                        <g:select name="${i},${j}" from="${samples}" value="${sampleValue}" optionKey="id" optionValue="name" noSelection="[null:'[Discard]']" class="importerSelect sampleSelect" onchange="selectChange('sampleSelect');"/>
+
                                                     </div>
                                                 </g:if>
                                                 </div>
@@ -198,28 +232,28 @@
                                                     <!-- Feature row -->
                                                     <g:if test="${edited_text!=null}">
                                                         <g:if test="${edited_text[i][j]!=null}">
-                                                            <g:select rel="featureSelector" name="${i},${j}" from="${features}" value="${edited_text[i][j].id}" optionKey="id" optionValue="name" noSelection="[null:'[Discard]']" class="importerSelect featureSelect" onchange="selectChange('featureSelect');"/>
+                                                            <g:select rel="featureSelector" name="${i},${j}" from="${features}" value="${edited_text[i][j].id}" optionKey="id" optionValue="name" noSelection="[null:'[Discard]']" class="importerSelect featureSelect"/>
                                                         </g:if>
                                                         <g:else>
-                                                            <g:select rel="featureSelector" name="${i},${j}" from="${features}" value="" optionKey="id" optionValue="name" noSelection="[null:'[Discard]']" class="importerSelect featureSelect" onchange="selectChange('featureSelect');"/>
+                                                            <g:select rel="featureSelector" name="${i},${j}" from="${features}" value="" optionKey="id" optionValue="name" noSelection="[null:'[Discard]']" class="importerSelect featureSelect"/>
                                                         </g:else>
                                                     </g:if>
                                                     <g:else>
-                                                        <g:select rel="featureSelector" name="${i},${j}" from="${features}" value="${features[feature_matches[column]].id}" optionKey="id" optionValue="name" noSelection="[null:'[Discard]']" class="importerSelect featureSelect" onchange="selectChange('featureSelect');"/>
+                                                        <g:select rel="featureSelector" name="${i},${j}" from="${features}" value="${features[feature_matches[column]].id}" optionKey="id" optionValue="name" noSelection="[null:'[Discard]']" class="importerSelect featureSelect"/>
                                                     </g:else>
                                                 </g:if>
                                                 <g:if test="${i==1&&j>0}">
                                                     <!-- Timepoint row -->
                                                     <g:if test="${edited_text!=null}">
                                                         <g:if test="${edited_text[i][j]!=null}">
-                                                            <g:select name="${i},${j}" from="${timepoints}" value="${edited_text[i][j]}" noSelection="[null:'[Discard]']" class="importerSelect timepointSelect" onchange="selectChange('timepointSelect');"/>
+                                                            <g:select name="${i},${j}" from="${timepoints}" value="${edited_text[i][j]}" noSelection="[null:'[Discard]']" class="importerSelect timepointSelect"/>
                                                         </g:if>
                                                         <g:else>
-                                                            <g:select name="${i},${j}" from="${timepoints}" value="" noSelection="[null:'Discard']" class="importerSelect timepointSelect" onchange="selectChange('timepointSelect');"/>
+                                                            <g:select name="${i},${j}" from="${timepoints}" value="" noSelection="[null:'Discard']" class="importerSelect timepointSelect"/>
                                                         </g:else>
                                                     </g:if>
                                                     <g:else>
-                                                        <g:select name="${i},${j}" from="${timepoints}" value="${timepoints[timepoint_matches[column]]}" noSelection="[null:'[Discard]']" class="importerSelect timepointSelect" onchange="selectChange('timepointSelect');"/>
+                                                        <g:select name="${i},${j}" from="${timepoints}" value="${timepoints[timepoint_matches[column]]}" noSelection="[null:'[Discard]']" class="importerSelect timepointSelect"/>
                                                     </g:else>
                                                 </g:if>
                                                 <g:if test="${j==0 && i>1}">
