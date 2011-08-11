@@ -58,7 +58,9 @@
             <li><g:link class="import" controller="measurement" action="importData">Import</g:link></li>
         </content>
         <div class="data">
-            <h1>Confirm input</h1>
+
+            <imp:importerHeader pages="${pages}" page="checkInput" />
+
             <p>
                 Please check your input. Use the 'Previous' button to make changes when necessary. A cell with a white background contains only a number. <span class="importerOperatorCell">A cell with this color background</span> contains an operator, and <span class="importerCommentCell">a cell with this color background</span> contains at least a comment. To change the contents of special cells, such as those containing features, please go to the previous page. Clicking on a regular cell allows you to edit it's contents.
             </p>
@@ -161,8 +163,11 @@
                         </tr>
                     </g:each>
                 </table>
-                <g:submitButton name="previous" value="Previous" action="previous"/>
-                <g:submitButton name="save" value="Save your data" action="save"/>
+                
+                <imp:importerFooter>
+                    <g:submitButton name="previous" value="« Previous" action="previous"/>
+                    <g:submitButton name="next" value="Save" action="save"/>
+                </imp:importerFooter>
             </form>
         </div>
         <div id="dialog" title="Edit cell contents">

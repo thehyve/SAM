@@ -102,7 +102,9 @@
         </content>
         <h1>${test}</h1>
         <div class="data">
-            <h1>Confirm matches</h1>
+
+            <imp:importerHeader pages="${pages}" page="selectColumns" />
+
             <p>
                 You have chosen the <g:if test="${layout=='sample_layout'}">sample layout</g:if><g:if test="${layout=='subject_layout'}">subject layout</g:if>. On this page, we have tried to match your data with our data. You must double check these matches, and confirm your final choice.
             </p>
@@ -281,8 +283,10 @@
                         </g:each>
                     </table>
                 </g:else>
-                <g:submitButton name="previous" value="Previous" action="previous"/>
-                <g:submitButton name="next" value="Next" action="next"/>
+                <imp:importerFooter>
+                    <g:submitButton name="previous" value="« Previous" action="previous"/>
+                    <g:submitButton name="next" value="Next »" action="next"/>
+                </imp:importerFooter>
             </form>            
 
         </div>

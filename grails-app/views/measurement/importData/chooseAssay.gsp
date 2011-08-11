@@ -10,7 +10,9 @@
             <li><g:link class="import" controller="measurement" action="importData">Import</g:link></li>
         </content>
         <div class="data">
-            <h1>Choose the assay</h1>
+
+            <imp:importerHeader pages="${pages}" page="chooseAssay" />
+
             <p>The data you wish to import must be related to an assay. Choose the assay in question from the following list. </p>
             <div class="list">
                 <dt:dataTable id="fList" class="paginate sortable filter selectOne" rel="${g.createLink( controller: 'feature', action: 'datatables_list' )}">
@@ -40,15 +42,19 @@
             		- the datatables scripts don't support a checkbox or radio being selected on load
             		- the user does want to select another assay, so the current selection is not important
             	 --%>
-				<g:hiddenField name="assay" value=""/>
-				<g:submitButton name="next" value="Next" action="next" onClick="
-					if( elementsSelected == undefined || elementsSelected[ 'fList_table' ] == undefined || elementsSelected[ 'fList_table' ].length == 0 ) {
-						return false;
-					} else {
-						\$( '#assay' ).val( elementsSelected[ 'fList_table' ][ 0] );
-						return true;
-					}
-				"/>
+                <imp:importerFooter>
+                    <g:submitButton name="previous" value="« Previous" action="" disabled="true"/>
+
+                    <g:hiddenField name="assay" value=""/>
+                    <g:submitButton name="next" value="Next »" action="next" onClick="
+                        if( elementsSelected == undefined || elementsSelected[ 'fList_table' ] == undefined || elementsSelected[ 'fList_table' ].length == 0 ) {
+                            return false;
+                        } else {
+                            \$( '#assay' ).val( elementsSelected[ 'fList_table' ][ 0] );
+                            return true;
+                        }
+                    "/>
+                </imp:importerFooter>
             </g:form>
         </div>
     </body>

@@ -20,7 +20,9 @@
             <li><g:link class="import" controller="measurement" action="importData">Import</g:link></li>
         </content>
         <div class="data">
-            <h1>Upload your file</h1>
+
+            <imp:importerHeader pages="${pages}" page="uploadData" />
+
             <g:if test="${message}">
                 <br>
                 <span class="errors">${message}</span>
@@ -50,10 +52,11 @@
                     <p>Make sure to add a comma-separated values based or Excel based file using the upload field below.</p>
                     <input id="file" type="file" id="fileUpload" name="fileUpload"/> <span id="pasteField">or <a href="#" onclick="createTextfield('pasteField'); return false;">paste in textfield</a></span>
                 </div>
-                <div style="display: block;">
-                    <g:submitButton name="previous" value="Choose a different assay" action="previous"/>
-                    <g:submitButton name="next" value="Upload file and continue importing" action="next"/>
-                </div>
+                
+                <imp:importerFooter>
+                    <g:submitButton name="previous" value="« Previous" action="previous"/>
+                    <g:submitButton name="next" value="Next »" action="next"/>
+                </imp:importerFooter>
             </form>
         </div>
     </body>

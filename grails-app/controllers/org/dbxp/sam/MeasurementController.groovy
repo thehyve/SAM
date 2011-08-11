@@ -190,6 +190,15 @@ class MeasurementController {
                 }
 
                 flow.assayList = Assay.giveWritableAssays( session.user );
+
+                flow.pages = [
+                    "chooseAssay": "Choose Assay",
+                    "uploadData": "Upload",
+                    "selectLayout": "Select Layout",
+                    "selectColumns": "Select Columns",
+                    "checkInput": "Check Input",
+                    "saveDate": "Done"
+                ]
             }
             on("success").to "chooseAssay"
         }

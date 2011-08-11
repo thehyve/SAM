@@ -11,7 +11,9 @@
             <li><g:link class="import" controller="measurement" action="importData">Import</g:link></li>
         </content>
         <div class="data">
-            <h1>Select layout</h1>
+
+            <imp:importerHeader pages="${pages}" page="selectLayout" />
+
             <g:if test="${input!=null}">
                 <p>
                     The file <b>${input.originalFilename}</b> has been successfully read in.
@@ -166,8 +168,10 @@
                         </div>
                     </g:else>
                 </div>
-                <g:submitButton name="previous" value="Choose a different file" action="previous"/>
-                <g:submitButton name="next" value="Next" action="next"/>
+                <imp:importerFooter>
+                    <g:submitButton name="previous" value="« Previous" action="previous"/>
+                    <g:submitButton name="next" value="Next »" action="next"/>
+                </imp:importerFooter>
             </form>
         </div>
     </body>

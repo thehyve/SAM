@@ -11,6 +11,9 @@
             <li><g:link class="list" controller="featureGroup">List feature groups</g:link></li>
         </content>
         <div class="data">
+
+            <imp:importerHeader pages="${pages}" page="saveData" />
+
             <h1>The importing process has finished.</h1>
             <p>The new features should now be available.</p>
             <g:if test="${message}">

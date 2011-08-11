@@ -433,7 +433,12 @@ class FeatureController {
 
         startUp {
             action{
-                // init actions
+                flow.pages = [
+                    "uploadAndSelectTemplate": "Upload",
+                    "matchColumns": "Match Columns",
+                    "checkInput": "Check Input",
+                    "saveData": "Done"
+                ]
             }
             on("success").to "uploadAndSelectTemplate"
         }

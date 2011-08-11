@@ -20,7 +20,9 @@
             <li><g:link class="list" controller="featureGroup">List feature groups</g:link></li>
         </content>
         <div class="data">
-            <h1>Confirm input</h1>
+
+            <imp:importerHeader pages="${pages}" page="checkInput" />
+
             <p>
                 Please check your input. Use the 'Previous' button to make changes when necessary.
             </p>
@@ -50,8 +52,10 @@
 
                 <br />
 
-                <g:submitButton name="previous" value="Previous" action="previous"/>
-                <g:submitButton name="save" value="Save your data" action="save"/>
+                <imp:importerFooter>
+                    <g:submitButton name="previous" value="« Previous" action="previous"/>
+                    <g:submitButton name="next" value="Save" action="save"/>
+                </imp:importerFooter>
             </form>
         </div>
     </body>
