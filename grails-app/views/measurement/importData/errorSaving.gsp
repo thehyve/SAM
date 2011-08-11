@@ -10,6 +10,9 @@
             <li><g:link class="import" controller="measurement" action="importData">Import</g:link></li>
         </content>
         <div class="data">
+
+            <imp:importerHeader pages="${pages}" page="saveData" />
+
             <g:if test="${message}">
                 <p class="message">${message.toString()}</p>
             </g:if>
@@ -22,7 +25,9 @@
                 Please note that none of your data has been saved yet.
             </p
             <g:form method="post" name="importData" action="importData">
-                <g:submitButton name="previous" value="Previous" action="previous"/>
+                <imp:importerFooter>
+                    <g:submitButton name="previous" value="« Previous" action="previous"/>
+                </imp:importerFooter>
             </g:form>
         </div>
     </body>

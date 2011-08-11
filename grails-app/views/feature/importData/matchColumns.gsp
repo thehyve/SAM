@@ -51,7 +51,9 @@
             <li><g:link class="list" controller="featureGroup">List feature groups</g:link></li>
         </content>
         <div class="data">
-            <h1>Importer wizard</h1>
+
+            <imp:importerHeader pages="${pages}" page="matchColumns" />
+
             <g:if test="${input!=null}">
                 <p>The file <b>${input.originalFilename}</b> has been successfully read in.</p>
             </g:if>
@@ -106,8 +108,10 @@
                 </table>
 
                 <br />
-                <g:submitButton name="previous" value="Choose a different file" action="previous"/>
-                <g:submitButton name="next" value="Next" action="next"/>
+                <imp:importerFooter>
+                    <g:submitButton name="previous" value="« Previous" action="previous"/>
+                    <g:submitButton name="next" value="Next »" action="next"/>
+                </imp:importerFooter>
             </g:form>
         </div>
     </body>

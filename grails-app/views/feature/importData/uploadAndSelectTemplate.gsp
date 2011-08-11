@@ -49,7 +49,9 @@
             <li><g:link class="list" controller="featureGroup">List feature groups</g:link></li>
         </content>
         <div class="data">
-            <h1>Importer wizard</h1>
+
+            <imp:importerHeader pages="${pages}" page="uploadAndSelectTemplate" />
+
             <p>You can import your Excel data to the server by choosing a file from your local harddisk in the form below. </p>
 
             <g:if test="${message}">
@@ -73,8 +75,11 @@
 
                     </table>
                     <br />
-                    <g:submitButton name="next" value="Upload file and continue importing" onClick="return !\$('option:selected', \$('#template') ).hasClass( 'modify' );" action="next"/>
 
+                    <imp:importerFooter>
+                        <g:submitButton name="previous" value="« Previous" action="" disabled="true"/>
+                        <g:submitButton name="next" value="Next »" onClick="return !\$('option:selected', \$('#template') ).hasClass( 'modify' );" action="next"/>
+                    </imp:importerFooter>
                 </g:form>
             </div>
         </div>
