@@ -3,7 +3,7 @@
 */
 body { font-family: Verdana, Arial, Helvetica, sans-serif; font-size: 11px; }
 
-div#contextmenu { margin-top: 0; }
+div#contextmenu { margin-top: 0; margin-bottom: 20px; }
 div#contextmenu ul {
 	list-style-type: none;
 	margin: 0 0 0 11px;
@@ -28,7 +28,10 @@ div#contextmenu a:hover {
 h1 { }
 
 /* Div around all data (lists/forms) including buttons */
-div.data { padding-left: 11px;}
+div.data {
+    padding-left: 11px;
+    
+}
 
 /* Buttons specifically targeted at the data shown */
 ul.data_nav {
