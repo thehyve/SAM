@@ -13,4 +13,8 @@ modules = {
     tableEditor {
         resource url:[plugin: 'gdt', dir:'css', file: 'table-editor.css', disposition: 'head']
     }
+	
+	importer { 
+		resource url: 'js/importer.js'
+	}
 }
