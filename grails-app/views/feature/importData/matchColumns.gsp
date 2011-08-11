@@ -12,6 +12,11 @@
         <meta name="layout" content="main"/>
         <title>Feature importer</title>
         <script type="text/javascript">
+
+            $(document).ready(function() {
+                selectChange();
+            });
+
             function selectChange() {
                 listSelects = $('select');
                 var mapSelected = new Object();
