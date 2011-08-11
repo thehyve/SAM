@@ -218,6 +218,13 @@ class MeasurementController {
             action {
                 def f = flow.inputfile
                 def text = ""
+				
+				// Reset all data that might have been entered by the user before, in other 
+				// steps of the wizard. This data might interfere with the new file the user entered 
+				flow.edited_text = null
+				flow.operator = null
+				flow.comments = null
+				
                 if(flow.inputField!=null) {
                     text = MatrixImporter.getInstance().importString(flow.inputField,["delimiter":"\t"]);
                     flow.text = text
@@ -244,7 +251,7 @@ class MeasurementController {
                             flow.message += ' Make sure to add a comma-separated values based or Excel based file using the upload field below.'
                             return error()
                         }
-
+						
                         // In the following section we will try to find out what layout the data in this file has
                         def sampl = 0
                         def subj = 0
@@ -281,7 +288,10 @@ class MeasurementController {
                         for(int i = 1; i < text[0].size(); i++){
                             if(i == 15){
                                 // Don't check everything
-                                break;
+                        						flow.edited_text = null
+						flow.operator = null
+						flow.comments = null
+        break;
                             }
                             tmp.push(!text[0][i])
                         }

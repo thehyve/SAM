@@ -95,7 +95,7 @@
                 <g:if test="${layout=='sample_layout'}">
                     <table style="width: auto">
                         <g:each in="${text}" var="row" status="i">
-                            <g:if test="${row.size()==0}">
+                            <g:if test="${row?.size()==0}">
                                 <tr></tr>
                             </g:if>
                             <g:else>
@@ -124,7 +124,7 @@
                                                     <br>
                                                     <!-- Feature row -->
                                                     <div class="importerSelectBackground">
-                                                        <g:if test="${edited_text!=null}">
+                                                        <g:if test="${edited_text != null}">
                                                             <g:if test="${edited_text[i][j]!=null}">
                                                                 <g:select rel="featureSelector" name="${i},${j}" from="${features}" value="${edited_text[i][j].id}" optionKey="id" optionValue="name" noSelection="[null:'[Discard]']" class="importerSelect featureSelect" onchange="selectChange('featureSelect');"/>
                                                             </g:if>
@@ -169,7 +169,7 @@
                 <g:else>
                     <table style="width: auto">
                         <g:each in="${text}" var="row" status="i">
-                            <g:if test="${row.size()==0}">
+                            <g:if test="${row?.size()==0}">
                                 <tr></tr>
                             </g:if>
                             <g:else>
@@ -249,7 +249,8 @@
                 </g:else>
                 <g:submitButton name="previous" value="Previous" action="previous"/>
                 <g:submitButton name="next" value="Next" action="next"/>
-            </form>
+            </form>            
+
         </div>
     </body>
 </html>
