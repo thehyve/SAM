@@ -2,6 +2,9 @@
     <head>
       <meta name="layout" content="main"/>
       <title>Your data has not been saved</title>
+        
+        <r:require module="importer" />
+      
     </head>
     <body>
         <content tag="contextmenu">

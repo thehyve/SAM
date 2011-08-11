@@ -3,6 +3,8 @@
     <head>
       <meta name="layout" content="main"/>
       <title>Measurement importer</title>
+        
+      <r:require module="importer" />
     </head>
     <body>
         <content tag="contextmenu">

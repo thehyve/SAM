@@ -50,6 +50,9 @@
                 $("#dialog").dialog('close');
             }
         </r:script>
+        
+        <r:require module="importer" />
+        
     </head>
     <body>
         <content tag="contextmenu">

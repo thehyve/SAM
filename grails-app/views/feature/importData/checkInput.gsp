@@ -2,7 +2,10 @@
     <head>
         <meta name="layout" content="main"/>
         <title>Feature importer</title>
+        
         <r:require modules="tableEditor"/>
+        <r:require module="importer" />
+        
         <style type="text/css">
             .helpContent {
                 display: none;
@@ -54,7 +57,7 @@
 
                 <imp:importerFooter>
                     <g:submitButton name="previous" value="« Previous" action="previous"/>
-                    <g:submitButton name="next" value="Save" action="save"/>
+                    <g:submitButton name="save" value="Save" action="save"/>
                 </imp:importerFooter>
             </form>
         </div>
