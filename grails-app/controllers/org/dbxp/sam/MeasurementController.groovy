@@ -56,7 +56,10 @@ class MeasurementController {
             redirect(action: "show", id: measurementInstance.id)
         }
         else {
-            render(view: "create", model: [measurementInstance: measurementInstance])
+			def features = Feature.list();
+			def samples = SAMSample.giveWritableSamples( session.user )
+	
+            render(view: "create", model: [measurementInstance: measurementInstance, samples: samples, features: features])
         }
     }
 
