@@ -56,7 +56,7 @@
                                 <label for="sample"><g:message code="measurement.sample.label" default="Sample"/></label>
                             </td>
                             <td valign="top" class="value ${hasErrors(bean: measurementInstance, field: 'sample', 'errors')}">
-                                <g:select name="sample.id" from="${org.dbxp.sam.SAMSample.list()}" optionKey="id"
+                                <g:select name="sample.id" from="${samples}" optionKey="id"
                                           value="${measurementInstance?.sample?.id}"/>
                             </td>
                         </tr>
@@ -66,7 +66,7 @@
                                 <label for="feature"><g:message code="measurement.feature.label" default="Feature"/></label>
                             </td>
                             <td valign="top" class="value ${hasErrors(bean: measurementInstance, field: 'feature', 'errors')}">
-                                <g:select name="feature.id" from="${org.dbxp.sam.Feature.list()}" optionKey="id"
+                                <g:select name="feature.id" from="${features}" optionKey="id"
                                           value="${measurementInstance?.feature?.id}"/>
                             </td>
                         </tr>

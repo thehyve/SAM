@@ -27,6 +27,19 @@ class Measurement {
         feature(blank:false)
     }
 	
+	/**
+	 * Return all measurements this user may read
+	 * @param user
+	 * @return
+	 */
+	public static giveReadableMeasurements( user ) {
+		def assays = Assay.giveReadableAssays( user );
+		if( !assays )
+			return []
+			
+		return Measurement.findAll( "FROM Measurement m WHERE m.sample.assay IN (:assays)", [ "assays": assays ] )
+	}
+	
 	public static deleteByAssay( Assay a ) {
 		try {
 			Measurement.executeUpdate( "delete Measurement m WHERE m.sample IN( FROM Sample s where s.assay = :assay )", [ assay: a ] );

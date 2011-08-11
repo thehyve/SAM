@@ -14,8 +14,10 @@ class MeasurementController {
     }
 
     def list = {
-        //params.max = Math.min(params.max ? params.int('max') : 10, 100)
-        [measurementInstanceList: Measurement.list(params), measurementInstanceTotal: Measurement.count()]
+		// Find all measurements this user has access to 
+		def measurements = Measurement.giveReadableMeasurements( session.user );
+		
+        [measurementInstanceList: measurements, measurementInstanceTotal: measurements.size() ]
     }
 
     def create = {
@@ -27,7 +29,11 @@ class MeasurementController {
 		
         def measurementInstance = new Measurement()
         measurementInstance.properties = params
-        return [measurementInstance: measurementInstance]
+		
+		def features = Feature.list();
+		def samples = SAMSample.giveWritableSamples( session.user )
+		
+        return [measurementInstance: measurementInstance, samples: samples, features: features]
     }
 
     def save = {
@@ -58,8 +64,10 @@ class MeasurementController {
         if (!measurementInstance) {
             flash.message = "The requested measurement could not be found."
             redirect(action: "list")
-        }
-        else {
+        } else if( !measurementInstance.sample.assay.study.canRead( session.user ) ) {
+			flash.message = "You are not allowed to access the requested measurement."
+			redirect( action: "list" );
+        } else {
             [measurementInstance: measurementInstance]
         }
     }
@@ -175,7 +183,6 @@ class MeasurementController {
 				synchronizationService.initSynchronization( session.sessionToken, session.user );
 				synchronizationService.synchronizeChangedStudies()
 
-                println "Feature.count()="+Feature.count()
                 if(Feature.count()==0){
                     redirect(action: 'nofeatures')
                 }
@@ -597,7 +604,13 @@ class MeasurementController {
                         }
                     }
                 }
-
+				
+				// Check whether the assay is still writable
+				if( !flow.assay.study.canWrite( session.user ) ) {
+					flash.message = "The authorization of your study has changed while you were adding measurements. Please choose another assay."
+					return error();
+				}
+				
                 Measurement.withTransaction {
                     status ->
                     measurementList.each {

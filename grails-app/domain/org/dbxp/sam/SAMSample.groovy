@@ -1,6 +1,8 @@
 package org.dbxp.sam
+import org.dbxp.moduleBase.Sample
+import org.dbxp.moduleBase.Assay
 
-class SAMSample extends org.dbxp.moduleBase.Sample {
+class SAMSample extends Sample {
 	String subjectName
 	Long eventStartTime
 
@@ -40,4 +42,31 @@ class SAMSample extends org.dbxp.moduleBase.Sample {
 		}
 
 	}
+	
+	/**
+	* Return all samples this user may read
+	* @param user
+	* @return
+	*/
+   public static giveReadableSamples( user ) {
+	   def assays = Assay.giveReadableAssays( user );
+	   if( !assays )
+		   return []
+		   
+	   return Sample.findAll( "FROM SAMSample s WHERE s.assay IN (:assays)", [ "assays": assays ] )
+   }
+   
+   
+   /**
+   * Return all samples this user may write
+   * @param user
+   * @return
+   */
+  public static giveWritableSamples( user ) {
+	  def assays = Assay.giveWritableAssays( user );
+	  if( !assays )
+		  return []
+		  
+	  return Sample.findAll( "FROM SAMSample s WHERE s.assay IN (:assays)", [ "assays": assays ] )
+  }
 }

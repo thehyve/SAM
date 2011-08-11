@@ -26,8 +26,6 @@ class AssayController {
 		// First synchronize all studies that have been changed
 		synchronizationService.initSynchronization( session.sessionToken, session.user );
 		synchronizationService.synchronizeChangedStudies()
-
-        [assayInstanceList: Assay.list(params), assayInstanceTotal: Assay.count()]
     }
 
 	/**
@@ -78,8 +76,16 @@ class AssayController {
 	   
 	   def joinHQL = " LEFT JOIN a.samples s "
 	   def groupByHQL = " GROUP BY a.id, a.study.name, a.name "
-	   def whereHQL = "";
+	   def whereHQL = "WHERE ";
 	   def orderHQL = "";
+	   
+	   // Add authorization
+	   if( session.user ) {
+		   whereHQL += " EXISTS( FROM Auth auth WHERE auth.user = :user AND auth.study = a.study AND auth.canRead = true )"
+	   	   hqlParams[ "user" ] = session.user
+	   } else {
+	   		whereHQL += " a.study.isPublic = true ";
+	   }
 	   
 	   // Search properties
 	   if( search ) {
@@ -89,7 +95,7 @@ class AssayController {
 		   hqlConstraints << "LOWER(a.name) LIKE :search"
 		   hqlConstraints << "LOWER(a.study.name) LIKE :search"
 		   
-		   whereHQL += "WHERE " + hqlConstraints.join( " OR " ) + " "
+		   whereHQL += " AND " + hqlConstraints.join( " OR " ) + " "
 	   }
 		   
 	   // Sort properties
@@ -141,6 +147,12 @@ class AssayController {
             redirect(action: "list")
 			return
         }
+		
+		if( !assayInstance.study.canRead( session.user ) ) {
+			flash.message = "You are not allowed to access assay " + assayInstance
+			redirect(action: "list")
+			return
+		}
 		
 		// Lookup all samples for this assay
 		def numberOfSamples = SAMSample.countByAssay( assayInstance );
