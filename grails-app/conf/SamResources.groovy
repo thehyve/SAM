@@ -16,5 +16,6 @@ modules = {
 	
 	importer { 
 		resource url: 'js/importer.js'
+        resource url: 'css/importer.css'
 	}
 }
