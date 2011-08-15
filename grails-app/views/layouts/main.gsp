@@ -11,7 +11,7 @@
 	    <body>
 			<content tag="topnav">
 				<% /* Insert only li tags for the top navigation, without surrounding ul */ %>
-				<li><a href="${resource(dir: '')}">Home</a></li>
+				<li><g:link controller="assay">Home</g:link></li>
 				<li>
 					<a href="#">Browse</a>
 					<ul class="subnav">
