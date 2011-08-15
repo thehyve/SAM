@@ -1,5 +1,6 @@
 <%@ page import="org.dbnp.gdt.TemplateField; org.dbxp.sam.Feature" %>
 <%@ page import="org.dbnp.gdt.GdtTagLib" %>
+<%@ page import="org.dbxp.sam.FeatureGroup" %>
 <html>
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
@@ -69,29 +70,48 @@
 	            
             }
 
-            function addToFeatureGroup(){
-                // Add the new feature group in a function apart from the refreshEdit controller action,
-                // to make sure feature groups will not be added by accident during a regular refreshEdit call.
-                $.ajax({
-                    url: baseUrl+"/feature/confirmNewFeatureGroup?newFeatureGroupID="+$("#newFeatureGroup").val()+"&id=${featureInstance.id}",
-                    success: function(html, textStatus, jqXHR) {
-                    	$("#featureGroups_list").replaceWith(html);
-                    }
-                });
+            function addFeatureGroup(){
+                // Add the new feature group to the list
+                var optId = $("select#newFeatureGroup option:selected").val();
+                var optText = $("select#newFeatureGroup option:selected").text();
+
+                if(optId!="") {
+                    var newA = $( '<a>' ).attr("href",baseUrl+"/featureGroup/show/"+optId)
+                        .attr("class","showLink")
+                        .text(optText);
+
+                    var newDELA = $( '<a>' ).attr("href","#")
+                        .attr("class","buttons button delete")
+                        .attr("onClick","if( confirm('Are you sure?') ) { removeFeatureGroup("+optId+"); }");
+
+                    var newSPAN = $( '<span>' ).attr("class"," buttons button")
+                        .append(newDELA);
+
+                    var newINPUT = $( '<input>' ).attr("type","hidden")
+                        .attr("name","featuregroups")
+                        .attr("value",optId);
+
+                    var newLI = $( '<li>' ).attr( "id", "fg_"+optId )
+                        .css( "display", "none")
+                        .css( "background-color", "#FFFF66")
+                        .append(newA).append(newSPAN).append(newINPUT);
+
+                    $("ul#fg").append(newLI);
+
+                    $("ul#fg #fg_"+optId).fadeIn( 'slow', function() { $("ul#fg #fg_"+optId).css("background-color",""); } );
+
+                    $("select#newFeatureGroup option:selected").remove();
+                }
             }
 
-            function removeFromFeatureGroup( fagId ){
-                // Add the new feature group in a function apart from the refreshEdit controller action,
-                // to make sure feature groups will not be added by accident during a regular refreshEdit call.
-                $.ajax({
-                    url: baseUrl+"/feature/removeFromGroup?fagId="+fagId+"&id=${featureInstance.id}",
-                    type: "POST",
-                    success: function(html, textStatus, jqXHR) {
-                    	$("#featureGroups_list").replaceWith(html);
-                    }
-                });
-            }            
-            
+            function removeFeatureGroup( fagId ){
+                // Remove the new feature group from the list
+                var optText = $("ul#fg #fg_"+fagId+" a").text();
+                $("ul#fg #fg_"+fagId).css("background-color","#FF3333");
+                $("ul#fg #fg_"+fagId).fadeOut( 'slow', function() { $("ul#fg #fg_"+fagId).remove(); } );
+                $("select#newFeatureGroup").append("<option value="+fagId+">"+optText+"</option>");
+            }
+
         </r:script>
     </head>
 
@@ -117,7 +137,7 @@
                             <td valign="top">
                                 Common fields:
                             </td>
-                            <td valign="top" style="width: 40%;">
+                            <td valign="top">
                                 Groups containing this feature:
                             </td>
                         </tr>
@@ -150,8 +170,27 @@
 			                           </tr>                                    
                                 </table>
                             </td>
-                            <td rowspan="3" style="width: 40%;">
-                               	<g:include action="confirmNewFeatureGroup" params="['id' : featureInstance.id]" />
+                            <td rowspan="3" class="styleFeatureGroup">
+                                <ul id="fg">
+                               	<g:each in="${groupList}" var="f" status="i">
+                                    <li id="fg_${f?.featureGroup.id}">
+                                        <g:link controller="featureGroup" action="show" id="${f?.featureGroup.id}" class="showLink">${f?.featureGroup.name.encodeAsHTML()}</g:link>
+                                        <span class="buttons button">
+                                            <a href="#" class="buttons button delete" onclick="if( confirm('Are you sure?') ) { removeFeatureGroup(${f?.featureGroup.id}); }"></a>
+                                        </span>
+                                        <input type="hidden" name="featuregroups" value="${f?.featureGroup.id}" />
+                                    </li>
+                                </g:each>
+                                </ul>
+                                <br />
+                                Add this feature to group:
+                                <br />
+                                <select id="newFeatureGroup" onchange="addFeatureGroup()">
+                                    <option value="" SELECTED="true">[select group]</option>
+                                    <g:each in="${remainingGroups}" var="f" status="j">
+                                        <option value="${f?.id}">${f?.name.encodeAsHTML()}</option>
+                                    </g:each>
+                                </select>
                             </td>
                         </tr>
 

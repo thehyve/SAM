@@ -2,11 +2,8 @@ package org.dbxp.sam
 
 import grails.converters.JSON
 import org.dbnp.gdt.Template
-import org.dbxp.moduleBase.Auth
-import org.dbxp.moduleBase.Assay
+
 import org.dbxp.matriximporter.MatrixImporter
-import org.dbnp.gdt.TemplateField
-import org.springframework.validation.FieldError
 
 class FeatureController {
 
@@ -173,8 +170,16 @@ class FeatureController {
 			// Store session template id, so it will show up correctly after
 			// opening the template editor. See also _determineTemplate
 			session.templateId = featureInstance.template?.id
-			
-            return [featureInstance: featureInstance]
+
+            def groupList = FeaturesAndGroups.findAllByFeature(featureInstance);
+            def remainingGroups;
+
+            if( groupList )
+                remainingGroups = FeatureGroup.executeQuery( "FROM FeatureGroup fg WHERE fg NOT IN (:groups)", [ 'groups': groupList*.featureGroup ] )
+            else
+                remainingGroups = FeatureGroup.list()
+
+            return [featureInstance: featureInstance, groupList: groupList, remainingGroups: remainingGroups]
         }
     }
 
@@ -187,7 +192,7 @@ class FeatureController {
 
                     featureInstance.errors.rejectValue("", "Another user has updated this feature while you were editing. Because of this, your changes have not been saved to the database.")
                     render(view: "edit", model: [featureInstance: featureInstance])
-                    return
+                    return;
                 }
             }
 			
@@ -203,6 +208,24 @@ class FeatureController {
                     // and set their values
                     featureInstance.setFieldValue(it.name, params.get(it.escapedName()))
                 }
+            }
+
+            // set the new featuregroups
+            def groupList = FeaturesAndGroups.findAllByFeature(featureInstance);
+            def featuregroups = params.list( 'featuregroups' ).findAll { it.isLong() }.collect { it.toLong() };
+
+            // Delete groups
+            for(int i=0; i<groupList.size(); i++) {
+                if(featuregroups.contains(groupList[i].featureGroup.id)) {
+                    featuregroups.remove(groupList[i].featureGroup.id);
+                } else {
+                    groupList[i].delete();
+                }
+            }
+
+            // Add remaining groups
+            for(int i=0; i<featuregroups.size(); i++) {
+                FeaturesAndGroups.create(FeatureGroup.findById(featuregroups[i]),featureInstance);
             }
 
 			// Remove the template parameter, since it is a string and that troubles the 
@@ -244,38 +267,7 @@ class FeatureController {
             redirect(action:list)
         }
     }
-	
-    def confirmNewFeatureGroup = {
-        // Used to add a new FeaturesAndGroups connection and to refresh the edit page's feature group list
-        if(!session.featureInstance.isAttached()){
-            session.featureInstance.attach()
-        }
-        if(params?.newFeatureGroupID) {
-            // Creating a new group
-            if( FeaturesAndGroups.create(FeatureGroup.get(params.newFeatureGroupID), session.featureInstance, true ) ) {
-			    println "Association created"
-            } else {
-                println "Association already existed"
-            }
-        }
-
-        // This featureInstance is only used to display an accurate list
-        def featureInstance = Feature.get(params.id)
-		showFaGList( featureInstance );
-    }
-	
-	protected def showFaGList( featureInstance ) {
-		def groupList = FeaturesAndGroups.findAllByFeature(featureInstance)
-		def remainingGroups 
 		
-		if( groupList )
-			remainingGroups = FeatureGroup.executeQuery( "FROM FeatureGroup fg WHERE fg NOT IN (:groups)", [ 'groups': groupList*.featureGroup ] )
-		else
-			remainingGroups = FeatureGroup.list()
-			
-		render(view: "FaGList", model: [groupList: groupList, remainingGroups: remainingGroups])
-	}
-
     // Get a list of template specific fields
     def templateSelection = {
         render(template: "templateSelection", model: [template: _determineTemplate()])
@@ -356,46 +348,6 @@ class FeatureController {
            // TODO: Make this more informative
            flash.message = "An error occurred while updating this feature's template. Please try again.<br>${e}"
         }
-    }
-
-    def removeFromGroup = {
-        // Used to delete a FeaturesAndGroups connection
-        if(!session.featureInstance.isAttached()){
-            session.featureInstance.attach()
-        }
-		
-        // Clear message so no message will be shown if everything is OK
-        flash.FGError = "";
-		
-        try {
-            // Try to find the featuresAndGroupsInstance that we wish to delete
-            def featuresAndGroupsInstance = FeaturesAndGroups.get(params.fagId)
-			
-			if(featuresAndGroupsInstance==null){
-				// We could not find the featuresAndGroupsInstance that we wish to remove
-				flash.FGError = "The specified group could not be found. The probable cause for this would be that the group has already been removed."
-			} else {
-				// We found the featuresAndGroupsInstance that we wish to remove
-				def groupName = featuresAndGroupsInstance.featureGroup.name
-				def featureID = featuresAndGroupsInstance.feature.id
-	
-				// Proceed with deletion
-				try {
-					featuresAndGroupsInstance.delete(flush: true)
-				} catch (org.springframework.dao.DataIntegrityViolationException e) {
-					log.error(e)
-					flash.FGError = "There has been a problem with removing the group ${groupName} from this feature.<br>${e}"
-				}
-			}
-        } catch (Exception e){
-            log.error(e)
-            // An error occurred while fetching the featuresAndGroupsInstance that we wish to remove
-            flash.FGError = "The specified group could not be found.<br>${e}"
-        }
-
-		// This featureInstance is only used to display an accurate list
-		def featureInstance = Feature.get( params.int( 'id' ) )
-		showFaGList( featureInstance );
     }
 
     /**
