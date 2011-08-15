@@ -63,8 +63,9 @@
 										// Select discard option
 										$( 'option:first-child', $select ).attr( 'selected', true );
 									}
+                                });
 
-                        checkSelectValue('featureSelect');
+                                checkSelectValue('featureSelect');                                
                             }
                         );
                     }
