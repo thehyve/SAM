@@ -6,7 +6,7 @@
 */
 
 .tooltip span {
-    border-radius: 5px 5px 5px 5px; 
+    border-radius: 5px 5px 5px 5px;
     box-shadow: 5px 5px rgba(0, 0, 0, 0.1);
     display:none;
     border: 1px dotted lightgray;
