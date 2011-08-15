@@ -65,7 +65,14 @@
 									}
                                 });
 
-                                checkSelectValue('featureSelect');                                
+                				<g:if test="${layout == 'sample_layout'}">
+                					// Check if duplicate values are selected
+            	                	selectChange('featureSelect');
+            	                </g:if>
+            	                <g:else>
+            	                	// Check if maybe the add/modify option has been selected
+									checkSelectValue('featureSelect');
+								</g:else>
                             }
                         );
                     }
@@ -86,15 +93,14 @@
                 var mapSelected = new Object();
                 for(i=0; i<listSelects.length; i++) {
                     val = listSelects[ i ].value;
-                    if(val!="" && val != "null") {
+
+					// Value is "" if 'add/modify' is selected. Value is "null" if [discard] option is selected
+                    if( val!="" && val != "null" ) {
                         if(mapSelected[val]==null) {
                             mapSelected[val] = 1;
                         } else {
                             mapSelected[val]++;
                         }
-                    }
-                    if(val==""){
-                        mapSelected[val]=2;
                     }
                 }
 
@@ -106,11 +112,7 @@
                     val = listSelects[ i ].value;
                     listSelects[ i ].style.color = '';
                     if(val!="null") {
-                        if(mapSelected[val]>1) {
-                            listSelects[ i ].style.color = 'red';
-                            blnOK = false;
-                        }
-                        if(val=="") {
+                        if(mapSelected[val] > 1 || val == "" ) {
                             listSelects[ i ].style.color = 'red';
                             blnOK = false;
                         }
