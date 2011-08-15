@@ -218,7 +218,7 @@ class MeasurementController {
 			// Step 2: upload data and give the user a preview. The user then chooses which layout he wants
 			// to use.
 			on("next") {
-                if(params.pasteField!=null && flow.inputField!="") {
+                if(params.pasteField!=null && params.pasteField!="") {
                     flow.inputField = params.pasteField;
                 } else {
                     flow.inputfile = request.getFile('fileUpload')
@@ -302,10 +302,10 @@ class MeasurementController {
                         for(int i = 1; i < text[0].size(); i++){
                             if(i == 15){
                                 // Don't check everything
-                        						flow.edited_text = null
-						flow.operator = null
-						flow.comments = null
-        break;
+                                flow.edited_text = null
+                                flow.operator = null
+                                flow.comments = null
+                                break;
                             }
                             tmp.push(!text[0][i])
                         }

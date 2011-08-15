@@ -23,16 +23,16 @@
 
             <imp:importerHeader pages="${pages}" page="uploadData" />
 
-            <g:if test="${message}">
-                <br>
-                	<span class="errors">${message}</span>
-                <br>
-            </g:if>
-            
             <form method="post" enctype="multipart/form-data">
 
 	            <h2>Locate the file on your computer:</h2>
-	            <p class="fieldInfo">Make sure to add an <strong>excel</strong> or <strong>comma-separated file</strong> that has a structure that corresponds to one of the <a href="#" onClick="$( '#layouts' ).dialog( 'open' ); return false;">allowed layouts</a>.</p> 
+	            <p class="fieldInfo">Make sure to add an <strong>excel</strong> or <strong>comma-separated file</strong> that has a structure that corresponds to one of the <a href="#" onClick="$( '#layouts' ).dialog( 'open' ); return false;">allowed layouts</a>.</p>
+
+                <g:if test="${message}">
+                    <div class="errors">${message}</div>
+                    <br />
+                </g:if>
+
 	            <input id="file" type="file" id="fileUpload" name="fileUpload"/> <span id="pasteField">or <a href="#" onclick="createTextfield('pasteField'); return false;">paste in textfield</a></span>
             
 	            <div id="layouts">
