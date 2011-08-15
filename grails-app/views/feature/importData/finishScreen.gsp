@@ -4,7 +4,11 @@
       <title>Feature importer</title>
         
         <r:require module="importer" />
-      
+		<r:script disposition="">
+			// This variable is set to false, so no warnings are given that the user exits
+			// the importer
+			warnOnRedirect = false;
+		</r:script>          
     </head>
     <body>
         <content tag="contextmenu">
