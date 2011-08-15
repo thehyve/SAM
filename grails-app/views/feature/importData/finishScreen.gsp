@@ -19,13 +19,18 @@
             <imp:importerHeader pages="${pages}" page="saveData" />
 
             <h1>The importing process has finished.</h1>
-            <p>The new features should now be available.</p>
             <g:if test="${message}">
 				<p class="message">${message.toString()}</p>
 			</g:if>
 			<g:if test="${error}">
 				<p class="error">${error.toString()}</p>
 			</g:if>
+            <p>The following features should now be available:<br />
+                <g:each in="${featureList}" var="featureInstance" status="j">
+                    <g:if test="${j>0}">, </g:if>
+                    <g:link controller="feature" action="show" id="${featureInstance?.id}">${featureInstance?.name.encodeAsHTML()}</g:link>
+                </g:each>
+            </p>
         </div>
     </body>
 </html>

@@ -653,6 +653,8 @@ class FeatureController {
                         Feature objFeature = newFeatureList[i];
                         objFeature.save();
                     }
+
+                    flow.featureList = newFeatureList;
                 }
             }
             on("success").to "finishScreen"
