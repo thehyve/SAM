@@ -503,10 +503,13 @@ class FeatureController {
                 // Get the rows that need to be discarded
                 flow.discardRow = [];
                 flow.featureList = [];
+
+                boolean blnDiscardAll = true;
                 for(int i=1; i<flow.text.size(); i++) {
                     if(!params.get("row_"+i)) {
                         flow.discardRow.add(i);
                     } else {
+                        blnDiscardAll = false;
                         Feature objFeature = new Feature();
                         if(flow.template!="")
                             objFeature.changeTemplate(flow.template);
@@ -543,13 +546,19 @@ class FeatureController {
                     }
                 }
 
+                if(blnDiscardAll) {
+                    flow.message = "No row was checked";
+                }
+
                 // Get the columns that need to be discarded
                 flow.discardColumn = [];
                 flow.columnField = [:];
+                blnDiscardAll = true;
                 for(int j=0; j<flow.text[0].size(); j++) {
                     if(params.get("column_"+j)=="") {
                         flow.discardColumn.add(j);
                     } else {
+                        blnDiscardAll = false;
                         for(int i=0; i<flow.templateFields.size(); i++) {
                             if(flow.templateFields[i].name==params.get("column_"+j)) {
                                 flow.columnField.put(j,flow.templateFields[i]);
@@ -559,10 +568,19 @@ class FeatureController {
                     }
                 }
 
+                if(blnDiscardAll) {
+                    flow.message = "All columns were discarded";
+                }
+
+                if(flow.message!=null) {
+                    return error();
+                }
+
             }.to "checkInput"
             on("previous") {
               flow.message = null;
             }.to "uploadAndSelectTemplate"
+            on("error").to "matchColumns"
 
         }
 

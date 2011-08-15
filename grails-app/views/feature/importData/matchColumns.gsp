@@ -62,6 +62,9 @@
             <g:if test="${input!=null}">
                 <p>The file <b>${input.originalFilename}</b> has been successfully read in.</p>
             </g:if>
+            <g:if test="${message}">
+                <p class="error">${message.toString()}</p>
+            </g:if>
             <g:form method="post" name="importData" action="importData">
 
                 <table style="width: auto">
