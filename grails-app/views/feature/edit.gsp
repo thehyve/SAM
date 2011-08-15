@@ -82,7 +82,7 @@
 
                     var newDELA = $( '<a>' ).attr("href","#")
                         .attr("class","buttons button delete")
-                        .attr("onClick","if( confirm('Are you sure?') ) { removeFeatureGroup("+optId+"); }");
+                        .attr("onClick","removeFeatureGroup("+optId+");");
 
                     var newSPAN = $( '<span>' ).attr("class"," buttons button")
                         .append(newDELA);
@@ -101,6 +101,8 @@
                     $("ul#fg #fg_"+optId).fadeIn( 'slow', function() { $("ul#fg #fg_"+optId).css("background-color",""); } );
 
                     $("select#newFeatureGroup option:selected").remove();
+
+                    $("#noGroups").css("display","none");
                 }
             }
 
@@ -108,8 +110,16 @@
                 // Remove the new feature group from the list
                 var optText = $("ul#fg #fg_"+fagId+" a").text();
                 $("ul#fg #fg_"+fagId).css("background-color","#FF3333");
-                $("ul#fg #fg_"+fagId).fadeOut( 'slow', function() { $("ul#fg #fg_"+fagId).remove(); } );
+
+                $("ul#fg #fg_"+fagId).fadeOut( 'slow', function() {
+                    $("ul#fg #fg_"+fagId).remove();
+                    if($('ul#fg li').size()==0) {
+                        $("#noGroups").css("display","block");
+                    }
+                });
+
                 $("select#newFeatureGroup").append("<option value="+fagId+">"+optText+"</option>");
+
             }
 
         </r:script>
@@ -171,12 +181,13 @@
                                 </table>
                             </td>
                             <td rowspan="3" class="styleFeatureGroup">
+                                <div id="noGroups" style="display: ${groupList.size>0 ? "none" : "block"}"><i>This feature is not present in any groups</i></div>
                                 <ul id="fg">
                                	<g:each in="${groupList}" var="f" status="i">
                                     <li id="fg_${f?.featureGroup.id}">
                                         <g:link controller="featureGroup" action="show" id="${f?.featureGroup.id}" class="showLink">${f?.featureGroup.name.encodeAsHTML()}</g:link>
                                         <span class="buttons button">
-                                            <a href="#" class="buttons button delete" onclick="if( confirm('Are you sure?') ) { removeFeatureGroup(${f?.featureGroup.id}); }"></a>
+                                            <a href="#" class="buttons button delete" onclick="removeFeatureGroup(${f?.featureGroup.id});"></a>
                                         </span>
                                         <input type="hidden" name="featuregroups" value="${f?.featureGroup.id}" />
                                     </li>
