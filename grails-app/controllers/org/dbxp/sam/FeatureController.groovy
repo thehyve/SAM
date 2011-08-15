@@ -399,21 +399,15 @@ class FeatureController {
     }
 
     /**
-     * Returns a list of options to be added to a select
-     * @param currentOptions	List of ids of the options already in the select. These options will not be returned.
-     * @return	JSON list of options not present in the select option
+     * Returns a list of features as JSON
+     * @return	JSON list of features with 'id' and 'name'
      */
-	def retrieveMissingOptions = {
-		def currentOptions = params.list( 'currentOptions' ).findAll { it.isLong() }.collect { it.toLong() };
-		def featureList;
+	def ajaxList = {
+		def features = Feature.list( sort: "name" );
+		def lastFeature = Feature.find( "from Feature order by id desc" );
 		
-		if( currentOptions?.size() ) {
-			featureList = Feature.findAll( "FROM Feature f WHERE f.id NOT IN (:current)", [ "current": currentOptions ] ); 
-		} else {
-			featureList = Feature.list();
-		}
-		
-        render featureList.collect { return [ 'id': it.id, 'name': it.name ] } as JSON
+		def data = [ "last": [ 'id': lastFeature?.id, 'name': lastFeature?.name ] ,"features": features.collect { return [ 'id': it.id, 'name': it.name ] } ];
+        render data as JSON
     }
 
     def minimalCreate = {
