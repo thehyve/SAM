@@ -7,6 +7,9 @@
         <title>Show assay ${assayInstance.name}</title>
     </head>
     <body>
+        <content tag="contextmenu">
+      		<li><g:link action="list" class="list">Back to list</g:link></li>
+        </content>    
 		<h1>${assayInstance.name} / ${assayInstance.study.name}</h1>
 		
 		<g:if test="${measurements.size() > 0}">
