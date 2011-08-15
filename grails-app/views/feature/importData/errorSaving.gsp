@@ -25,11 +25,11 @@
                 You can use the 'previous' button to go back to the previous page.
                 Please note that none of your data has been saved yet.
             </p>
-            <g:form method="post">
+            <form method="post">
                 <imp:importerFooter>
                     <g:submitButton name="previous" value="« Previous" action="previous"/>
                 </imp:importerFooter>
-            </g:form>
+            </form>
         </div>
     </body>
 </html>

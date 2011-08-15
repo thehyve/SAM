@@ -582,7 +582,7 @@ class FeatureController {
                             if(newMessage.length()>0) newMessage += "<br />";
                             switch(it.code) {
                                 case "unique":
-                                    newMessage += "A feature with the name ["+it.rejectedValue+"] already exists.";
+                                    newMessage += "A feature with the name ["+it.rejectedValue+"] already exists. Edit the corresponding row to create a new feature. Leave the row unedited to discard this row and keep the existing feature.";
                                     break;
                                 case "nullable":
                                     newMessage += "The field ["+it.field+"] can't be null.";
@@ -657,22 +657,26 @@ class FeatureController {
                         }
                     }
 
+                    boolean blnUniqueError = false;
                     objFeature.validate();
                     objFeature.getErrors().allErrors.each {
-                        if(newMessage.length()>0) newMessage += "<br />";
                         switch(it.code) {
                             case "unique":
-                                newMessage += "A feature with the name ["+it.rejectedValue+"] already excists.";
+                                blnUniqueError = true;
                                 break;
                             case "nullable":
+                                if(newMessage.length()>0) newMessage += "<br />";
                                 newMessage += "The field ["+it.field+"] can't be null.";
                                 break;
                             default:
+                                if(newMessage.length()>0) newMessage += "<br />";
                                 newMessage += "Errorcode ["+it.code+"] on field ["+it.field+"] with value ["+it.rejectedValue+"]";
                         }
                     }
 
-                    newFeatureList.add(objFeature);
+                    if(!blnUniqueError) {
+                        newFeatureList.add(objFeature);
+                    }
                 }
 
                 if(newMessage.length()>0) {
