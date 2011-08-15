@@ -34,6 +34,8 @@
                                 $("select[rel*='featureSelector'] .modify").before( options );
                             }
                         );
+
+                        checkSelectValue('featureSelect');
                     }
                 });
 
@@ -59,6 +61,9 @@
                             mapSelected[val]++;
                         }
                     }
+                    if(val==""){
+                        mapSelected[val]=2;
+                    }
                 }
 
 				var blnOK = true;
@@ -68,8 +73,12 @@
                 for(i=0; i<listSelects.length; i++) {
                     val = listSelects[ i ].value;
                     listSelects[ i ].style.color = '';
-                    if(val!="" && val!="null") {
+                    if(val!="null") {
                         if(mapSelected[val]>1) {
+                            listSelects[ i ].style.color = 'red';
+                            blnOK = false;
+                        }
+                        if(val=="") {
                             listSelects[ i ].style.color = 'red';
                             blnOK = false;
                         }
@@ -91,6 +100,23 @@
 				}
 
                 $( '#_eventId_next' ).attr( 'disabled', !globalOK );
+            }
+
+            function checkSelectValue(type) {
+                // Loop through all selects and mark the ones red that have
+				// 'Create new feature' as their selected values
+                listSelects = $( 'select.' + type );
+				var blnOK = true;
+                for(i=0; i<listSelects.length; i++) {
+                    val = listSelects[ i ].value;
+                    listSelects[ i ].style.color = '';
+                    if(val=="") {
+                        listSelects[ i ].style.color = 'red';
+                        blnOK = false;
+                    }
+                }
+                selectsOK[ type ] = blnOK;
+                toggleNextButton();
             }
         </script>
         
