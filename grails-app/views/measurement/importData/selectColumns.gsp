@@ -18,20 +18,53 @@
 						// Check the option ids of the options currently in the database
 						ids = new Array();
 
-						$.each( $( 'option', $( "select[rel*=featureSelector]" ).first() ), function(index, element) {
-							if( !$(element).hasClass( 'modify' ) && $(element).attr( 'value' ) != null && $(element).attr( 'value' ) != "" ) {
-								ids[ ids.length ] = "currentOptions=" + $(element).attr( 'value' );
-							}
-						});
-							
+						// Retrieve a list of all features to be put in the selects
                         $.getJSON(
-                            baseUrl + "/feature/retrieveMissingOptions?" + ids.join( "&" ),
-                            function(j){
+                            baseUrl + "/feature/ajaxList",
+                            function(data){
                                 var options = '';
-                                for (var i = 0; i < j.length; i++) {
-                                    options += '<option value="' + j[i].id + '">' + j[i].name + '</option>';
+                                var features = data.features
+
+                                // Create a list of options
+                                for (var i = 0; i < features.length; i++) {
+                                    options += '<option value="' + features[i].id + '">' + features[i].name + '</option>';
                                 }
-                                $("select[rel*='featureSelector'] .modify").before( options );
+                                
+                                $("select[rel*='featureSelector']").each( function( index, select ) {
+                                    $select = $(select);
+                                    
+                                    // Update the list of items for each select. We have to keep the same values selected
+                                    // so we remember the value of the selected item
+                                    selection = $select.val();
+
+                                    // Store the add/modify option
+                                    var addModifyOption = $( 'option:last-child', $select );
+                                    var discardOption = $( 'option:first-child', $select );
+
+									// Check the number of features currently in the list
+									var numFeatures = $( 'option', $select ).length - 2; // addModify and discard option 
+                                    
+									// Set the new options in the list
+									$select.html( options );
+
+                                   	// Add the add/modify and discard options back again
+                                   	$select.append( addModifyOption );
+									$select.prepend( discardOption );
+									
+									// Select the previously selected item. If nothing was selected, select the 
+									// one that was added last 
+									if( selection != undefined && selection != "" ) {
+										// Select previously selected option
+										$( 'option[value=' + selection + ']', $select ).attr( 'selected', true );
+									} else if( numFeatures < features.length ){
+										// Select feature last added
+										$( 'option[value=' + data.last.id + ']', $select ).attr( 'selected', true );
+									} else {
+										// Select discard option
+										$( 'option:first-child', $select ).attr( 'selected', true );
+									}
+                                   	
+                                });
                             }
                         );
                     }
