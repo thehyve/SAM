@@ -21,10 +21,10 @@ class FuzzySearchService {
 			def topScore = 0
 			def bestFit = null
 			
-			candidates.each { candidate ->
+			candidates.eachWithIndex { candidate, idx ->
 				def score = stringSimilarity(pattern, candidate);
 				if( !score.isNaN() && score >= treshold )
-					matches << [ 'pattern': pattern, 'candidate': candidate, 'score': score ];
+					matches << [ 'pattern': pattern, 'candidate': candidate, 'score': score, 'index': idx ];
 			}
 		}
 		
@@ -32,13 +32,16 @@ class FuzzySearchService {
 		matches = matches.sort( { a, b -> b.score <=> a.score } as Comparator )
 		
 		// Loop through the scores and select the best matching for every candidate
-		def results = patterns.collect { [ 'pattern': it, 'candidate': null ] }
+		def results = patterns.collect { [ 'pattern': it, 'candidate': null, 'index': null ] }
 		def selectedCandidates = [];
 		def filledPatterns = [];
 		
 		matches.each { match ->
 			if( !filledPatterns.contains( match.pattern ) && !selectedCandidates.contains( match.candidate ) ) {
-				results.find { result -> result.pattern == match.pattern }?.candidate = match.candidate;
+				def foundMatch = results.find { result -> result.pattern == match.pattern };
+                foundMatch?.candidate = match.candidate;
+                foundMatch?.index = match.index;
+
 				
 				selectedCandidates << match.candidate;
 				filledPatterns << match.pattern;
