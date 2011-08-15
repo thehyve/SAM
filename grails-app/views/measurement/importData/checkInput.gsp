@@ -28,6 +28,29 @@
                 var valA = jQuery.trim(objA.val());
                 var valB = jQuery.trim(objB.val());
                 var valC = jQuery.trim(objC.val());
+
+                var blnRet = false;
+
+                if(valA=="" || valA==">" || valA=="<") {
+                    objA.css("background-color","");
+                } else {
+                    objA.css("background-color","pink");
+                    blnRet = true;
+                }
+
+                var objRegExp  =  /^[0-9]*[,|.][0-9]+$/;
+
+                if(valB=="" || objRegExp.test(valB)) {
+                    objB.css("background-color","");
+                } else {
+                    objB.css("background-color","pink");
+                    blnRet = true;
+                }
+
+                if(blnRet) {
+                    return false;
+                }
+
                 var obj = $('td[id="'+key+'"]');
                 obj.removeClass("importerOperatorCell importerCommentCell")
                 var content = ""+valA+""+valB+" "+valC
