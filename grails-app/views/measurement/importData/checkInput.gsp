@@ -101,8 +101,14 @@
                                     <%
                                         def op = operator.get(i+','+j)
                                         def co = comments.get(i+','+j)
+                                        def timepoint = false
+                                        if(layout == 'subject_layout'){
+                                            if(i==1){
+                                                timepoint = true
+                                            }
+                                        }
                                     %>
-                                    <g:if test="${i==0 || j==0}">
+                                    <g:if test="${i==0 || j==0 || timepoint}">
                                         <g:if test="${column==null}">
                                             <td style="border: 1px solid lightgray;" class="importerDiscarded">Discarded</td>
                                             <%
