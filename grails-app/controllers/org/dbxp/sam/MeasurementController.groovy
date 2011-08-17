@@ -231,6 +231,7 @@ class MeasurementController {
             // Check to make sure we actually received a file.
             action {
                 def f = flow.inputfile
+                def filename = ""
                 def text = ""
 				
 				// Reset all data that might have been entered by the user before, in other 
@@ -339,7 +340,7 @@ class MeasurementController {
                 }
 
                 flow.text = text
-                flow.input = [ "file": flow.inputfile, "originalFilename": f.getOriginalFilename()]
+                flow.input = [ "file": flow.inputfile]
             }
             on("success").to "selectLayout"
             on("error").to "uploadData"

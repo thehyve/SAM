@@ -16,7 +16,7 @@
 
             <g:if test="${input!=null}">
                 <p>
-                    The file <b>${input.originalFilename}</b> has been successfully read in.
+                    The data has been successfully read in.
                     Now we need to know which layout the file uses. There are two layouts you can choose from:
                 </p>
             </g:if>
