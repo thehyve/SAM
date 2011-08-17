@@ -17,7 +17,7 @@
             <g:if test="${input!=null}">
                 <p>
                     The data has been successfully read in.
-                    Now we need to know which layout the file uses. There are two layouts you can choose from:
+                    Now we need to know which layout the data uses. There are two layouts you can choose from:
                 </p>
             </g:if>
             <form method="post">
@@ -27,7 +27,7 @@
                         <b>The sample layout</b>
                     </div>
                     <div id="samplesample" <g:if test="${layoutguess!='sample_layout'}">style="display: none"</g:if>>
-                        <g:if test="${layoutguess=='sample_layout'}">Our guess is that this file uses the sample layout. </g:if>Using the sample layout and the sample of the file contents, the data types would be as follows:
+                        <g:if test="${layoutguess=='sample_layout'}">Our guess is that this data uses the sample layout. </g:if>Using the sample layout and a sample of the data, the data types would be as follows:
                         <%
                             def content_sample_sample_layout = "<table style='width: auto;'>"
                             for(int i = 0; i < text?.size(); i++){
@@ -86,7 +86,7 @@
                 </div>
                 <div class='layoutchoice'>
                     <g:if test="${disableSubjectLayout}">
-                        Because the selected assay does not contain enough information to be able to use the subject layout (such as event timepoints and subject names), the subject layout cannot be used. If you do want to upload a file that uses the subject layout, please enter the required information into GSCF and try again.
+                        Because the selected assay does not contain enough information to be able to use the subject layout (such as event timepoints and subject names), the subject layout cannot be used. If you do want to upload data that uses the subject layout, please enter the required information into GSCF and try again.
                     </g:if>
                     <g:else>
                         <div style="vertical-align: middle; text-align:center;">
@@ -94,8 +94,8 @@
                             <b>The subject layout</b>
                         </div>
                         <div id="subjectsample" <g:if test="${layoutguess!='subject_layout'}">style="display: none"</g:if>>
-                            <g:if test="${layoutguess=='subject_layout'}">Our guess is that this file uses the subject layout. </g:if>
-                            Using the subject layout and the sample of the file contents, the data types would be as follows:
+                            <g:if test="${layoutguess=='subject_layout'}">Our guess is that this data uses the subject layout. </g:if>
+                            Using the subject layout and a sample of the data, the data types would be as follows:
                             <%
                                 def content_sample_subject_layout = "<table style='width: auto;'>"
                                 for(int i = 0; i < text?.size(); i++){
