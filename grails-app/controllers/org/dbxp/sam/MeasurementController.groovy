@@ -259,7 +259,7 @@ class MeasurementController {
                         }
                     }
                     else {
-                        flow.message = 'Make sure to add a file using the upload field below. The file upload field cannot be empty.'
+                        flow.message = 'Make sure to add a file using the upload field below or use the \'paste in textfield\' option to upload the data.'
                         return error()
                     }
                 }
@@ -268,6 +268,10 @@ class MeasurementController {
                 if(text==null){
                     // Apparently the MatrixImporter was unable to read this file
                     flow.message = "It appears this file cannot be read in. Make sure to add a comma-separated values based or Excel based file using the upload field below."
+                    return error()
+                }
+                if(text.size()<2 || text[0].size()<2){
+                    flow.message = "It appears the data does not have a valid layout. Please refer to the layout examples."
                     return error()
                 }
 

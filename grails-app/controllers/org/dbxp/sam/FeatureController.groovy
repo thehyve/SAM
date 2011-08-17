@@ -443,6 +443,10 @@ class FeatureController {
                             flow.message += ' Make sure to add a comma-separated values based or Excel based file using the upload field below.'
                             return error()
                         }
+                        if(text.size()<2 || text[0].size()<2){
+                            flow.message = "It appears the data does not have a valid layout."
+                            return error()
+                        }
                         // Save some variables of the file into the flow
                         flow.input = [ "file": flow.inputfile, "originalFilename": f.getOriginalFilename()]
                     } else {

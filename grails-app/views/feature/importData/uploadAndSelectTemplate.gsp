@@ -52,7 +52,7 @@
 
             <imp:importerHeader pages="${pages}" page="uploadAndSelectTemplate" />
 
-            <p>You can import your Excel data to the server by choosing a file from your local harddisk in the form below. </p>
+            <p>You can import your Excel data to the server by choosing a file from your local harddisk in the form below. Alternatively, you can paste such data in the textfield, which you can find under the 'paste in textfield' option. Please make sure the data has a header row.</p>
 
             <g:if test="${message}">
                 <div class="errors">${message}</div><br />
