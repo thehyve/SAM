@@ -16,16 +16,26 @@ class AssayController {
     }
 		
 	def synchronize = {
-		synchronizationService.initSynchronization( session.sessionToken, session.user ) ;
-		synchronizationService.fullSynchronization();
+		try { 
+			synchronizationService.initSynchronization( session.sessionToken, session.user ) ;
+			synchronizationService.fullSynchronization();
+		} catch( Exception e ) {
+			e.printStackTrace();
+			flash.error = "An error occurred while synchronizing: " + e.getMessage() + "; Please try again."
+		}
 		
 		redirect(action: "list", params: params)
 	}
 
     def list = {
 		// First synchronize all studies that have been changed
-		synchronizationService.initSynchronization( session.sessionToken, session.user );
-		synchronizationService.synchronizeChangedStudies()
+		try {
+			synchronizationService.initSynchronization( session.sessionToken, session.user );
+			synchronizationService.synchronizeChangedStudies()
+		} catch( Exception e ) {
+			e.printStackTrace();
+			flash.error = "An error occurred while synchronizing: " + e.getMessage()
+		}
     }
 
 	/**
