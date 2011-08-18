@@ -503,6 +503,7 @@ class FeatureController {
             on("next") {
                 flow.message = null;
                 String newMessage = "";
+                String strUniqueMessage = "";
 
                 // Get the rows that need to be discarded
                 flow.discardRow = [];
@@ -535,7 +536,8 @@ class FeatureController {
                             if(newMessage.length()>0) newMessage += "<br />";
                             switch(it.code) {
                                 case "unique":
-                                    newMessage += "A feature with the name ["+it.rejectedValue+"] already exists. Edit the corresponding row to create a new feature. Leave the row unedited to discard this row and keep the existing feature.";
+                                    if(strUniqueMessage.length()>0) strUniqueMessage += "<br />";
+                                    strUniqueMessage += "A feature with the name ["+it.rejectedValue+"] already exists. Edit the corresponding row to create a new feature. Leave the row unedited to discard this row and keep the existing feature.";
                                     break;
                                 case "nullable":
                                     newMessage += "The field ["+it.field+"] can't be null.";
@@ -578,6 +580,10 @@ class FeatureController {
 
                 if(flow.message!=null) {
                     return error();
+                }
+
+                if(strUniqueMessage.length()>0) {
+                    flow.message = strUniqueMessage;
                 }
 
             }.to "checkInput"
