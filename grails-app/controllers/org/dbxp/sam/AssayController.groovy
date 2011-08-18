@@ -196,5 +196,15 @@ class AssayController {
 		return [assayInstance: assayInstance, samples: samples, features: features, measurements: measurements, hideEmpty: hideEmpty] 
     }
 	
-	
+	def showByToken = {
+        def assay = Assay.findByAssayToken(params.id)
+
+        if (!assay) {
+            flash.message = "The assay you requested could not be found. PLease use your browser back button."
+            redirect(action: "list")
+			return
+        }
+        
+        redirect(action:"show", params:[id: assay.id])
+    }
 }
