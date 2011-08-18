@@ -114,8 +114,8 @@ class FuzzySearchService {
 
 		candidates.eachWithIndex { candidate, idx ->
 			def score = stringSimilarity(pattern, candidate)
-			
-			if (score > topScore) {
+
+			if (score != java.lang.Double.NaN && score > topScore) {
 				topScore = score
 				bestFit = idx
 			}

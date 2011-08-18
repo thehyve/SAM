@@ -14,7 +14,8 @@
 
             <imp:importerHeader pages="${pages}" page="chooseAssay" />
 
-            <p>The data you wish to import must be related to an assay. Choose the assay in question from the following list. </p>
+            <p>The data you wish to import must be related to an assay. Choose the assay in question from the following list.</p>
+            <p>Please note:  Assays without samples are not shown in this list. To be able to upload measurements, make sure your assay contains samples. </p>
             <div class="list">
                 <dt:dataTable id="fList" class="paginate sortable filter selectOne" rel="${g.createLink( controller: 'feature', action: 'datatables_list' )}">
                     <thead>
