@@ -11,10 +11,12 @@ class AssayController {
 	
 	def synchronizationService
 	
+	@RefreshUserInformation
 	def index = {
         redirect(action: "list", params: params)
     }
 		
+	@RefreshUserInformation
 	def synchronize = {
 		try { 
 			synchronizationService.initSynchronization( session.sessionToken, session.user ) ;
@@ -27,6 +29,7 @@ class AssayController {
 		redirect(action: "list", params: params)
 	}
 
+	@RefreshUserInformation
     def list = {
 		// First synchronize all studies that have been changed
 		try {
@@ -147,7 +150,7 @@ class AssayController {
 	   
    }
 	
-	
+	@RefreshUserInformation
     def show = {
 		def hideEmpty = params.hideEmpty ? Boolean.parseBoolean( params.hideEmpty ) : true
         def assayInstance = Assay.get(params.id)
