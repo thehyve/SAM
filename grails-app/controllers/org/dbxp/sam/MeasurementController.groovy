@@ -192,7 +192,10 @@ class MeasurementController {
                     redirect(action: 'nofeatures')
                 }
 
-                flow.assayList = Assay.giveWritableAssays( session.user );
+                // TODO: Maybe we want to make this search functionality available in, for example, Assay.groovy
+                // Grabs the Ids of assays that contain samples and the user can write to
+                def assayIdList = Assay.executeQuery( "SELECT DISTINCT a.id FROM Assay a, Auth auth LEFT JOIN  a.samples s WHERE ( auth.user = :user AND auth.study = a.study AND auth.canWrite = true) GROUP BY a HAVING COUNT(s) > 0", [ "user": session.user ] )
+                flow.assayList = Assay.executeQuery( "SELECT DISTINCT a FROM Assay a WHERE  a.id in (:list)", [ "list": assayIdList ])
 
                 flow.pages = [
                     "chooseAssay": "Choose Assay",
