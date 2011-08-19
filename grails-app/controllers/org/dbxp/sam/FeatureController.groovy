@@ -394,6 +394,7 @@ class FeatureController {
 
             on("next") {
                 flow.templateFields = null;
+                flow.template = params.template;
                 // Check if the user used the textarea
                 if(params.pasteField!=null && params.pasteField!="") {
                     // The textarea is used
@@ -608,6 +609,7 @@ class FeatureController {
                 flow.message = null;
                 String newMessage = "";
                 def newFeatureList = [];
+                def lstFeatureNames = [];
 
                 for(int i=0; i<flow.featureList.size; i++) {
 
@@ -617,6 +619,14 @@ class FeatureController {
                     // Set all variables from POST var
                     for(int j=0; j<flow.templateFields.size(); j++) {
                         String strFieldVal = params.get("entity_"+strIdent+"_"+flow.templateFields[j].name.toLowerCase());
+                        if(flow.templateFields[j].name.toLowerCase().equals("name")) {
+                            if(lstFeatureNames.contains(strFieldVal)) {
+                                if(newMessage.length()>0) newMessage += "<br />";
+                                newMessage += "The feature ["+strFieldVal+"] can't be present more than once";
+                            } else {
+                                lstFeatureNames.add(strFieldVal);
+                            }
+                        }
                         if(flow.templateFields[j].required && strFieldVal==null) {
                             if(newMessage.length()>0) newMessage += "<br />";
                             newMessage += "Column ["+flow.templateFields[j]+"] is required";
@@ -640,7 +650,7 @@ class FeatureController {
                                 break;
                             case "nullable":
                                 if(newMessage.length()>0) newMessage += "<br />";
-                                newMessage += "The field ["+it.field+"] can't be null.";
+                                newMessage += "The field ["+it.field+"] can't be null";
                                 break;
                             default:
                                 if(newMessage.length()>0) newMessage += "<br />";
