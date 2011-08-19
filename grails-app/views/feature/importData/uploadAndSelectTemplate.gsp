@@ -39,7 +39,7 @@
             }
 
             function createUpload(id) {
-                strContent = $("textarea#pasteField").val();
+                strContent = $("textarea#pasteField").val().replace(/\n/g,"\\n");
                 $( "#pasteField" ).html('<input type="file" id="'+id+'" name="'+id+'"/> or <a href="#" onclick="createTextfield(\'pasteField\',\''+strContent+'\'); return false;">paste in textfield</a>');
             }
 
