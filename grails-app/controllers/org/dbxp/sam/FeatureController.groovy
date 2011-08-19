@@ -399,9 +399,11 @@ class FeatureController {
                 if(params.pasteField!=null && params.pasteField!="") {
                     // The textarea is used
                     flow.inputField = params.pasteField;
+                    flow.input = null;
                 } else {
                     // The uploaded files is used
                     flow.inputfile = request.getFile('fileUpload')
+                    flow.inputField = null;
                 }
             }.to "uploadDataCheck"
         }
@@ -419,6 +421,7 @@ class FeatureController {
                 } else {
                     // Save the uploaded file into a variable
                     def f = flow.inputfile
+                    println("JAAA");
                     if(!f.empty) {
                         // Save data of this step
                         flow.message = "It appears this file cannot be read in." // In case we get an error before finishing
@@ -451,9 +454,20 @@ class FeatureController {
                         // Save some variables of the file into the flow
                         flow.input = [ "file": flow.inputfile, "originalFilename": f.getOriginalFilename()]
                     } else {
-                        flow.message += ' Make sure to add a file using the upload field below. The file upload field cannot be empty.'
-                        return error()
+                        if(flow.input==null && flow.inputField==null) {
+                            // only throw the error if there is no input set at all (it might have been set in an earlier call)
+                            flow.message += ' Make sure to add a file using the upload field below. The file upload field cannot be empty.'
+                            return error()
+                        } else {
+                            println(flow.input);
+                            println(flow.inputField);
+                        }
                     }
+                }
+
+                // Store the content of the textarea or the file in the flow
+                if(!text.equals("")) {
+                    flow.text = text;
                 }
 
                 // If we've reached this point, the error message needs to be reset
@@ -481,20 +495,18 @@ class FeatureController {
                     lstFieldNames += flow.templateFields[k].name.toLowerCase();
                 }
                 def lstColumnHeaders = [];
-                for(int j=0; j<text[0].size(); j++) {
-                    lstColumnHeaders += text[0][j].toLowerCase();
+                for(int j=0; j<flow.text[0].size(); j++) {
+                    lstColumnHeaders += flow.text[0][j].toLowerCase();
                 }
 
                 def matches = fuzzySearchService.mostSimilarUnique( lstColumnHeaders, lstFieldNames, fuzzyMatchTreshold );
 
-                for(int i=0; i<text[0].size(); i++) {
+                for(int i=0; i<flow.text[0].size(); i++) {
                     if(matches[i].index!=null) {
                         flow.columnField.put(i,flow.templateFields[matches[i].index]);
                     }
                 }
 
-                // Store the content of the textarea or the file in the flow
-                flow.text = text;
             }
             on("success").to "matchColumns"
             on("error").to "uploadAndSelectTemplate"

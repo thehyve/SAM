@@ -6,6 +6,10 @@
         <r:script type="text/javascript" disposition="head">
             $(document).ready(function() {
                 insertSelectAddMore();
+                strVal = "${inputField?.encodeAsJavaScript()}";
+                if(strVal.length>0) {
+                    createTextfield('pasteField','${inputField?.encodeAsJavaScript()}');
+                }
             });
 
             function insertSelectAddMore() {
@@ -27,11 +31,16 @@
                 });
             }
 
-            function createTextfield(id) {
-                $( "#"+id ).html("<br /><br /><span style='color: grey'>Add tab delimited data</span><br /><textarea id='"+id+"' name='"+id+"' rows='5' cols='20'></textarea>");
+            function createTextfield(id, content) {
+                $( "#"+id ).html("<span style='color: grey'>Add tab delimited data (<a href='#' onClick='createUpload(\"fileUpload\"); return false;'>close</a>)</span><br /><textarea id='"+id+"' name='"+id+"' rows='5' cols='20'>"+content+"</textarea>");
                 $( "#"+id ).resizable({
                     handles: "se"
                 });
+            }
+
+            function createUpload(id) {
+                strContent = $("textarea#pasteField").val();
+                $( "#pasteField" ).html('<input type="file" id="'+id+'" name="'+id+'"/> or <a href="#" onclick="createTextfield(\'pasteField\',\''+strContent+'\'); return false;">paste in textfield</a>');
             }
 
             function handleTemplateChange() {
@@ -62,13 +71,18 @@
                     <table>
                         <tbody>
                             <tr>
-                                <td width="100px">Choose your Excel file to import:</td>
-                                <td width="100px"><input type="file" id="fileUpload" name="fileUpload"/> <span id="pasteField">or <a href="#" onclick="createTextfield('pasteField'); return false;">paste in textfield</a></span></td>
+                                <td width="100px">
+                                    Choose your Excel file to import:
+                                    <g:if test="${input!=null}">
+                                        <p>The file <b>${input.originalFilename}</b> was loaded.</p>
+                                    </g:if>
+                                </td>
+                                <td width="100px"><span id="pasteField"><input type="file" id="fileUpload" name="fileUpload"/> or <a href="#" onclick="createTextfield('pasteField','${inputField?.encodeAsJavaScript()}'); return false;">paste in textfield</a></span></td>
                             </tr>
                             <tr>
-                                <td><div id="datatemplate">Choose type of data template: </div></td>
+                                <td><div id="datatemplate">Choose type of data template:</div></td>
                                 <td id="templateSelection">
-                                    <af:templateElement name="template" rel="template" description="" entity="${Feature}" ontologies="" value="" error="template" addDummy="true" onChange="if(!\$( 'option:selected', \$(this) ).hasClass( 'modify' )){ }"></af:templateElement>
+                                    <af:templateElement name="template" rel="template" description="" entity="${Feature}" ontologies="" value="${template}" error="template" addDummy="true" onChange="if(!\$( 'option:selected', \$(this) ).hasClass( 'modify' )){ }"></af:templateElement>
                                 </td>
                             </tr>
                         </tbody>
