@@ -165,6 +165,11 @@
 
             <imp:importerHeader pages="${pages}" page="selectColumns" />
 
+            <g:if test="${message}">
+                <div class="errors">${message}</div>
+                <br />
+            </g:if>
+
             <p>
                 You have chosen the <g:if test="${layout=='sample_layout'}">sample layout</g:if><g:if test="${layout=='subject_layout'}">subject layout</g:if>. On this page, we have tried to match your data with our data. You must double check these matches, and confirm your final choice.
             </p>

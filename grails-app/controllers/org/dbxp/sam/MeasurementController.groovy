@@ -474,6 +474,33 @@ class MeasurementController {
         selectColumns {
 			// Step 3: Choose which features in the database match which column in the uploaded file
 			on("next") {
+                // Check if the user is even importing any data at all. If not, return error message.
+                def countRows = 0
+                def countColumns = 0
+                for(int i = 0; i < flow.text.size(); i++){
+                    for(int j = 0; j < flow.text[i].size(); j++){
+                        if(params[i+','+j]){
+                            // Did the user set enough rows/columns to be included in the importing process?
+                            if(params[i+','+j] == 'null'){
+                                // Not included...
+                                continue;
+                            }
+                            if(i==0){
+                                countColumns++;
+                                continue;
+                            }
+                            if(j==0){
+                                countRows++
+                                continue;
+                            }
+                        }
+                    }
+                }
+                if(countRows<2 || countColumns<2){
+                    flash.message = "With the selection that had been made, no data would be uploaded. Please make a different selection."
+					return error();
+                }
+
 				// Save data of this step and make some more information available about the contents of the cells
 
                 // Generate extra information about cell contents and fold the user's selections into our data storage object flow.edited_text
@@ -580,6 +607,7 @@ class MeasurementController {
                 // Update feature list in case the user has created new features on 'selectColumns.gsp'
                 flow.features = Feature.list().sort(){it.name}
 			}.to "selectLayout"
+			on("error").to "selectColumns"
 		}
 
 		checkInput {

@@ -14,12 +14,10 @@
 
             <imp:importerHeader pages="${pages}" page="selectLayout" />
 
-            <g:if test="${input!=null}">
-                <p>
-                    The data has been successfully read in.
-                    Now we need to know which layout the data uses. There are two layouts you can choose from:
-                </p>
-            </g:if>
+            <p>
+                The data has been successfully read in.
+                Now we need to know which layout the data uses. There are two layouts you can choose from:
+            </p>
             <form method="post">
                 <div class='layoutchoice'>
                     <div style="vertical-align: middle; text-align:center;">
