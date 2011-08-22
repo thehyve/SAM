@@ -214,6 +214,21 @@ class MeasurementController {
 			on("next") {
                 flow.assay = Assay.get(params.assay)
                 flow.studyName = flow.assay.study.name
+
+                // Reset the relevant data that might have been entered by the user before, in the next step(s) of the wizard
+                flow.inputField = null;
+                flow.inputFile = null;
+                flow.pasteField = null;
+                flow.text = null;
+                flow.edited_text = null;
+                flow.timepoint_matches = null;
+                flow.timepoints = null;
+                flow.sample_matches = null;
+                flow.samples = null;
+                flow.feature_matches = null;
+                flow.features = null;
+                flow.comments = null;
+                flow.operator = null;
 			}.to "uploadData"
 		}
 
@@ -226,8 +241,14 @@ class MeasurementController {
                 } else {
                     flow.inputfile = request.getFile('fileUpload')
                 }
+
+                // Clear upload screen error message by hand
+                flow.message = null;
 			}.to "uploadDataCheck"
-			on("previous"){}.to "chooseAssay"
+			on("previous"){
+                // Clear upload screen error message by hand
+                flow.message = null;
+            }.to "chooseAssay"
 		}
 
         uploadDataCheck {
@@ -432,7 +453,22 @@ class MeasurementController {
                     }
                 }
 			}.to "selectColumns"
-			on("previous") {}.to "uploadData"
+			on("previous") {
+                // Reset the relevant data that might have been entered by the user before, in the previous and current step of the wizard
+                flow.inputField = null;
+                flow.inputFile = null;
+                flow.pasteField = null;
+                flow.text = null;
+                flow.edited_text = null;
+                flow.timepoint_matches = null;
+                flow.timepoints = null;
+                flow.sample_matches = null;
+                flow.samples = null;
+                flow.feature_matches = null;
+                flow.features = null;
+                flow.comments = null;
+                flow.operator = null;
+            }.to "uploadData"
         }
 
         selectColumns {
