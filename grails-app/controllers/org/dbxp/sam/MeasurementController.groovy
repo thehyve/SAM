@@ -474,43 +474,24 @@ class MeasurementController {
         selectColumns {
 			// Step 3: Choose which features in the database match which column in the uploaded file
 			on("next") {
-                // Check if the user is even importing any data at all. If not, return error message.
-                def countRows = 0
-                def countColumns = 0
-                for(int i = 0; i < flow.text.size(); i++){
-                    for(int j = 0; j < flow.text[i].size(); j++){
-                        if(params[i+','+j]){
-                            // Did the user set enough rows/columns to be included in the importing process?
-                            if(params[i+','+j] == 'null'){
-                                // Not included...
-                                continue;
-                            }
-                            if(i==0){
-                                countColumns++;
-                                continue;
-                            }
-                            if(j==0){
-                                countRows++
-                                continue;
-                            }
-                        }
-                    }
-                }
-                if(countRows<2 || countColumns<2){
-                    flash.message = "With the selection that had been made, no data would be uploaded. Please make a different selection."
-					return error();
-                }
-
 				// Save data of this step and make some more information available about the contents of the cells
 
                 // Generate extra information about cell contents and fold the user's selections into our data storage object flow.edited_text
                 def fresh // Is this a 'fresh start'?
+                def subjectTimepointConflicts = null
+                subjectTimepointConflicts = [] // Can that subject be combined with that timepoint?
                 if(!flow.edited_text){
                     flow.edited_text = new Object[flow.text.size()][flow.text[0].size()]
                     fresh = true;
                     flow.operator = [:]
                     flow.comments = [:]
                 }
+
+                println "flow.assay.samples "+flow.assay.samples
+                flow.assay.samples.each {
+                    println "\t SAMSample: "+it.eventStartTime+"("+new RelTime(it.eventStartTime).toString()+") with "+it.subjectName
+                }
+
                 for(int i = 0; i < flow.text.size(); i++){
                     for(int j = 0; j < flow.text[i].size(); j++){
                         if(params[i+','+j]){
@@ -534,6 +515,26 @@ class MeasurementController {
                             } else {
                                 if(i==1 || j==0){
                                     flow.edited_text[i][j] = params[i+','+j]
+
+                                    // Check for a subject/timepoint conflict, for those timepoints that are not discarded (also check their features to make sure those are not discarded either)
+                                    if(i==1 && j!= 0 && params[1+','+j]!='null' && params[0+','+j]!='null'){
+                                        for(int k = 0; k < flow.text.size(); k++){
+                                            if(k>1 && params[k+','+0]!='null'){
+                                                def sample
+                                                flow.assay.samples.each {
+                                                    if(new RelTime( it.eventStartTime ).toString()==params[1+','+j] && it.subjectName==params[k+','+0]){
+                                                        sample = it
+                                                    }
+                                                }
+                                                if(sample==null){
+                                                    if(!subjectTimepointConflicts.contains(['timepoint' : params[1+','+j], 'subjectName' : params[k+','+0]])){
+                                                        subjectTimepointConflicts.add(['timepoint' : params[1+','+j], 'subjectName' : params[k+','+0]]);
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                    
                                     continue;
                                 }
                             }
@@ -565,6 +566,44 @@ class MeasurementController {
                             }
                         }
                     }
+                }
+
+                // Check if the user is even importing any data at all. If not, return error message.
+                def countRows = 0
+                def countColumns = 0
+                for(int i = 0; i < flow.text.size(); i++){
+                    for(int j = 0; j < flow.text[i].size(); j++){
+                        if(params[i+','+j]){
+                            // Did the user set enough rows/columns to be included in the importing process?
+                            if(params[i+','+j] == 'null'){
+                                // Not included...
+                                continue;
+                            }
+                            if(i==0){
+                                countColumns++;
+                                continue;
+                            }
+                            if(j==0){
+                                countRows++
+                                continue;
+                            }
+                        }
+                    }
+                }
+                if(countRows<2 || countColumns<2){
+                    flash.message = "With the selection that had been made, no data would be uploaded. Please make a different selection."
+					return error();
+                }
+                
+                // Did we have subject/timepoint conflicts?
+                println "subjectTimepointConflicts    "+subjectTimepointConflicts
+                if(subjectTimepointConflicts!=null && subjectTimepointConflicts.size()>0){
+                    flash.message="Unfortunately, according to the study the following subject names and timepoints cannot be combined: "
+                    subjectTimepointConflicts.each {
+                        flash.message+="<br/> - "+it['timepoint']+" and "+it['subjectName']
+                    }
+                    flash.message+="<br/>Please make a different selection."
+                    error();
                 }
 			}.to "checkInput"
 			on("previous") {
@@ -619,17 +658,17 @@ class MeasurementController {
                         def txt = params?.get('valueHidden'+i+','+j)
                         def comm = params?.get('commentHidden'+i+','+j)
                         def op = params?.get('operatorHidden'+i+','+j)
-                        if(txt.class==java.lang.String){
+                        if(txt?.class==java.lang.String){
                             flow.edited_text[i][j] = txt
                         }
-                        if(op.class==java.lang.String){
+                        if(op?.class==java.lang.String){
                             if(op==""){
                                 flow.operator.remove(i+","+j)
                             } else {
                                 flow.operator.put(i+","+j,op)
                             }
                         }
-                        if(comm.class==java.lang.String){
+                        if(comm?.class==java.lang.String){
                             if(comm==""){
                                 flow.comments.remove(i+","+j)
                             } else {
