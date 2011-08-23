@@ -92,7 +92,6 @@
                 <%
                     def discard_i = []
                     def discard_j = []
-                    println ignore
                 %>
                 <table style="width: auto;">
                     <g:each in="${edited_text}" var="row" status="i">

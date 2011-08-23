@@ -529,10 +529,13 @@ class MeasurementController {
                                                     }
                                                 }
                                                 if(sample==null){
-                                                    //if(!subjectTimepointConflicts.contains(['timepoint' : params[1+','+j], 'subjectName' : params[k+','+0]])){
+                                                    if(!subjectTimepointConflicts.contains(['timepoint' : params[1+','+j], 'subjectName' : params[k+','+0]])){
                                                         subjectTimepointConflicts.add(['timepoint' : params[1+','+j], 'subjectName' : params[k+','+0]]);
-                                                        flow.ignore.add([k+","+j])
-                                                    //}
+                                                        // Here we don't add a timepoint/subjectName combination mmultiple times as this list is presented to the user, without any notion of features
+                                                        // The reason why combinations might occur more than once is that they can occur with different features
+                                                    }
+                                                    // Here we do add the combinations for each different feature as this list is used internally to represent which datapoints should never be saved to the database
+                                                    flow.ignore.add([k+","+j])
                                                 }
                                             }
                                         }
@@ -543,10 +546,24 @@ class MeasurementController {
                             }
                         } else {
                             if(fresh){
+                                // This is a fresh start, so we will check the data for the occurence of values, operators and comments.
                                 flow.edited_text[i][j] = flow.text[i][j]
                                 def txt = flow.edited_text[i][j]
                                 if(i>0 && j>0 && txt!=null && txt!=""){
                                     txt = txt.trim()
+
+                                    if(!txt.isDouble()){
+                                        // Apparently the value is not a valid double
+                                        // Let us check if the problem is a comma (Dutch integer-fraction separator)
+                                        def txt2 = txt.replace(',','.')
+                                        if(txt2.isDouble()){
+                                            // That did the trick...
+                                            // Apparently the measurement used a comma inside it's Double value
+                                            // We replace the comma with a dot in order to be able to proceed with importing
+                                            txt = txt2
+                                        }
+                                    }
+
                                     if(!txt.isDouble()){
                                         // Apparently the value is not a valid double
 
@@ -563,7 +580,7 @@ class MeasurementController {
                                         }
                                     } else {
                                         // This is a simple double value
-                                        // We don't need to save more information than contained in flow.edited_text
+                                        flow.edited_text[i][j] = txt
                                     }
                                 }
                             }
