@@ -185,8 +185,14 @@ class MeasurementController {
         startUp {
             action{
 				// First synchronize all studies that have been changed
-				synchronizationService.initSynchronization( session.sessionToken, session.user );
-				synchronizationService.synchronizeChangedStudies()
+				try {
+					synchronizationService.initSynchronization( session.sessionToken, session.user );
+					synchronizationService.synchronizeChangedStudies()
+				} catch( Exception e ) {
+					// If an exception occurs, probably the synchronization is already running. Notify the user,
+					// but still continue
+					flash.error = "Synchronization with GSCF failed: " + e.getMessage();
+				}
 
                 if(Feature.count() == 0){
                     redirect(action: 'nofeatures')
