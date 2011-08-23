@@ -480,6 +480,7 @@ class MeasurementController {
                 def fresh // Is this a 'fresh start'?
                 def subjectTimepointConflicts = null
                 subjectTimepointConflicts = [] // Can that subject be combined with that timepoint?
+                flow.ignore = [] // Add datapoints that will be ignored to this array
                 if(!flow.edited_text){
                     flow.edited_text = new Object[flow.text.size()][flow.text[0].size()]
                     fresh = true;
@@ -522,9 +523,10 @@ class MeasurementController {
                                                     }
                                                 }
                                                 if(sample==null){
-                                                    if(!subjectTimepointConflicts.contains(['timepoint' : params[1+','+j], 'subjectName' : params[k+','+0]])){
+                                                    //if(!subjectTimepointConflicts.contains(['timepoint' : params[1+','+j], 'subjectName' : params[k+','+0]])){
                                                         subjectTimepointConflicts.add(['timepoint' : params[1+','+j], 'subjectName' : params[k+','+0]]);
-                                                    }
+                                                        flow.ignore.add([k+","+j])
+                                                    //}
                                                 }
                                             }
                                         }
@@ -582,22 +584,31 @@ class MeasurementController {
                                 countRows++
                                 continue;
                             }
+                            if(countColumns>0&&countRows>0){
+                                // It seems that at least some data is set to be imported, so carry on.
+                                break;
+                            }
                         }
                     }
                 }
-                if(countRows<2 || countColumns<2){
+                // Not a single row or not a single column that isn't set on discard?
+                // That is probably a user error.
+                if(countRows<1 || countColumns<1){
                     flash.message = "With the selection that had been made, no data would be uploaded. Please make a different selection."
 					return error();
                 }
                 
                 // Did we have subject/timepoint conflicts?
                 if(subjectTimepointConflicts!=null && subjectTimepointConflicts.size()>0){
-                    flash.message="Unfortunately, according to the study the following subject names and timepoints cannot be combined: "
+                    flash.subjectTimepointConflictsMessage="Unfortunately, according to the study the following subject names and timepoints cannot be combined: "
                     subjectTimepointConflicts.each {
-                        flash.message+="<br/> - "+it['timepoint']+" and "+it['subjectName']
+                        flash.subjectTimepointConflictsMessage+="<br/> - "+it['timepoint']+" and "+it['subjectName']
                     }
-                    flash.message+="<br/>Please make a different selection."
-                    error();
+                    flash.subjectTimepointConflictsMessage+="<br/>Please make a different selection or indicate that you wish to ignore the conflicting datapoints. These datapoints will not be imported. Alternatively, you can edit your study in GSCF and restart the importer."
+                    if(!params.ignoreConflictedData){
+                        // User did not ask to ignore this, so don't let user proceed
+                        return error();
+                    }
                 }
 			}.to "checkInput"
 			on("previous") {
@@ -707,14 +718,18 @@ class MeasurementController {
                     for(int i = 1; i < flow.edited_text.size(); i++){
                         if(flow.edited_text[i][0]!=null && flow.edited_text[i][0]!="null"){
                             for(int j = 1; j < flow.edited_text[0].size(); j++){
-                                if(i>1 && flow.edited_text[0][j]!=null && flow.edited_text[0][j]!="null"){
+                                if(i>1 && flow.edited_text[0][j]!=null && flow.edited_text[0][j]!="null" && flow.edited_text[1][j]!=null && flow.edited_text[1][j]!="null"){
                                     // For a particular subject and a particular timepoint and thus a particular sample
 									
 									// In order for that to work, reconvert the timepoint into seconds
 									def timepoint = new RelTime( flow.edited_text[1][j] ).getValue();
 									
                                     SAMSample s = SAMSample.findByEventStartTimeAndSubjectName(timepoint, flow.edited_text[i][0]);
-									
+
+                                    if(s==null){
+                                        // This datapoint needs to be ignored on account of a subject/timepoint conflict; adding a datapoint for this particular eventStartTime and subjectName combination is simply not allowed.
+                                        continue;
+                                    }
                                     // ... and a particular feature
                                     Feature f = flow.edited_text[0][j]
 									

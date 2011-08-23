@@ -170,24 +170,34 @@
                 <br />
             </g:if>
 
-            <p>
-                You have chosen the <g:if test="${layout=='sample_layout'}">sample layout</g:if><g:if test="${layout=='subject_layout'}">subject layout</g:if>. On this page, we have tried to match your data with our data. You must double check these matches, and confirm your final choice.
-            </p>
-            <g:if test="${blnPassedSelectColumns==true}">
-                <p class='message'>
-                    Please note: changes that have been made on the next page ('Confirm Input') are not reflected on this page. However, they will be available to you again on the next page. On this page the original file contents are being shown.
-                </p>
-            </g:if>
-            
-            <%--
-            	Unfortunately, within the webflow, we cannot pass variables to the view (as you do 
-            	normally by render( view: '', model: [...])). For that reason, we retrieve the list of
-            	features from the database here. That way, if the user refreshes the page, all features
-            	are read from the database (also the ones previously added).
-             --%>
-             <% features = org.dbxp.sam.Feature.list( sort: "name" ); %>
-            
             <form method="post">
+                <g:if test="${subjectTimepointConflictsMessage}">
+                    <div class="errors">
+                        ${subjectTimepointConflictsMessage}
+                        <br/>
+                        <g:checkBox name="ignoreConflictedData" value="${false}"/> Ignore conflicted data.
+                    </div>
+                    <br />
+                </g:if>
+
+                <p>
+                    You have chosen the <g:if test="${layout=='sample_layout'}">sample layout</g:if><g:if test="${layout=='subject_layout'}">subject layout</g:if>. On this page, we have tried to match your data with our data. You must double check these matches, and confirm your final choice.
+                </p>
+                <g:if test="${blnPassedSelectColumns==true}">
+                    <p class='message'>
+                        Please note: changes that have been made on the next page ('Confirm Input') are not reflected on this page. However, they will be available to you again on the next page. On this page the original file contents are being shown.
+                    </p>
+                </g:if>
+
+                <%--
+                    Unfortunately, within the webflow, we cannot pass variables to the view (as you do
+                    normally by render( view: '', model: [...])). For that reason, we retrieve the list of
+                    features from the database here. That way, if the user refreshes the page, all features
+                    are read from the database (also the ones previously added).
+                 --%>
+                 <% features = org.dbxp.sam.Feature.list( sort: "name" ); %>
+
+
                 <g:if test="${layout=='sample_layout'}">
                     <table style="width: auto">
                         <g:each in="${text}" var="row" status="i">

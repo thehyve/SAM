@@ -92,6 +92,7 @@
                 <%
                     def discard_i = []
                     def discard_j = []
+                    println ignore
                 %>
                 <table style="width: auto;">
                     <g:each in="${edited_text}" var="row" status="i">
@@ -112,7 +113,7 @@
                                         <g:if test="${column==null}">
                                             <td style="border: 1px solid lightgray;" class="importerDiscarded">Discarded</td>
                                             <%
-                                                if(i==0){
+                                                if(i==0 || timepoint){
                                                     discard_j.add(j)
                                                 }
                                                 if(j==0){
@@ -145,7 +146,7 @@
                                         <g:hiddenField name="operatorHidden${i},${j}" value="${op}"/>
                                         <g:hiddenField name="commentHidden${i},${j}" value="${co}"/>
                                         <g:hiddenField name="valueHidden${i},${j}" value="${column}"/>
-                                        <g:if test="${discard_i.contains(i) || discard_j.contains(j)}">
+                                        <g:if test="${discard_i.contains(i) || discard_j.contains(j) || ignore.contains([i+','+j])}">
                                             <td id="${i},${j}" style="border: 1px solid lightgray;" class="importerDiscarded">
                                         </g:if>
                                         <g:else>
