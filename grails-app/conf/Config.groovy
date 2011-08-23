@@ -16,9 +16,9 @@ grails.config.locations = [
 	"file:${userHome}/.dbnp/${grails.util.GrailsUtil.environment}-${appName}.properties",
 ]
 
- if(System.properties["${appName}.config.location"]) {
-    grails.config.locations << "file:" + System.properties["${appName}.config.location"]
- }
+if(System.properties["${appName}.config.location"]) {
+	grails.config.locations << "file:" + System.properties["${appName}.config.location"]
+}
 
 
 grails.project.groupId = appName // change this to alter the default package name and Maven publishing destination
