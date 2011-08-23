@@ -487,11 +487,6 @@ class MeasurementController {
                     flow.comments = [:]
                 }
 
-                println "flow.assay.samples "+flow.assay.samples
-                flow.assay.samples.each {
-                    println "\t SAMSample: "+it.eventStartTime+"("+new RelTime(it.eventStartTime).toString()+") with "+it.subjectName
-                }
-
                 for(int i = 0; i < flow.text.size(); i++){
                     for(int j = 0; j < flow.text[i].size(); j++){
                         if(params[i+','+j]){
@@ -596,7 +591,6 @@ class MeasurementController {
                 }
                 
                 // Did we have subject/timepoint conflicts?
-                println "subjectTimepointConflicts    "+subjectTimepointConflicts
                 if(subjectTimepointConflicts!=null && subjectTimepointConflicts.size()>0){
                     flash.message="Unfortunately, according to the study the following subject names and timepoints cannot be combined: "
                     subjectTimepointConflicts.each {
