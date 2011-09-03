@@ -15,9 +15,9 @@
 				<li>
 					<a href="#">Browse</a>
 					<ul class="subnav">
-		    			<!-- <li><g:link controller="measurement">Measurements</g:link></li> -->
+		    			<li><g:link controller="measurement">Measurements</g:link></li>
 						<li><g:link controller="feature">Features</g:link></li>
-						<li><g:link controller="featureGroup">Featuregroups</g:link></li>
+						<!-- <li><g:link controller="featureGroup">Featuregroups</g:link></li> -->
 						<li><g:link controller="assay">Assays</g:link></li>
 		    		</ul>
 		    	</li>
