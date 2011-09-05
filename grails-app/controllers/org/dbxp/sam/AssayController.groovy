@@ -65,8 +65,8 @@ class AssayController {
 		*/
 
 	   // Display parameters
-	   int displayStart = params.int( 'iDisplayStart' );
-	   int displayLength = params.int( 'iDisplayLength' );
+	   int displayStart = params.int( 'iDisplayStart' ) ?: 0;
+	   int displayLength = params.int( 'iDisplayLength' ) ?: 10;
 	   int numColumns = params.int( 'columns' );
 	   
 	   // Search parameters; searchable columns are determined serverside
@@ -84,7 +84,7 @@ class AssayController {
 	   
 	   // Create the HQL query
 	   def hqlParams = [:];
-	   def columnsHQL = "SELECT a.id, a.study.name, a.name, COUNT( * ) "
+	   def columnsHQL = "SELECT a.id, a.study.name, a.name, COUNT( s ) "
 	   def hql = "FROM Assay a ";
 	   
 	   def joinHQL = " LEFT JOIN a.samples s "
