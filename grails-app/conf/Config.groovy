@@ -98,9 +98,18 @@ log4j = {
 
     warn   'org.mortbay.log'
 
-    trace    "grails.app",
+    trace   "grails.app",
             //'org.codehaus.groovy.grails.plugins' // plugins
             "dbxp.moduleBase"
+			
+	// Change log4j properties for production
+	environments {
+		production {
+			warn	"grails.app", 
+					"dbxp.moduleBase"
+		}
+	}
 }
 
 module.synchronization.classes.sample = "org.dbxp.sam.SAMSample"
+
