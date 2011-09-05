@@ -499,7 +499,7 @@ class MeasurementController {
                     flow.operator = [:]
                     flow.comments = [:]
                 }
-
+				
                 for(int i = 0; i < flow.text.size(); i++){
                     for(int j = 0; j < flow.text[i].size(); j++){
                         if(params[i+','+j]){
@@ -528,12 +528,10 @@ class MeasurementController {
                                     if(i==1 && j!= 0 && params[1+','+j]!='null' && params[0+','+j]!='null'){
                                         for(int k = 0; k < flow.text.size(); k++){
                                             if(k>1 && params[k+','+0]!='null'){
-                                                def sample
-                                                flow.assay.samples.each {
-                                                    if(new RelTime( it.eventStartTime ).toString()==params[1+','+j] && it.subjectName==params[k+','+0]){
-                                                        sample = it
-                                                    }
+                                                def sample = flow.assay.samples.find { 
+													new RelTime( it.eventStartTime ).toString()==params[1+','+j] && it.subjectName==params[k+','+0]
                                                 }
+												
                                                 if(sample==null){
                                                     if(!subjectTimepointConflicts.contains(['timepoint' : params[1+','+j], 'subjectName' : params[k+','+0]])){
                                                         subjectTimepointConflicts.add(['timepoint' : params[1+','+j], 'subjectName' : params[k+','+0]]);
@@ -591,7 +589,7 @@ class MeasurementController {
                                 }
                             }
                         }
-                    }
+                    } 
                 }
 
                 // Check if the user is even importing any data at all. If not, return error message.
@@ -744,6 +742,8 @@ class MeasurementController {
                         }
                     }
                 } else {
+					def assaySamples = flow.assay.samples;
+				
                     for(int i = 1; i < flow.edited_text.size(); i++){
                         if(flow.edited_text[i][0]!=null && flow.edited_text[i][0]!="null"){
                             for(int j = 1; j < flow.edited_text[0].size(); j++){
@@ -753,7 +753,7 @@ class MeasurementController {
 									// In order for that to work, reconvert the timepoint into seconds
 									def timepoint = new RelTime( flow.edited_text[1][j] ).getValue();
 									
-                                    SAMSample s = SAMSample.findByEventStartTimeAndSubjectName(timepoint, flow.edited_text[i][0]);
+                                    SAMSample s = assaySamples.find { it.eventStartTime == timepoint && it.subjectName == flow.edited_text[i][0] }
 
                                     if(s==null){
                                         // This datapoint needs to be ignored on account of a subject/timepoint conflict; adding a datapoint for this particular eventStartTime and subjectName combination is simply not allowed.
