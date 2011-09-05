@@ -38,7 +38,7 @@
                     blnRet = true;
                 }
 
-                var objRegExp  =  /^[0-9]*[,|.][0-9]+$/;
+                var objRegExp  =  /^[0-9]*([,|.][0-9]+)?$/;
 
                 if(valB=="" || objRegExp.test(valB)) {
                     objB.css("background-color","");
