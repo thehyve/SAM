@@ -5,6 +5,11 @@
         <meta name="layout" content="main" />
         <g:set var="entityName" value="${message(code: 'study.label', default: 'Study')}" />
         <title>Show assay ${assayInstance.name}</title>
+        
+        <style type="text/css">
+        	.delete_button { display: none; }
+        	td:hover .delete_button { display: inline; }
+        </style>
     </head>
     <body>
         <content tag="contextmenu">
@@ -13,81 +18,93 @@
 		<h1>${assayInstance.name} / ${assayInstance.study.name}</h1>
 		
 		<g:if test="${measurements.size() > 0}">
-			<table>
-				<thead>
-					<tr>
-						<th></th>
-						<g:each var="feature" in="${features}">
-							<th>${feature.name}</th>
-						</g:each>
-					</tr>
-				</thead>
-				<tbody>
-					<g:set var="measurementIndex" value="${0}" />
-					<g:each var="sample" in="${samples}">
+            <ul class="data_nav buttons ontop">
+           		<li><g:link class="delete" controller="measurement" action="deleteByAssay" id="${assayInstance.id}" onClick="return confirm('Are you sure?');">Delete all measurements</g:link></li>
+           		<li><g:link class="delete" controller="measurement" action="delete" onClick="if( confirm('Are you sure?') ) { \$( '#deleteform' ).submit(); } return false; ">Delete selected measurements</g:link></li>
+            </ul>
+            		
+			<form id="deleteform" action="<g:createLink controller="measurement" action="delete" />" method="post">
+				<input type="hidden" name="assayId" value="${assayInstance.id}" />
+				<table>
+					<thead>
 						<tr>
-							<td>${sample.name}</td>
-							
+							<th></th>
 							<g:each var="feature" in="${features}">
-								<%--
-									In every table cell, we should lookup the measurement that belongs to this sample and feature.
-									Because the measurements are ordered in the same way as they are outputted to the screen 
-									( sample.name, feature.name ), we can easily check whether the 'current' measurement belongs 
-									to this cell. If not, we keep this cell empty.
-									
-									Because there might be multiple measurements for one cell, we first find all measurements for this cell.
-									We show always the value/operator of the first measurement, but show all data in the comments field.
-								--%>
-								<g:set var="cellMeasurements" value="${[]}" />
-								<g:set var="currentMeasurement" value="${measurements[ measurementIndex ]}" />
-								<g:while test="${currentMeasurement?.sample?.id == sample.id && currentMeasurement?.feature?.id == feature.id}">
-									<% cellMeasurements << currentMeasurement; %>
-									<g:set var="currentMeasurement" value="${measurements[ ++measurementIndex ]}" />
-								</g:while>
-								
-								<%-- 
-									Now we know all measurements for this cell and the measurementIndex points to the 
-									next measurement. If there are multiple measurements, we combine the data.
-								--%>
-								<g:if test="${cellMeasurements.size() > 0}">
-									<% def comments = cellMeasurements[ 0 ].comments?.encodeAsHTML(); %>
-									<g:if test="${cellMeasurements.size() > 1}">
-										<%  
-											comments = cellMeasurements.collect {
-												def description = ""
-												
-												if( it.value )
-													description += (it.operator ?: "") + it.value;
-													
-												if( it.comments )
-													description += ( description ? "<br />" : "" ) + "<span class='comments'>" + it.comments.encodeAsHTML() + "</span>";
-													 
-											}.join( "<hr>" );
-										%>
-									</g:if>
-									<td class="${comments ? 'comments tooltip' : ''}">
-										<g:if test="${cellMeasurements[0].operator}">${cellMeasurements[0].operator}</g:if>
-										${cellMeasurements[0].value}
-										
-										<g:if test="${comments}">
-											<span>
-												${comments}
-											</span>
-										</g:if>
-									</td>									
-								</g:if>
-								<g:else>
-									<td></td>
-								</g:else>
+								<th>${feature.name}</th>
 							</g:each>
 						</tr>
-					</g:each>
-				</tbody>
-			</table>
+					</thead>
+					<tbody>
+						<g:set var="measurementIndex" value="${0}" />
+						<g:each var="sample" in="${samples}">
+							<tr>
+								<td>${sample.name}</td>
+								
+								<g:each var="feature" in="${features}">
+									<%--
+										In every table cell, we should lookup the measurement that belongs to this sample and feature.
+										Because the measurements are ordered in the same way as they are outputted to the screen 
+										( sample.name, feature.name ), we can easily check whether the 'current' measurement belongs 
+										to this cell. If not, we keep this cell empty.
+										
+										Because there might be multiple measurements for one cell, we first find all measurements for this cell.
+										We show always the value/operator of the first measurement, but show all data in the comments field.
+									--%>
+									<g:set var="cellMeasurements" value="${[]}" />
+									<g:set var="currentMeasurement" value="${measurements[ measurementIndex ]}" />
+									<g:while test="${currentMeasurement?.sample?.id == sample.id && currentMeasurement?.feature?.id == feature.id}">
+										<% cellMeasurements << currentMeasurement; %>
+										<g:set var="currentMeasurement" value="${measurements[ ++measurementIndex ]}" />
+									</g:while>
+									
+									<%-- 
+										Now we know all measurements for this cell and the measurementIndex points to the 
+										next measurement. If there are multiple measurements, we combine the data.
+									--%>
+									<g:if test="${cellMeasurements.size() > 0}">
+										<% def comments = cellMeasurements[ 0 ].comments?.encodeAsHTML(); %>
+										<g:if test="${cellMeasurements.size() > 1}">
+											<%  
+												comments = cellMeasurements.collect {
+													def description = ""
+													
+													if( it.value )
+														description += (it.operator ?: "") + it.value;
+														
+													if( it.comments )
+														description += ( description ? "<br />" : "" ) + "<span class='comments'>" + it.comments.encodeAsHTML() + "</span>";
+														 
+												}.join( "<hr>" );
+											%>
+										</g:if>
+										<td class="${comments ? 'comments tooltip' : ''}">
+											<% /* TODO: if multiple measurements are shown, this checkbox is not sufficient anymore */ %>
+											<input type="checkbox" name="ids" value="${cellMeasurements[0].id}" />
+										
+											<g:if test="${cellMeasurements[0].operator}">${cellMeasurements[0].operator}</g:if>
+											${cellMeasurements[0].value}
+											
+											<g:if test="${comments}">
+												<span>
+													${comments}
+												</span>
+											</g:if>
+										</td>
+									</g:if>
+									<g:else>
+										<td></td>
+									</g:else>
+								</g:each>
+							</tr>
+						</g:each>
+					</tbody>
+				</table>
+			</form>
 			
             <br />
             <ul class="data_nav buttons">
-            		<li><g:link class="delete" controller="measurement" action="deleteByAssay" id="${assayInstance.id}" onClick="return confirm('Are you sure?');">Delete all measurements</g:link></li>
+           		<li><g:link class="delete" controller="measurement" action="deleteByAssay" id="${assayInstance.id}" onClick="return confirm('Are you sure?');">Delete all measurements</g:link></li>
+           		<li><g:link class="delete" controller="measurement" action="delete" onClick="if( confirm('Are you sure?') ) { \$( '#deleteform' ).submit(); } return false; ">Delete selected measurements</g:link></li>
             </ul>
             			
 			<g:if test="${hideEmpty}">

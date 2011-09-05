@@ -30,8 +30,10 @@ h1 { }
 /* Div around all data (lists/forms) including buttons */
 div.data {
     padding-left: 11px;
-    
 }
+
+/* Buttons on top of a list */
+ul.buttons.ontop { margin: 6px 0; }
 
 /* Buttons specifically targeted at the data shown */
 ul.data_nav {

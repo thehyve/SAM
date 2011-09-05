@@ -165,7 +165,13 @@ class MeasurementController {
 		if( numErrors > 1 )
 			flash.error += numErrors + " measurements could not be deleted. Please try again" 
 		
-		redirect(action: "list")
+		// Redirect to the assay list, because that is the only place where a 
+		// delete button exists.
+		if( params.assayId ) {
+			redirect( controller: "assay", action: "show", id: params.assayId )
+		} else {
+			redirect(action: "list")
+		}
     }
 
     def nofeatures = {}
