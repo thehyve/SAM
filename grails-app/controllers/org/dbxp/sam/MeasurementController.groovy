@@ -528,7 +528,6 @@ class MeasurementController {
                                             if(flow.text[k][j]==null || flow.text[k][j].toString().trim()==""){
                                                 // Empty cells should always be ignored.
                                                 blnNoDataInCell = true
-                                                println "!@#\$%^&*\tblnNoDataInCell = true at ["+k+","+j+"]"
                                             }
                                             if((k>1 && params[k+','+0]!='null') || blnNoDataInCell){
                                                 def sample
