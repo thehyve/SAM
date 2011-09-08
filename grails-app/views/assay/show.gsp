@@ -20,7 +20,7 @@
 		<g:if test="${measurements.size() > 0}">
             <ul class="data_nav buttons ontop">
            		<li><g:link class="delete" controller="measurement" action="deleteByAssay" id="${assayInstance.id}" onClick="return confirm('Are you sure?');">Delete all measurements</g:link></li>
-           		<li><g:link class="delete" controller="measurement" action="delete" onClick="if( confirm('Are you sure?') ) { \$( '#deleteform' ).submit(); } return false; ">Delete selected measurements</g:link></li>
+           		<li><g:link class="delete" controller="measurement" action="delete" onClick="if( \$( '#deleteform input:checked' ).length != 0 && confirm('Are you sure?') ) { \$( '#deleteform' ).submit(); } return false; ">Delete selected measurements</g:link></li>
             </ul>
             		
 			<form id="deleteform" action="<g:createLink controller="measurement" action="delete" />" method="post">
@@ -104,7 +104,7 @@
             <br />
             <ul class="data_nav buttons">
            		<li><g:link class="delete" controller="measurement" action="deleteByAssay" id="${assayInstance.id}" onClick="return confirm('Are you sure?');">Delete all measurements</g:link></li>
-           		<li><g:link class="delete" controller="measurement" action="delete" onClick="if( confirm('Are you sure?') ) { \$( '#deleteform' ).submit(); } return false; ">Delete selected measurements</g:link></li>
+           		<li><g:link class="delete" controller="measurement" action="delete" onClick="if( \$( '#deleteform input:checked' ).length != 0 && confirm('Are you sure?') ) { \$( '#deleteform' ).submit(); } return false; ">Delete selected measurements</g:link></li>
             </ul>
             			
 			<g:if test="${hideEmpty}">
