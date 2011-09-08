@@ -568,11 +568,17 @@ class MeasurementController {
                                         }
                                     }
 
-                                    if(!txt.isDouble()){
+                                    // Values can have several formats:
+									//  - double values are stored in the value
+									//  - double values with a operator in front are stored in operator and value
+									//  - all other values are stored in the comments 
+									if(!txt.isDouble()){
                                         // Apparently the value is not a valid double
 
-                                        // Is the first character a valid operator?
-                                        if(Measurement.validOperators.contains(txt.substring(0,1)) && txt.substring(1).trim().isDouble()){
+                                        // Is the first character a valid operator? This can only happen
+										// if the length of the string is 2 or larger. We perform the extra check 
+										// to avoid string-index out of bounds errors with the substring
+                                        if(txt.size() >= 2 && Measurement.validOperators.contains(txt.substring(0,1)) && txt.substring(1).trim().isDouble()){
                                             // Apparently, it is.
                                             flow.operator.put(i+","+j,txt.substring(0,1).trim())
                                             flow.edited_text[i][j] = Double.valueOf(txt.substring(1).trim())
