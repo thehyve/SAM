@@ -519,20 +519,30 @@ class MeasurementController {
                                     flow.edited_text[i][j] = params[i+','+j]
 
                                     // Check for a subject/timepoint conflict, for those timepoints that are not discarded (also check their features to make sure those are not discarded either)
+                                    // Empty cells should always be ignored.
                                     if(i==1 && j!= 0 && params[1+','+j]!='null' && params[0+','+j]!='null'){
-                                        for(int k = 0; k < flow.text.size(); k++){
-                                            if(k>1 && params[k+','+0]!='null'){
+                                        for(int k = 1; k < flow.text.size(); k++){
+                                            boolean blnNoDataInCell = false
+                                            if(flow.text[k][j]==null || flow.text[k][j].toString().trim()==""){
+                                                // Empty cells should always be ignored.
+                                                blnNoDataInCell = true
+                                                println "!@#\$%^&*\tblnNoDataInCell = true at ["+k+","+j+"]"
+                                            }
+                                            if((k>1 && params[k+','+0]!='null') || blnNoDataInCell){
                                                 def sample
-                                                flow.assay.samples.each {
-                                                    if(new RelTime( it.eventStartTime ).toString()==params[1+','+j] && it.subjectName==params[k+','+0]){
-                                                        sample = it
+                                                if(!blnNoDataInCell){
+                                                    flow.assay.samples.each {
+                                                        if(new RelTime( it.eventStartTime ).toString()==params[1+','+j] && it.subjectName==params[k+','+0]){
+                                                            sample = it
+                                                        }
                                                     }
                                                 }
-                                                if(sample==null){
-                                                    if(!subjectTimepointConflicts.contains(['timepoint' : params[1+','+j], 'subjectName' : params[k+','+0]])){
+                                                if(sample==null || blnNoDataInCell){
+                                                    if(!subjectTimepointConflicts.contains(['timepoint' : params[1+','+j], 'subjectName' : params[k+','+0]]) && !blnNoDataInCell){
                                                         subjectTimepointConflicts.add(['timepoint' : params[1+','+j], 'subjectName' : params[k+','+0]]);
                                                         // Here we don't add a timepoint/subjectName combination mmultiple times as this list is presented to the user, without any notion of features
                                                         // The reason why combinations might occur more than once is that they can occur with different features
+                                                        // Also, we only add to this list in case the cell contains data
                                                     }
                                                     // Here we do add the combinations for each different feature as this list is used internally to represent which datapoints should never be saved to the database
                                                     flow.ignore.add([k+","+j])
