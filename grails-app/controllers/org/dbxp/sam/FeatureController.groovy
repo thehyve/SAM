@@ -420,21 +420,13 @@ class FeatureController {
                     text = MatrixImporter.getInstance().importString(flow.inputField,["delimiter":"\t"]);
                 } else {
                     // Save the uploaded file into a variable
-                    def f = flow.inputfile
-                    println("JAAA");
+                    def f = flow.remove( 'inputfile' )
+                    
                     if(!f.empty) {
                         // Save data of this step
                         flow.message = "It appears this file cannot be read in." // In case we get an error before finishing
                         try{
-                            // Make the tempfolder (if it doesn't excist)
-                            new File( "./tempfolder/" ).mkdirs()
-                            // Transfer the file to the tempfolder
-                            f.transferTo( new File( "./tempfolder/" + File.separatorChar + f.getOriginalFilename() ) )
-                            // Get a variable for the transfered file and save it in the flow
-                            File file = new File("./tempfolder/" + File.separatorChar + f.getOriginalFilename())
-                            flow.inputfile = file
-                            // Get the content of the transfered file
-                            text = MatrixImporter.getInstance().importFile(file);
+							text = MatrixImporter.getInstance().importInputStream( f.getInputStream() )
                         } catch(Exception e){
                             // Something went wrong with the file...
                             flow.message += " The precise error is as follows: "+e

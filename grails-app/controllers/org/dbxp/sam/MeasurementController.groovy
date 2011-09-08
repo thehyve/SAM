@@ -266,7 +266,7 @@ class MeasurementController {
         uploadDataCheck {
             // Check to make sure we actually received a file.
             action {
-                def f = flow.inputfile
+                def f = flow.remove( 'inputfile' );
                 def filename = ""
                 def text = ""
 				
@@ -284,11 +284,7 @@ class MeasurementController {
                     if(!f.empty) {
                         // Save data of this step
                         try{
-                            new File( "./tempfolder/" ).mkdirs()
-                            f.transferTo( new File( "./tempfolder/" + File.separatorChar + f.getOriginalFilename() ) )
-                            File file = new File("./tempfolder/" + File.separatorChar + f.getOriginalFilename())
-                            flow.inputfile = file
-                            text = MatrixImporter.getInstance().importFile(file);
+                            text = MatrixImporter.getInstance().importInputStream(f.getInputStream());
                         } catch(Exception e){
                             // Something went wrong with the file...
                             flow.message = "It appears this file cannot be read in. The precise error is as follows: "+e
@@ -376,7 +372,7 @@ class MeasurementController {
                 }
 
                 flow.text = text
-                flow.input = [ "file": flow.inputfile]
+                //flow.input = [ "file": flow.inputfile ]
             }
             on("success").to "selectLayout"
             on("error").to "uploadData"
