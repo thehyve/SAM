@@ -57,7 +57,7 @@ class FeatureController {
 		}
 		
 		// What columns to return?
-		def columns = [ 'name', 'unit' ]
+		def columns = [ 'name', 'unit', 'template.name' ]
 		
 		// Create the HQL query
 		def hqlParams = [:];
@@ -106,7 +106,7 @@ class FeatureController {
 			iTotalDisplayRecords: filteredRecords.size(),
 			sEcho: params.int( 'sEcho' ),
 			aaData: records.collect {
-				[ it.id, it.name, it.unit, it.getFeatureGroups()*.name?.join( ", " ),
+				[ it.id, it.name, it.unit, it.template?.name, it.getFeatureGroups()*.name?.join( ", " ),
                     dt.buttonShow(id: it.id, controller: "feature", blnEnabled: true),
                     dt.buttonEdit(id: it.id, controller: "feature", blnEnabled: true),
                     dt.buttonDelete(id: it.id, controller: "feature", blnEnabled: true)]
