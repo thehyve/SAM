@@ -87,7 +87,7 @@ class AssayController {
 	   def columnsHQL = "SELECT a.id, a.study.name, a.name, COUNT( s ) "
 	   def hql = "FROM Assay a ";
 	   
-	   def joinHQL = " LEFT JOIN a.samples s "
+	   def joinHQL  = " LEFT JOIN a.samples s "
 	   def groupByHQL = " GROUP BY a.id, a.study.name, a.name "
 	   def whereHQL = "WHERE ";
 	   def orderHQL = "";
@@ -123,6 +123,21 @@ class AssayController {
 	   def numTotalRecords = Assay.count();
 	   def filteredRecords = Assay.executeQuery( "SELECT id " + hql + whereHQL, hqlParams );
 	   
+	   // Retrieve the number of samples with measurements for each assay
+	   // This is not the most efficient way of performing this query, but still 
+	   def extendedRecords = []
+	   if( records.size() > 0 ) {
+		   records.each { record ->
+			   def retrieveFilledSampleCountHQL = "SELECT COUNT(*) FROM Assay a LEFT JOIN a.samples s WHERE a.id = :assayId AND EXISTS( FROM Measurement m WHERE m.sample = s )"
+			   def numFilledSamples = Assay.executeQuery( retrieveFilledSampleCountHQL, [ "assayId": record[ 0 ] ] )
+			   
+			   def extendedRecord = record as List;
+			   extendedRecord [ 4 ] = numFilledSamples[0]
+			   
+			   extendedRecords << extendedRecord 
+		   }
+	   } 
+	   
 	   /*
 	   int 	iTotalRecords 			Total records, before filtering (i.e. the total number of records in the database)
 	   int 	iTotalDisplayRecords 	Total records, after filtering (i.e. the total number of records after filtering has been applied - not just the number of records being returned in this result set)
@@ -131,15 +146,13 @@ class AssayController {
 	   array 	aaData 					The data in a 2D array. Note that you can change the name of this parameter with sAjaxDataProp.
 	   */
 
-
-
 	   def returnValues = [
 		   iTotalRecords: numTotalRecords,
 		   iTotalDisplayRecords: filteredRecords.size(),
 		   sEcho: params.int( 'sEcho' ),
-		   aaData: records.collect {
+		   aaData: extendedRecords.collect {
                [
-                it[1], it[2], it[3],
+                it[1], it[2], it[3], it[4],
 			    dt.buttonShow( 'controller': "assay", 'id': it[ 0 ] ) ]
 		   },
 		   aIds: filteredRecords
