@@ -132,7 +132,7 @@ class AssayController {
 			   def numFilledSamples = Assay.executeQuery( retrieveFilledSampleCountHQL, [ "assayId": record[ 0 ] ] )
 			   
 			   def extendedRecord = record as List;
-			   extendedRecord [ 4 ] = numFilledSamples[0]
+			   extendedRecord[ 3 ] = numFilledSamples[0] + " / " + extendedRecord[ 3 ]
 			   
 			   extendedRecords << extendedRecord 
 		   }
@@ -152,7 +152,7 @@ class AssayController {
 		   sEcho: params.int( 'sEcho' ),
 		   aaData: extendedRecords.collect {
                [
-                it[1], it[2], it[3], it[4],
+                it[1], it[2], it[3],
 			    dt.buttonShow( 'controller': "assay", 'id': it[ 0 ] ) ]
 		   },
 		   aIds: filteredRecords

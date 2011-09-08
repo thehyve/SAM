@@ -18,10 +18,8 @@
 
                         <th>Assay</th>
 
-                        <th># Samples</th>
+                        <th class="nonsortable"># Samples</th>
 
-                        <th class="nonsortable"># Samples 2</th>
-						
 						<th class="nonsortable"></th>
                     </tr>
                 </thead>
