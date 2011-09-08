@@ -3,6 +3,9 @@
 */
 body { font-family: Verdana, Arial, Helvetica, sans-serif; font-size: 11px; }
 
+/* FAQ on homepage */
+#faq .ui-accordion-content { padding: 0.5em 1.2em; }
+
 div#contextmenu { margin-top: 0; margin-bottom: 20px; }
 div#contextmenu ul {
 	list-style-type: none;

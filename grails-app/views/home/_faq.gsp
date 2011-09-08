@@ -10,7 +10,7 @@
 
 <h3><a href="#">What is a feature?</a></h3>
 <div>
-    <p>A feature is a substance (or measurementtype/detector/...) that is measured when a sample is taken. For example, glucose, leptin, CD40, bodyweight, urea</p>
+    <p>A feature is a substance (or measurementtype / detector / ...) that is measured when a sample is taken. For example, glucose, leptin, CD40, bodyweight, urea</p>
 </div>
 
 <h3><a href="#">What is a featuregroup?</a></h3>
