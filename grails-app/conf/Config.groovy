@@ -105,8 +105,14 @@ log4j = {
 	// Change log4j properties for production
 	environments {
 		production {
-			warn	"grails.app", 
+			info	"grails.app", 
 					"dbxp.moduleBase"
+		}
+		dbnptest {
+			info	"grails.app",
+					"dbxp.moduleBase"
+		}
+		ci {
 		}
 	}
 }
