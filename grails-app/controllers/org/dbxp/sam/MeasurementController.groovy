@@ -523,22 +523,33 @@ class MeasurementController {
                                     // Check for a subject/timepoint conflict, for those timepoints that are not discarded (also check their features to make sure those are not discarded either)
                                     // Empty cells should always be ignored.
                                     if(i==1 && j!= 0 && params[1+','+j]!='null' && params[0+','+j]!='null'){
+										// Build a list of eventStartTimes and subjects, in order to lookup 
+										// conflicts fast. The map has the keys being the eventStartTimes and
+										// every value is a list on its own of sample names belonging to that startTime
+										def validCombinations = [:]
+										flow.assay.samples.each {
+											def startTime = new RelTime( it.eventStartTime ).toString();
+											def subjectName = it.subjectName;
+											
+											if( !validCombinations[ startTime ] )
+												validCombinations[ startTime ] = [ subjectName ]
+											else
+												validCombinations[ startTime ] << subjectName
+										}
+										
                                         for(int k = 1; k < flow.text.size(); k++){
                                             boolean blnNoDataInCell = false
                                             if(flow.text[k][j]==null || flow.text[k][j].toString().trim()==""){
                                                 // Empty cells should always be ignored.
                                                 blnNoDataInCell = true
                                             }
-                                            if((k>1 && params[k+','+0]!='null') || blnNoDataInCell){
+                                            if((k>1 && params[k+','+0]!='null') || blnNoDataInCell) {
                                                 def sample
-                                                if(!blnNoDataInCell){
-                                                    flow.assay.samples.each {
-                                                        if(new RelTime( it.eventStartTime ).toString()==params[1+','+j] && it.subjectName==params[k+','+0]){
-                                                            sample = it
-                                                        }
-                                                    }
-                                                }
-                                                if(sample==null || blnNoDataInCell){
+												
+												def startTime = params[1+','+j]
+												def subjectName = params[k+','+0]
+												 
+                                                if(blnNoDataInCell || !validCombinations[ startTime ] || !validCombinations[ startTime ].contains( subjectName ) ) {
                                                     if(!subjectTimepointConflicts.contains(['timepoint' : params[1+','+j], 'subjectName' : params[k+','+0]]) && !blnNoDataInCell){
                                                         subjectTimepointConflicts.add(['timepoint' : params[1+','+j], 'subjectName' : params[k+','+0]]);
                                                         // Here we don't add a timepoint/subjectName combination mmultiple times as this list is presented to the user, without any notion of features
@@ -547,10 +558,10 @@ class MeasurementController {
                                                     }
                                                     // Here we do add the combinations for each different feature as this list is used internally to represent which datapoints should never be saved to the database
                                                     flow.ignore.add([k+","+j])
-                                                }
+                                                } 
                                             }
-                                        }
-                                    }
+		                                }
+	                                }
                                     
                                     continue;
                                 }
@@ -602,6 +613,7 @@ class MeasurementController {
                                 }
                             }
                         }
+						
                     } 
                 }
 
@@ -631,6 +643,7 @@ class MeasurementController {
                         }
                     }
                 }
+				
                 // Not a single row or not a single column that isn't set on discard?
                 // That is probably a user error.
                 if(countRows<1 || countColumns<1){
