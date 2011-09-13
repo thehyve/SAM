@@ -83,7 +83,7 @@
 
 
                                 <g:each in="${row}" var="column" status="j">
-                                    <td style="border: 1px solid lightgray;">
+                                    <td style="border: 1px solid lightgray;" ${discardRow?.contains(i) ? 'class="importerDiscarded"' : ''}>
 
                                         <g:if test="${column.length()>25}">
                                             <div class="tooltip">

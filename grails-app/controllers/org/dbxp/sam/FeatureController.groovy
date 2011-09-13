@@ -515,7 +515,7 @@ class FeatureController {
                 // Get the rows that need to be discarded
                 flow.discardRow = [];
                 flow.featureList = [];
-
+                flow.featureAndIndexList = [:] // This list is used to retrieve the location of a feature (row-index) in the 'matchColumns.gsp' list, based on Feature name and unit. This is used to be allow the 'saveData' action to automatically un-check a Feature
                 boolean blnDiscardAll = true;
                 boolean bnlDuplicatesDetected = false; // Used to see if we should make the flow.message more informative
                 for(int i=1; i<flow.text.size(); i++) {
@@ -539,6 +539,7 @@ class FeatureController {
                             }
                         }
 
+                        flow.featureAndIndexList.put(objFeature.name+","+objFeature.unit,i);
                         objFeature.validate();
                         objFeature.getErrors().allErrors.each {
                             if(newMessage.length()>0) newMessage += "<br />";
@@ -627,10 +628,10 @@ class FeatureController {
                     // Here we check to see if this feature name and unit combination is presented more than once, in the user's input
                     // If it is we mark it as a duplicate and do not further process it
                     for(int j = 0; j < newFeatureList.size(); j++){
-                        if(newFeatureList[j].name==params.get("entity_"+strIdent+"_name") && newFeatureList[j].unit==params.get("entity_"+strIdent+"_unit")) {
+                        if(newFeatureList[j].name.toLowerCase()==params.get("entity_"+strIdent+"_name").toLowerCase() && newFeatureList[j].unit.toLowerCase()==params.get("entity_"+strIdent+"_unit").toLowerCase()) {
                             if(newMessage.length()>0) newMessage += "<br />";
                             newMessage += "The feature ["+objFeature.name+"] with unit ["+objFeature.unit+"] appears more than once in the input with this particular  name/unit combination. Please check this list.";
-                            flow.discardRow.add(j+1) // zero'th row rontains the header, which is not included in newFeatureList. This is why we must add '1' to the index
+                            flow.discardRow.add(flow.featureAndIndexList.get(objFeature.name+","+objFeature.unit))
 
                             // This feature occurs in the list more than once. We don't need to further check the list
                             blnUniqueErrorHasOccured = true;
@@ -669,7 +670,7 @@ class FeatureController {
                                 break;
                             case "validator.invalid":
                                 newMessage += "The feature ["+objFeature.name+"] cannot be saved, because that particular name/unit combination already exists.";
-                                flow.discardRow.add(j+1) // zero'th row rontains the header, which is not included in flow.featureList. This is why we must add '1' to the index
+                                flow.discardRow.add(flow.featureAndIndexList.get(objFeature.name+","+objFeature.unit))
                                 blnFeatureIsDuplicate = true
                                 blnUniqueErrorHasOccured = true
                                 break;
