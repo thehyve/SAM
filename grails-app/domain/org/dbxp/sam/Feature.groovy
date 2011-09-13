@@ -13,7 +13,24 @@ class Feature extends TemplateEntity {
     //static belongsTo = FeatureGroup
 
     static constraints = {
-        name(unique:true, blank:false)
+        name(unique:false, blank:false,
+            validator:{val,obj->
+                if(obj.id!=null){
+                    if(obj.unit!=null){
+                        Feature.find("from Feature as f where f.name=:name and f.unit=:unit and not f.id=:id",[name:val,unit:obj.unit,id:obj.id])==null
+                    } else {
+                        Feature.find("from Feature as f where f.name=:name and not f.id=:id",[name:val,id:obj.id])==null
+                    }
+                } else {
+                    if(obj.unit!=null){
+                        Feature.find("from Feature as f where f.name=:name and f.unit=:unit",[name:val,unit:obj.unit])==null
+                    } else {
+                        Feature.find("from Feature as f where f.name=:name",[name:val])==null
+                    }
+                }
+
+            }
+        )
         unit(nullable:true, blank:true)
     }
 

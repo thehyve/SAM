@@ -405,6 +405,9 @@ class FeatureController {
                     flow.inputfile = request.getFile('fileUpload')
                     flow.inputField = null;
                 }
+
+                // Empty flow.discardRow to make sure that we don't discard the same rows as we did with a different file
+                flow.discardRow = [];
             }.to "uploadDataCheck"
         }
 
@@ -439,7 +442,7 @@ class FeatureController {
                             flow.message += ' Make sure to add a comma-separated values based or Excel based file using the upload field below.'
                             return error()
                         }
-                        if(text.size()<2 || text[0].size()<2){
+                        if(text.size()<2 || text[0].size()<1){ // The text[0].size() check has been changed to <1, because having a column for units is not mandatory.
                             flow.message = "It appears the data does not have a valid layout."
                             return error()
                         }
@@ -508,13 +511,13 @@ class FeatureController {
             on("next") {
                 flow.message = null;
                 String newMessage = "";
-                String strUniqueMessage = "";
 
                 // Get the rows that need to be discarded
                 flow.discardRow = [];
                 flow.featureList = [];
 
                 boolean blnDiscardAll = true;
+                boolean bnlDuplicatesDetected = false; // Used to see if we should make the flow.message more informative
                 for(int i=1; i<flow.text.size(); i++) {
                     if(!params.get("row_"+i)) {
                         flow.discardRow.add(i);
@@ -540,12 +543,14 @@ class FeatureController {
                         objFeature.getErrors().allErrors.each {
                             if(newMessage.length()>0) newMessage += "<br />";
                             switch(it.code) {
-                                case "unique":
-                                    if(strUniqueMessage.length()>0) strUniqueMessage += "<br />";
-                                    strUniqueMessage += "A feature with the name ["+it.rejectedValue+"] already exists. Edit the corresponding row to create a new feature. Leave the row unedited to discard this row and keep the existing feature.";
-                                    break;
                                 case "nullable":
                                     newMessage += "The field ["+it.field+"] can't be null.";
+                                    break;
+                                case "validator.invalid":
+                                    newMessage += "The feature ["+objFeature.name+"] cannot be saved, because that particular name/unit combination already exists.";
+                                    // Set this feature to unchecked in the view
+                                    flow.discardRow.add(i)
+                                    bnlDuplicatesDetected = true
                                     break;
                                 default:
                                     newMessage += "Errorcode ["+it.code+"] on field ["+it.field+"] with value ["+it.rejectedValue+"]";
@@ -583,14 +588,13 @@ class FeatureController {
                     flow.message = "All columns were discarded";
                 }
 
+                if(bnlDuplicatesDetected){
+                    flow.message = "Unfortunately some name/unit combinations already exist. We have unchecked the relevant features for you.<br/>"+flow.message
+                }
+
                 if(flow.message!=null) {
                     return error();
                 }
-
-                if(strUniqueMessage.length()>0) {
-                    flow.message = strUniqueMessage;
-                }
-
             }.to "checkInput"
             on("previous") {
               flow.message = null;
@@ -613,24 +617,35 @@ class FeatureController {
                 flow.message = null;
                 String newMessage = "";
                 def newFeatureList = [];
-                def lstFeatureNames = [];
-
+                boolean blnUniqueErrorHasOccured = false; // Used to see if we should make the flow.message more informative
+              
                 for(int i=0; i<flow.featureList.size; i++) {
-
+                    boolean blnFeatureIsDuplicate = false
                     Feature objFeature = flow.featureList[i];
                     String strIdent = objFeature.getIdentifier();
+
+                    // Here we check to see if this feature name and unit combination is presented more than once, in the user's input
+                    // If it is we mark it as a duplicate and do not further process it
+                    for(int j = 0; j < newFeatureList.size(); j++){
+                        if(newFeatureList[j].name==params.get("entity_"+strIdent+"_name") && newFeatureList[j].unit==params.get("entity_"+strIdent+"_unit")) {
+                            if(newMessage.length()>0) newMessage += "<br />";
+                            newMessage += "The feature ["+objFeature.name+"] with unit ["+objFeature.unit+"] appears more than once in the input with this particular  name/unit combination. Please check this list.";
+                            flow.discardRow.add(j+1) // zero'th row rontains the header, which is not included in newFeatureList. This is why we must add '1' to the index
+
+                            // This feature occurs in the list more than once. We don't need to further check the list
+                            blnUniqueErrorHasOccured = true;
+                            blnFeatureIsDuplicate = true;
+                            break
+                        }
+                    }
+                    if(blnFeatureIsDuplicate){
+                        // We already know that his is a duplicate, so we don't further process it
+                        continue
+                    }
 
                     // Set all variables from POST var
                     for(int j=0; j<flow.templateFields.size(); j++) {
                         String strFieldVal = params.get("entity_"+strIdent+"_"+flow.templateFields[j].name.toLowerCase());
-                        if(flow.templateFields[j].name.toLowerCase().equals("name")) {
-                            if(lstFeatureNames.contains(strFieldVal)) {
-                                if(newMessage.length()>0) newMessage += "<br />";
-                                newMessage += "The feature ["+strFieldVal+"] can't be present more than once";
-                            } else {
-                                lstFeatureNames.add(strFieldVal);
-                            }
-                        }
                         if(flow.templateFields[j].required && strFieldVal==null) {
                             if(newMessage.length()>0) newMessage += "<br />";
                             newMessage += "Column ["+flow.templateFields[j]+"] is required";
@@ -645,24 +660,24 @@ class FeatureController {
                         }
                     }
 
-                    boolean blnUniqueError = false;
                     objFeature.validate();
                     objFeature.getErrors().allErrors.each {
+                        if(newMessage.length()>0) newMessage += "<br />";
                         switch(it.code) {
-                            case "unique":
-                                blnUniqueError = true;
-                                break;
                             case "nullable":
-                                if(newMessage.length()>0) newMessage += "<br />";
                                 newMessage += "The field ["+it.field+"] can't be null";
                                 break;
+                            case "validator.invalid":
+                                newMessage += "The feature ["+objFeature.name+"] cannot be saved, because that particular name/unit combination already exists.";
+                                flow.discardRow.add(j+1) // zero'th row rontains the header, which is not included in flow.featureList. This is why we must add '1' to the index
+                                blnFeatureIsDuplicate = true
+                                blnUniqueErrorHasOccured = true
+                                break;
                             default:
-                                if(newMessage.length()>0) newMessage += "<br />";
                                 newMessage += "Errorcode ["+it.code+"] on field ["+it.field+"] with value ["+it.rejectedValue+"]";
                         }
                     }
-
-                    if(!blnUniqueError) {
+                    if(!blnFeatureIsDuplicate) {
                         newFeatureList.add(objFeature);
                     }
                 }
@@ -670,6 +685,9 @@ class FeatureController {
                 if(newMessage.length()>0) {
                     flow.featureList = newFeatureList;
                     flow.message = newMessage;
+                    if(blnUniqueErrorHasOccured){
+                        flow.message = "Unfortunately some name/unit combinations already exist. We have unchecked the relevant features for you.<br/>"+flow.message
+                    }
                     return error();
                 } else {
                     // SAVE DATA
@@ -682,7 +700,7 @@ class FeatureController {
                 }
             }
             on("success").to "finishScreen"
-			on("error").to "errorSaving"
+			on("error").to "matchColumns"
 		}
 
         errorSaving {

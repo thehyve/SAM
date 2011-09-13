@@ -181,7 +181,7 @@
                                 </table>
                             </td>
                             <td rowspan="3" class="styleFeatureGroup">
-                                <div id="noGroups" style="display: ${groupList.size>0 ? "none" : "block"}"><i>This feature is not present in any groups</i></div>
+                                <div id="noGroups" style="display: ${(groupList==null || groupList.size>0) ? "none" : "block"}"><i>This feature is not present in any groups</i></div>
                                 <ul id="fg">
                                	<g:each in="${groupList}" var="f" status="i">
                                     <li id="fg_${f?.featureGroup.id}">
