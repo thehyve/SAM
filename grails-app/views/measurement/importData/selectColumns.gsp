@@ -7,6 +7,8 @@
 			// Associative array of booleans representing the state of the
 			// select boxes 
     		var selectsOK = new Array();
+            var numRowSelectorProblems = 0;
+            var numColumnSelectorProblems = 0;
         	
             $(document).ready(function() {
                 new SelectAddMore().init({
@@ -88,6 +90,12 @@
             });
 
             function selectChange(type) {
+                if(type=='featureSelect'){
+                    numColumnSelectorProblems=0;
+                } else {
+                    numRowSelectorProblems=0;
+                } // Resetting the selection problem counts per selection type
+
                 listSelects = $( 'select.' + type );
                 
                 var mapSelected = new Object();
@@ -110,21 +118,30 @@
 				// been selected multiple times
                 for(i=0; i<listSelects.length; i++) {
                     val = listSelects[ i ].value;
+                    //listSelects[ i ].style.color = '';
                     listSelects[ i ].style.color = '';
+                    listSelects[ i ].style.backgroundColor = '';
                     if(val!="null") {
                         if(mapSelected[val] > 1 || val == "" ) {
-                            listSelects[ i ].style.color = 'red';
+                            //listSelects[ i ].style.color = 'red';
+                            listSelects[ i ].style.color = 'white';
+                            listSelects[ i ].style.backgroundColor = 'red';
                             blnOK = false;
+                            if(type=='featureSelect'){
+                                numColumnSelectorProblems++;
+                            } else {
+                                numRowSelectorProblems++;
+                            }
                         }
                     }
                 }
 
                 selectsOK[ type ] = blnOK;
 
-                toggleNextButton();
+                toggleNextButton(type);
             }
 
-            function toggleNextButton() {
+            function toggleNextButton(type) {
 				var globalOK = true;
 				for( type in selectsOK ) {
 					if( !selectsOK[ type ] ) {
@@ -134,6 +151,24 @@
 				}
 
                 $( '#_eventId_next' ).attr( 'disabled', !globalOK );
+                if(!globalOK){
+                    var message = "Importer cannot proceed at this moment, because the combination of values in "
+                    if(numColumnSelectorProblems>0 && numRowSelectorProblems>0){
+                        message += numRowSelectorProblems+" horizontal selection fields and the combination of values in "+numColumnSelectorProblems+" vertical"
+                    } else {
+                        if(numColumnSelectorProblems>0){
+                            message += numColumnSelectorProblems+" vertical"
+                        } else {
+                            message += numRowSelectorProblems+" horizontal"
+                        }
+                    }
+                    message += " selection fields are incompatible. Please review the selection fields that are marked in red."
+                    $('#importerNotes').html(message);
+                    $('#importerNotes').addClass("errors");
+                } else {
+                    $('#importerNotes').html("");
+                    $('#importerNotes').removeClass("errors")
+                }
             }
 
             function checkSelectValue(type) {
@@ -147,10 +182,15 @@
                     if(val=="") {
                         listSelects[ i ].style.color = 'red';
                         blnOK = false;
+                        if(type=='featureSelect'){
+                            numColumnSelectorProblems++;
+                        } else {
+                            numRowSelectorProblems++;
+                        }
                     }
                 }
                 selectsOK[ type ] = blnOK;
-                toggleNextButton();
+                toggleNextButton(type);
             }
         </script>
         
@@ -358,6 +398,7 @@
                         </g:each>
                     </table>
                 </g:else>
+                <div id="importerNotes"></div>
                 <imp:importerFooter>
                     <g:submitButton name="previous" value="« Previous" action="previous"/>
                     <g:submitButton name="next" value="Next »" action="next"/>
