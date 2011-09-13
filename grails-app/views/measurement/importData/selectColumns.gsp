@@ -282,7 +282,7 @@
                                                            	<g:set var="featureValue" value="${features[feature_matches[column]].id}" />
                                                         </g:else>
                                                         
-                                                        <g:select rel="featureSelector" name="${i},${j}" from="${features}" value="${featureValue}" optionKey="id" optionValue="name" noSelection="[null:'[Discard]']" class="importerSelect featureSelect" onchange="selectChange('featureSelect');"/>
+                                                        <g:select rel="featureSelector" name="${i},${j}" from="${features}" value="${featureValue}" optionKey="id" noSelection="[null:'[Discard]']" class="importerSelect featureSelect" onchange="selectChange('featureSelect');"/>
                                                     </div>
                                                 </g:if>
                                                 <g:if test="${j==0}">
@@ -349,14 +349,14 @@
                                                     <!-- Feature row -->
                                                     <g:if test="${edited_text!=null}">
                                                         <g:if test="${edited_text[i][j]!=null}">
-                                                            <g:select rel="featureSelector" name="${i},${j}" from="${features}" value="${edited_text[i][j].id}" optionKey="id" optionValue="name" noSelection="[null:'[Discard]']" class="importerSelect featureSelect"/>
+                                                            <g:select rel="featureSelector" name="${i},${j}" from="${features}" value="${edited_text[i][j].id}" optionKey="id" noSelection="[null:'[Discard]']" class="importerSelect featureSelect"/>
                                                         </g:if>
                                                         <g:else>
-                                                            <g:select rel="featureSelector" name="${i},${j}" from="${features}" value="" optionKey="id" optionValue="name" noSelection="[null:'[Discard]']" class="importerSelect featureSelect"/>
+                                                            <g:select rel="featureSelector" name="${i},${j}" from="${features}" value="" optionKey="id" noSelection="[null:'[Discard]']" class="importerSelect featureSelect"/>
                                                         </g:else>
                                                     </g:if>
                                                     <g:else>
-                                                        <g:select rel="featureSelector" name="${i},${j}" from="${features}" value="${features[feature_matches[column]].id}" optionKey="id" optionValue="name" noSelection="[null:'[Discard]']" class="importerSelect featureSelect"/>
+                                                        <g:select rel="featureSelector" name="${i},${j}" from="${features}" value="${features[feature_matches[column]].id}" optionKey="id" noSelection="[null:'[Discard]']" class="importerSelect featureSelect"/>
                                                     </g:else>
                                                 </g:if>
                                                 <g:if test="${i==1&&j>0}">

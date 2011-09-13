@@ -30,7 +30,7 @@
 						<tr>
 							<th></th>
 							<g:each var="feature" in="${features}">
-								<th>${feature.name}</th>
+								<th>${feature }</th>
 							</g:each>
 						</tr>
 					</thead>

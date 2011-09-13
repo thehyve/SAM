@@ -17,13 +17,13 @@ class Feature extends TemplateEntity {
             validator:{val,obj->
                 if(obj.id!=null){
                     if(obj.unit!=null){
-                        Feature.find("from Feature as f where lower(f.name) like :name and lower(f.unit) like :unit and not f.id = :id",[name:"%"+val.toLowerCase()+"%",unit:"%"+obj.unit.toLowerCase()+"%",id:obj.id])==null
+                        Feature.find("from Feature as f where lower(f.name) like :name and f.unit = :unit and not f.id = :id",[name:"%"+val.toLowerCase()+"%",unit:obj.unit,id:obj.id])==null
                     } else {
                         Feature.find("from Feature as f where lower(f.name) like :name and not f.id=:id",[name:"%"+val.toLowerCase()+"%",id:obj.id])==null
                     }
                 } else {
                     if(obj.unit!=null){
-                        Feature.find("from Feature as f where lower(f.name) like :name and lower(f.unit) like :unit",[name:"%"+val.toLowerCase()+"%",unit:"%"+obj.unit.toLowerCase()+"%"])==null
+                        Feature.find("from Feature as f where lower(f.name) like :name and f.unit = :unit",[name:"%"+val.toLowerCase()+"%",unit:obj.unit])==null
                     } else {
                         Feature.find("from Feature as f where lower(f.name) like :name",[name:"%"+val.toLowerCase()+"%"])==null
                     }

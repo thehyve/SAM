@@ -628,7 +628,7 @@ class FeatureController {
                     // Here we check to see if this feature name and unit combination is presented more than once, in the user's input
                     // If it is we mark it as a duplicate and do not further process it
                     for(int j = 0; j < newFeatureList.size(); j++){
-                        if(newFeatureList[j].name.toLowerCase()==params.get("entity_"+strIdent+"_name").toLowerCase() && newFeatureList[j].unit.toLowerCase()==params.get("entity_"+strIdent+"_unit").toLowerCase()) {
+                        if(newFeatureList[j].name.toLowerCase()==params.get("entity_"+strIdent+"_name").toLowerCase() && newFeatureList[j].unit==params.get("entity_"+strIdent+"_unit")) {
                             if(newMessage.length()>0) newMessage += "<br />";
                             newMessage += "The feature ["+objFeature.name+"] with unit ["+objFeature.unit+"] appears more than once in the input with this particular  name/unit combination. Please check this list.";
                             flow.discardRow.add(flow.featureAndIndexList.get(objFeature.name+","+objFeature.unit))
