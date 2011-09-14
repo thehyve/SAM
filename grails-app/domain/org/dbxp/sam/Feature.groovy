@@ -17,18 +17,25 @@ class Feature extends TemplateEntity {
             validator:{val,obj->
                 if(obj.id!=null){
                     if(obj.unit!=null){
-                        Feature.find("from Feature as f where lower(f.name) like :name and f.unit = :unit and not f.id = :id",[name:"%"+val.toLowerCase()+"%",unit:obj.unit,id:obj.id])==null
+                        // The Feature has an id and a unit
+                        // Look for features with a different id (exact match), that have the same name (case-insensitive) and have the same unit (case-insensitive)
+                        Feature.find("from Feature as f where lower(f.name) like :name and lower(f.unit) = :unit and not f.id = :id",[name:val.toLowerCase(),unit:obj.unit.toLowerCase(),id:obj.id])==null
                     } else {
-                        Feature.find("from Feature as f where lower(f.name) like :name and not f.id=:id",[name:"%"+val.toLowerCase()+"%",id:obj.id])==null
+                        // The Feature has an id but not a unit
+                        // Look for features with a different id (exact match), that have the same name (case-insensitive) and also have no unit
+                        Feature.find("from Feature as f where lower(f.name) like :name and f.unit = null and not f.id=:id",[name:val.toLowerCase(),id:obj.id])==null
                     }
                 } else {
                     if(obj.unit!=null){
-                        Feature.find("from Feature as f where lower(f.name) like :name and f.unit = :unit",[name:"%"+val.toLowerCase()+"%",unit:obj.unit])==null
+                        // The Feature does not have an id but does have a unit
+                        // Look for features that have the same name (case-insensitive) and have the same unit (case-insensitive)
+                        Feature.find("from Feature as f where lower(f.name) like :name and lower(f.unit) = :unit",[name:val.toLowerCase(),unit:obj.unit.toLowerCase()])==null
                     } else {
-                        Feature.find("from Feature as f where lower(f.name) like :name",[name:"%"+val.toLowerCase()+"%"])==null
+                        // The Feature does not have an id and does not have a unit
+                        // Look for features that have the same name (case-insensitive) and also have no unit
+                        Feature.find("from Feature as f where lower(f.name) like :name and (f.unit = null or f.unit = '')",[name:val.toLowerCase()])==null
                     }
                 }
-
             }
         )
         unit(nullable:true, blank:true)

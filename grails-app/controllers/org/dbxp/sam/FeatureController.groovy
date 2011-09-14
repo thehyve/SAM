@@ -528,6 +528,9 @@ class FeatureController {
                             objFeature.changeTemplate(flow.template);
 
                         for(int j=0; j<flow.text[0].size(); j++) {
+                            // Trim the would-be field values
+                            // This is necessary to be able to accurately search for and compare these values
+                            flow.text[i][j] = flow.text[i][j].toString().trim()
 
                             if(params.get("column_"+j)!="") {
                                 try {
