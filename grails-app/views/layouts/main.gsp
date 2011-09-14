@@ -28,6 +28,7 @@
 		    			<li><g:link controller="measurement" action="importData">Measurements</g:link></li>
 		    		</ul>
 		    	</li>
+                <li><a href="${org.codehaus.groovy.grails.commons.ConfigurationHolder.config.grails.serverURL}/guides/SAM_User_Guide.pdf">User Guide</a></li>
 				<li><g:link url="${org.codehaus.groovy.grails.commons.ConfigurationHolder.config.gscf.baseURL}">Go to GSCF</g:link></li>
                 <g:if test="${org.codehaus.groovy.grails.commons.ConfigurationHolder.config.module.showVersionInfo}">
                     <li style="font-size: 9px; color: #888;"><g:message code="meta.app.version" default="Version: {0}" args="[meta(name: 'app.version')]"/><br />Changeset: <g:render template="/version"/></li>
