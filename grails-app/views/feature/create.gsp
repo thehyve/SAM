@@ -24,12 +24,20 @@
                 <div class="dialog">
                     <table>
                         <tbody>
-                            <tr class="prop">
+                            <tr class="prop odd">
                                 <td valign="top" class="name">
-                                    <label for="name">Name</label>
+                                    <label for="name">Name <i>(required)</i></label>
                                 </td>
                                 <td valign="top" class="value ${hasErrors(bean: featureInstance, field: 'name', 'errors')}">
                                     <g:textField name="name" value="${featureInstance?.name}" size="maxlength"/>
+                                </td>
+                            </tr>
+                             <tr class="prop even">
+                                <td valign="top" class="name">
+                                    <label for="unit">Unit</label>
+                                </td>
+                                <td valign="top" class="value ${hasErrors(bean: featureInstance, field: 'unit', 'errors')}">
+                                    <g:textField name="unit" value="${featureInstance?.unit}" size="maxlength"/>
                                 </td>
                             </tr>
                         </tbody>
