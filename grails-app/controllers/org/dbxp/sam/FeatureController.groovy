@@ -127,6 +127,11 @@ class FeatureController {
 
     def save = {
         def featureInstance = new Feature(params)
+
+        // Trim the whitespace from the name and (if available) the unit, to enable accurate validation
+        featureInstance.name = featureInstance.name?.trim()
+        featureInstance.unit = featureInstance.unit?.trim()
+        
         if (featureInstance.save(flush: true)) {
             flash.message = "The feature ${featureInstance.name} has been created."
             if(params?.nextPage=="edit"){
@@ -233,6 +238,11 @@ class FeatureController {
 			params.remove( 'template' ) 
 			
             featureInstance.properties = params
+           
+            // Trim the whitespace from the name and (if available) the unit, to enable accurate validation
+            featureInstance.name = featureInstance.name?.trim()
+            featureInstance.unit = featureInstance.unit?.trim()
+            
             if (!featureInstance.hasErrors() && featureInstance.save(flush: true)) {
                 flash.message = "The feature has been updated."
                 redirect(action: "show", id: featureInstance.id)
