@@ -498,6 +498,7 @@ class MeasurementController {
 				
                 for(int i = 0; i < flow.text.size(); i++){
                     for(int j = 0; j < flow.text[i].size(); j++){
+                        if(flow.text[i][j]!=null) flow.text[i][j] = flow.text[i][j].trim() // Taking this opportunity to trim cells. This way extraneous whitespace will not show up as comments.
                         if(params[i+','+j]){
                             // Here we are catching a user's feature or sample selection from the previous page and incorporating it into our new dataset
                             // We receive an object's id and use this to add the object to the flow.edited_text
