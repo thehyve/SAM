@@ -17,6 +17,14 @@
                 selectChange();
             });
 
+            function checkboxChange(strSelector) {
+                if( $(strSelector).attr("checked")=="checked" ) {
+                    $(strSelector).parents("tr").children(":not(.selectColumn)").removeClass("importerDiscarded");
+                } else {
+                    $(strSelector).parents("tr").children(":not(.selectColumn)").addClass("importerDiscarded");
+                }
+            }
+
             function selectChange() {
                 listSelects = $('select');
                 var mapSelected = new Object();
@@ -45,6 +53,8 @@
 
                 $("#_eventId_next").attr("Disabled", blnDisabled);
             }
+
+
 
         </script>
         
@@ -77,7 +87,7 @@
                             <tr>
                                 <td class="selectColumn">
                                     <g:if test="${i>0}">
-                                        <input type="checkbox" name="row_${i}" ${!discardRow?.contains(i) ? "CHECKED" : ""}/>
+                                        <input type="checkbox" name="row_${i}" ${!discardRow?.contains(i) ? "CHECKED" : ""} onclick="checkboxChange(this);"/>
                                     </g:if>
                                 </td>
 
