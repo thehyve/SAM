@@ -26,14 +26,15 @@
 
 <h3><a href="#">I want to import features, give me an example.</a></h3>
 <div>
-    <p>example: <img src="../images/examplefeatureimport.png" alt="subject layout" style="width: 80%;"/></p>
+    <p>example:</p>
+    <p><img src="${resource(dir: 'images', file: 'examplefeatureimport.png')}" alt="subject layout" style="width: 100%;"/></p>
 </div>
 
 <h3><a href="#">What kind of Excel sheets can I upload?</a></h3>
 <div>
     <p><b>examples:</b></p>
-    <p>subject layout sheet: <img src="../images/subjectlayout.png" alt="subject layout" style="width: 100%;" /></p>
-    <p>sample layout sheet: <img src="../images/samplelayout.png" alt="sample layout" style="width: 100%;" /></p>
+    <p>subject layout sheet: <img src="${resource(dir: 'images', file: 'subjectlayout.png')}" alt="subject layout" style="width: 100%;" /></p>
+    <p>sample layout sheet: <img src="${resource(dir: 'images', file: 'samplelayout.png')}" alt="sample layout" style="width: 100%;" /></p>
 </div>
 
 <h3><a href="#">Where can I edit my feature?</a></h3>
