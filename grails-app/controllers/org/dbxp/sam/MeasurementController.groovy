@@ -9,7 +9,10 @@ import org.dbnp.gdt.RelTime
 class MeasurementController {
     static allowedMethods = [save: "POST", update: "POST", delete: "POST"]
     def fuzzySearchService
-
+	
+	def sessionFactory
+	def propertyInstanceMap = org.codehaus.groovy.grails.plugins.DomainClassGrailsPlugin.PROPERTY_INSTANCE_MAP
+	
     def index = {
         redirect(action: "list", params: params)
     }
@@ -752,6 +755,8 @@ class MeasurementController {
 				// Save data into the database
                 flash.message = ""
 
+				def t = System.currentTimeMillis();
+				
                 def measurementList = []
                 if(flow.layout=="sample_layout"){
                     for(int i = 1; i < flow.edited_text.size(); i++){
@@ -805,37 +810,59 @@ class MeasurementController {
                     }
                 }
 				
+				log.trace "Creating list of samples (looking up samples): " + ( System.currentTimeMillis() - t )
+				t = System.currentTimeMillis();
+				
 				// Check whether the assay is still writable
 				if( !flow.assay.study.canWrite( session.user ) ) {
 					flash.message = "The authorization of your study has changed while you were adding measurements. Please choose another assay."
 					return error();
 				}
+				
+				// First create a list of measurements to save. This is done to avoid
+				// database lookups within the transaction to speed it up
+				def measurementsToSave = [];
+				measurementList.each {
+					m ->
+					if( m ) {
+						def measurementInstance = Measurement.findByFeatureAndSample( m.feature, m.sample );
+						
+						if(measurementInstance!=null){
+							measurementInstance.value = m.value
+							measurementInstance.operator = m.operator
+							measurementInstance.comments = m.comments
+							
+							measurementsToSave << measurementInstance
+						} else {
+							measurementsToSave << m
+						}
+					}
+				}
+				
+				log.trace "Looking up existing measurements: " + ( System.currentTimeMillis() - t )
+				t = System.currentTimeMillis();
+				
                 Measurement.withTransaction {
                     status ->
-                    measurementList.each {
+					def i = 0;
+                    measurementsToSave.each {
                         m ->
 						if( m ) {
-	                        def measurementInstance = Measurement.findByFeatureAndSample(m.feature, m.sample)
-	                        if(measurementInstance!=null){
-	                            measurementInstance.value = m.value
-	                            measurementInstance.operator = m.operator
-	                            measurementInstance.comments = m.comments
-	                            if(!measurementInstance.save(flush : true)){
-	                                flash.message += "<br>"+measurementInstance.getErrors().allErrors
-	                                println measurementInstance.getErrors().allErrors
-	                                status.setRollbackOnly();
-	                            }
-	                        } else {
-	                            if(!m.save(flush : true)){
-	                                flash.message += "<br>"+m.getErrors().allErrors
-	                                println m.getErrors().allErrors
-	                                status.setRollbackOnly();
-	                            }
-	                        }
+                            if(!m.save(flush : true)){
+                                flash.message += "<br>"+m.getErrors().allErrors
+                                println m.getErrors().allErrors
+                                status.setRollbackOnly();
+                            }
+							
+							// Clear hibernate session, in order to handle large amounts of
+							// samples
+							if (i++ % 20 == 0) cleanUpGorm( m )
 						}
                     }
                 }
-
+				
+				log.trace "Time it took for saving: " + ( System.currentTimeMillis() - t );
+				
                 if(flash.message!=""){
                     flash.message = "There were errors while saving your measurements: "+flash.message
                     return error()
@@ -853,6 +880,23 @@ class MeasurementController {
 
         finishScreen()
 	}
+	
+	/**
+	 * When saving lots of measurements, the hibernate session must be cleaned, otherwise
+	 * the import will be very very slow. See http://naleid.com/blog/2009/10/01/batch-import-performance-with-grails-and-mysql/
+	 * for more information.
+	 * @return
+	 */
+	def cleanUpGorm( Measurement m ) {
+		//log.trace( "Cleaning measurement from hibernate cache" );
+		//sessionFactory.evict(Measurement.class, m.id); //
+		
+		log.trace( "Cleaning hibernate session while saving" );
+		def session = sessionFactory.currentSession
+		session.flush()
+		session.clear()
+		propertyInstanceMap.get().clear()
+	}		
 
     Measurement importerCreateMeasurement(SAMSample s, Feature f, def txt, def comm, def op) {
         def operator

@@ -23,8 +23,8 @@ class Measurement {
         })
         operator(blank:true,nullable:true,validator:{val,obj->val in obj.validOperators})
         comments(blank:true,nullable:true)
-        sample(blank:false)
-        feature(blank:false)
+        sample(blank:false, index: 'sample_and_feature')
+        feature(blank:false, index: 'sample_and_feature')
     }
 	
 	/**
