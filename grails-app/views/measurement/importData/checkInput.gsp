@@ -97,8 +97,8 @@
                     <g:each in="${edited_text}" var="row" status="i">
                         <tr>
                             <g:each in="${row}" var="column" status="j">
-                                <g:if test="${!(i==0&j==0)}">
-                                    <%
+                                <g:if test="${!(i==0&j==0) && !(layout=='subject_layout'&& (i==1&j==0))}">
+                                    <% // The if-statement excludes cell A1, and also cell A2 when we are using subject layout, because of the fact that cell A2 is not interpreted in subject layout
                                         def op = operator?.get(i+','+j)
                                         def co = comments?.get(i+','+j)
                                         def timepoint = false

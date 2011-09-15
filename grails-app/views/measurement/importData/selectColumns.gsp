@@ -118,14 +118,10 @@
 				// been selected multiple times
                 for(i=0; i<listSelects.length; i++) {
                     val = listSelects[ i ].value;
-                    //listSelects[ i ].style.color = '';
                     listSelects[ i ].style.color = '';
-                    listSelects[ i ].style.backgroundColor = '';
                     if(val!="null") {
                         if(mapSelected[val] > 1 || val == "" ) {
-                            //listSelects[ i ].style.color = 'red';
-                            listSelects[ i ].style.color = 'white';
-                            listSelects[ i ].style.backgroundColor = 'red';
+                            listSelects[ i ].style.color = 'red';
                             blnOK = false;
                             if(type=='featureSelect'){
                                 numColumnSelectorProblems++;

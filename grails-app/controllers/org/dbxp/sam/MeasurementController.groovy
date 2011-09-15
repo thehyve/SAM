@@ -492,7 +492,11 @@ class MeasurementController {
                 if(!flow.edited_text){
                     flow.edited_text = new Object[flow.text.size()][flow.text[0].size()]
                     fresh = true;
+                }
+                if(!flow.operator){
                     flow.operator = [:]
+                }
+                if(!flow.comments){
                     flow.comments = [:]
                 }
 				
