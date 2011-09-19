@@ -25,6 +25,25 @@
                             success: function( returnHTML, textStatus, jqXHR ) {
                                 $( "td#templateSelection" ).html( returnHTML );
                                 insertSelectAddMore();
+
+                                $("#template").children().each(function() {
+                                    var child = $(this);
+                                    var blnFound = false;
+                                    for(i=0; i<prevTemplateOpt.length; i++) {
+                                        if(child.val()==prevTemplateOpt[i].value) {
+                                            blnFound = true;
+                                            break;
+                                        }
+                                    }
+                                    if(!blnFound || child.val()==selectedTempl) {
+                                        if(!blnFound) {
+                                            selectedTempl = child.val();
+                                        }
+                                        child.attr("selected","selected");
+                                    }
+                                });
+
+                                prevTemplateOpt = null;
                             }
                         });
                     }
@@ -32,7 +51,7 @@
             }
 
             function createTextfield(id, content) {
-                $( "#"+id ).html("<span style='color: grey'>Add tab delimited data (<a href='#' onClick='createUpload(\"fileUpload\"); return false;'>close</a>)</span><br /><textarea id='"+id+"' name='"+id+"' rows='5' cols='20'>"+content+"</textarea>");
+                $( "#"+id ).html("<span style='color: gray'>Add tab delimited data (<a href='#' onClick='createUpload(\"fileUpload\"); return false;'>close</a>)</span><br /><textarea id='"+id+"' name='"+id+"' rows='5' cols='20'>"+content+"</textarea>");
                 $( "#"+id ).resizable({
                     handles: "se"
                 });
@@ -43,9 +62,15 @@
                 $( "#pasteField" ).html('<input type="file" id="'+id+'" name="'+id+'"/> or <a href="#" onclick="createTextfield(\'pasteField\',\''+strContent+'\'); return false;">paste in textfield</a>');
             }
 
-            function handleTemplateChange() {
-                // Javascript that is executed when a template is selected
-                // Do nothing
+
+            var prevTemplateOpt = null;
+            var selectedTempl = null;
+            function handleTemplateChange(objSelect) {
+                if($("#template option:selected").hasClass("modify")) {
+                    prevTemplateOpt = $("#template").children();
+                } else {
+                    selectedTempl = $("#template option:selected").val();
+                }
             }
 
         </r:script>
@@ -82,7 +107,7 @@
                             <tr>
                                 <td><div id="datatemplate">Choose type of data template (not required):</div></td>
                                 <td id="templateSelection">
-                                    <af:templateElement name="template" rel="template" description="" entity="${Feature}" ontologies="" value="${template}" error="template" addDummy="true" onChange="if(!\$( 'option:selected', \$(this) ).hasClass( 'modify' )){ }"></af:templateElement>
+                                    <af:templateElement name="template" rel="template" description="" entity="${Feature}" ontologies="" value="${template}" error="template" addDummy="true" onChange="handleTemplateChange()"></af:templateElement>
                                 </td>
                             </tr>
                         </tbody>
