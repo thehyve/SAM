@@ -528,6 +528,8 @@ class FeatureController {
                 flow.featureAndIndexList = [:] // This list is used to retrieve the location of a feature (row-index) in the 'matchColumns.gsp' list, based on Feature name and unit. This is used to be allow the 'saveData' action to automatically un-check a Feature
                 boolean blnDiscardAll = true;
                 boolean bnlDuplicatesDetected = false; // Used to see if we should make the flow.message more informative
+                def lstUniqueErrorItemsFromDatabase = [] // This list will hold which items in the input list triggered the error
+
                 for(int i=1; i<flow.text.size(); i++) {
                     if(!params.get("row_"+i)) {
                         flow.discardRow.add(i);
@@ -555,18 +557,23 @@ class FeatureController {
                         flow.featureAndIndexList.put(objFeature.name+","+objFeature.unit,i);
                         objFeature.validate();
                         objFeature.getErrors().allErrors.each {
-                            if(newMessage.length()>0) newMessage += "<br />";
                             switch(it.code) {
                                 case "nullable":
+                                    if(newMessage.length()>0) newMessage += "<br />";
                                     newMessage += "The field ["+it.field+"] can't be null.";
                                     break;
                                 case "validator.invalid":
-                                    newMessage += "The feature ["+objFeature.name+"] cannot be saved, because that particular name/unit combination already exists.";
+                                    if(objFeature.unit==null || objFeature.unit==""){
+                                        lstUniqueErrorItemsFromDatabase.add("feature "+objFeature.name)
+                                    } else {
+                                        lstUniqueErrorItemsFromDatabase.add("feature "+objFeature.name+" with unit "+objFeature.unit)
+                                    }
                                     // Set this feature to unchecked in the view
                                     flow.discardRow.add(i)
                                     bnlDuplicatesDetected = true
                                     break;
                                 default:
+                                    if(newMessage.length()>0) newMessage += "<br />";
                                     newMessage += "Errorcode ["+it.code+"] on field ["+it.field+"] with value ["+it.rejectedValue+"]";
                             }
                         }
@@ -603,7 +610,14 @@ class FeatureController {
                 }
 
                 if(bnlDuplicatesDetected){
-                    flow.message = "Unfortunately some name/unit combinations already exist. We have unchecked the relevant features for you.<br/>"+flow.message
+                    if(lstUniqueErrorItemsFromDatabase.size()>0){
+                        def message = "Unfortunately some name/unit combinations already exist. We have unchecked the relevant features for you. It concerns the following features: "+lstUniqueErrorItemsFromDatabase
+                        if(flow.message!=null){
+                            flow.message += message+"<br/>"+flow.message
+                        } else {
+                            flow.message = message
+                        }
+                    }
                 }
 
                 if(flow.message!=null) {
@@ -632,6 +646,8 @@ class FeatureController {
                 String newMessage = "";
                 def newFeatureList = [];
                 boolean blnUniqueErrorHasOccured = false; // Used to see if we should make the flow.message more informative
+                def lstUniqueErrorItemsFromInputList = [] // This list will hold which items in the input list triggered the error
+                def lstUniqueErrorItemsFromDatabase = [] // This list will hold which items in the databee triggered the error
               
                 for(int i=0; i<flow.featureList.size; i++) {
                     boolean blnFeatureIsDuplicate = false
@@ -642,11 +658,14 @@ class FeatureController {
                     // If it is we mark it as a duplicate and do not further process it
                     for(int j = 0; j < newFeatureList.size(); j++){
                         if(newFeatureList[j].name.toLowerCase()==params.get("entity_"+strIdent+"_name").toLowerCase() && newFeatureList[j].unit==params.get("entity_"+strIdent+"_unit")) {
-                            if(newMessage.length()>0) newMessage += "<br />";
-                            newMessage += "The feature ["+objFeature.name+"] with unit ["+objFeature.unit+"] appears more than once in the input with this particular  name/unit combination. Please check this list.";
+                            if(objFeature.unit==null || objFeature.unit==""){
+                                lstUniqueErrorItemsFromInputList.add("feature "+objFeature.name)
+                            } else {
+                                lstUniqueErrorItemsFromInputList.add("feature "+objFeature.name+" with unit "+objFeature.unit)
+                            }
                             flow.discardRow.add(flow.featureAndIndexList.get(objFeature.name+","+objFeature.unit))
 
-                            // This feature occurs in the list more than once. We don't need to further check the list
+                            // This feature occurs in the list more than once. We don't need to further check the list to see if it appears again
                             blnUniqueErrorHasOccured = true;
                             blnFeatureIsDuplicate = true;
                             break
@@ -666,7 +685,6 @@ class FeatureController {
                         } else {
                             try {
                                 objFeature.setFieldValue(flow.templateFields[j].name,strFieldVal,true)
-                                //println("\n\n["+flow.templateFields[j].name+"] set to ["+strFieldVal+"]\n\n");
                             } catch (Exception e) {
                                 if(newMessage.length()>0) newMessage += "<br />";
                                 newMessage += "Column ["+flow.templateFields[j]+"] can't be set to ["+strFieldVal+"]";
@@ -676,18 +694,23 @@ class FeatureController {
 
                     objFeature.validate();
                     objFeature.getErrors().allErrors.each {
-                        if(newMessage.length()>0) newMessage += "<br />";
                         switch(it.code) {
                             case "nullable":
+                                if(newMessage.length()>0) newMessage += "<br />";
                                 newMessage += "The field ["+it.field+"] can't be null";
                                 break;
                             case "validator.invalid":
-                                newMessage += "The feature ["+objFeature.name+"] cannot be saved, because that particular name/unit combination already exists.";
+                                if(objFeature.unit==null || objFeature.unit==""){
+                                    lstUniqueErrorItemsFromDatabase.add("feature "+objFeature.name)
+                                } else {
+                                    lstUniqueErrorItemsFromDatabase.add("feature "+objFeature.name+" with unit "+objFeature.unit)
+                                }
                                 flow.discardRow.add(flow.featureAndIndexList.get(objFeature.name+","+objFeature.unit))
                                 blnFeatureIsDuplicate = true
                                 blnUniqueErrorHasOccured = true
                                 break;
                             default:
+                                if(newMessage.length()>0) newMessage += "<br />";
                                 newMessage += "Errorcode ["+it.code+"] on field ["+it.field+"] with value ["+it.rejectedValue+"]";
                         }
                     }
@@ -696,11 +719,16 @@ class FeatureController {
                     }
                 }
 
-                if(newMessage.length()>0) {
+                if(blnUniqueErrorHasOccured || newMessage.length()>0) {
                     flow.featureList = newFeatureList;
                     flow.message = newMessage;
                     if(blnUniqueErrorHasOccured){
-                        flow.message = "Unfortunately some name/unit combinations already exist. We have unchecked the relevant features for you.<br/>"+flow.message
+                        def message = ""
+                        if(flow.message!=null){
+                            message = "<br/>"+flow.message
+                        }
+                        if(lstUniqueErrorItemsFromInputList.size()>0) flow.message = "Unfortunately some name/unit combinations occur more than once in your input. We have unchecked the relevant features for you. It concerns the following features: "+lstUniqueErrorItemsFromInputList+message
+                        if(lstUniqueErrorItemsFromDatabase.size()>0) flow.message = "Unfortunately some name/unit combinations already exist. We have unchecked the relevant features for you. It concerns the following features: "+lstUniqueErrorItemsFromDatabase+message
                     }
                     return error();
                 } else {
