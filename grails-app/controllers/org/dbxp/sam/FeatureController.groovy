@@ -57,11 +57,11 @@ class FeatureController {
 		}
 		
 		// What columns to return?
-		def columns = [ 'name', 'unit', 'template.name' ]
+		def columns = [ 'f.name', 'f.unit', 't.name' ]
 		
 		// Create the HQL query
 		def hqlParams = [:];
-		def hql = "FROM Feature f ";
+		def hql = "FROM Feature f LEFT JOIN f.template as t ";
 		def orderHQL = "";
 		
 		// Search properties
@@ -69,12 +69,9 @@ class FeatureController {
 			hqlParams[ "search" ] = "%" + search.toLowerCase() + "%"
 			
 			def hqlConstraints = [];
-			for( int i = 0; i < 2; i++ ) {
+			for( int i = 0; i < 3; i++ ) {
 				hqlConstraints << "LOWER(" + columns[ i ] + ") LIKE :search"
 			}
-
-            // Template names should be searched seperately
-            hqlConstraints << "EXISTS ( FROM Template t WHERE t.id = f.template AND LOWER(t.name) LIKE :search)";
 
 			// Group names should be searched separately
 			hqlConstraints << "EXISTS ( FROM FeatureGroup fg, FeaturesAndGroups fag WHERE fg = fag.featureGroup AND fag.feature = f AND LOWER(fg.name) LIKE :search)";
@@ -87,12 +84,15 @@ class FeatureController {
 		// Sort properties
 		if( sortOn ) {
 			orderHQL = "ORDER BY " + sortOn.collect { columns[it.column] + " " + it.direction }.join( " " );
+            println(orderHQL)
 		}
+
+        println(hql+orderHQL);
 
         // Display properties
 		def records = Feature.executeQuery( hql + orderHQL, hqlParams, [ max: displayLength, offset: displayStart ] );
 		def numTotalRecords = Feature.count();
-		def filteredRecords = Feature.executeQuery( "SELECT id " + hql, hqlParams );
+		def filteredRecords = Feature.executeQuery( "SELECT f.id " + hql, hqlParams );
 		
 		/*
 		int 	iTotalRecords 			Total records, before filtering (i.e. the total number of records in the database)
@@ -109,10 +109,10 @@ class FeatureController {
 			iTotalDisplayRecords: filteredRecords.size(),
 			sEcho: params.int( 'sEcho' ),
 			aaData: records.collect {
-				[ it.id, it.name, it.unit, it.template?.name, it.getFeatureGroups()*.name?.join( ", " ),
-                    dt.buttonShow(id: it.id, controller: "feature", blnEnabled: true),
-                    dt.buttonEdit(id: it.id, controller: "feature", blnEnabled: true),
-                    dt.buttonDelete(id: it.id, controller: "feature", blnEnabled: true)]
+				[ it[0].id, it[0].name, it[0].unit, it[1]?.name, it[0]?.getFeatureGroups()*.name?.join( ", " ),
+                    dt.buttonShow(id: it[0].id, controller: "feature", blnEnabled: true),
+                    dt.buttonEdit(id: it[0].id, controller: "feature", blnEnabled: true),
+                    dt.buttonDelete(id: it[0].id, controller: "feature", blnEnabled: true)]
 			},
 			aIds: filteredRecords 
 		]

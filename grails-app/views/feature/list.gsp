@@ -21,7 +21,7 @@
 
                         <th>Unit</th>
 
-                        <th class="nonsortable">Template</th>
+                        <th>Template</th>
                         
                         <th class="nonsortable">Groups</th>
 
