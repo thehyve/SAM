@@ -137,14 +137,10 @@ class FeatureController {
         
         if (featureInstance.save(flush: true)) {
             flash.message = "The feature ${featureInstance.name} has been created."
-            if(params?.nextPage=="edit"){
-                redirect(action: "edit", id: featureInstance.id, featureInstance: featureInstance)
+            if(params?.nextPage=="minimalCreate"){
+                redirect(action: "minimalCreate")
             } else {
-                if(params?.nextPage=="minimalCreate"){
-                    redirect(action: "minimalCreate")
-                } else {
-                    redirect(action: "list")
-                }
+                redirect(action: "list")
             }
         }
         else {
