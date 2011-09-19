@@ -78,3 +78,8 @@
 .extraFieldInfo {
     display: none;
 }
+
+div.tableEditor {
+    overflow: visible;
+    overflow-x: auto;
+}

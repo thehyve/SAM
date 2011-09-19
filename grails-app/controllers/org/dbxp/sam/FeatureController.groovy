@@ -455,6 +455,25 @@ class FeatureController {
                             flow.message += ' Make sure to add a comma-separated values based or Excel based file using the upload field below.'
                             return error()
                         }
+
+                        // Check for the largest row, and pad the rest of the rows.
+                        // The reason we do this, is because empty cells are not reflected in the MatrixImporter output.
+                        // This results in the table being rendered in a non-spiffy fashion, and selectors not appearing where they should.
+                        // This padding occurs before the 'valid layout check', because an empty header does not pass that check.
+                        int intLargestRowSize = 0
+                        for(int i = 0; i < text.size(); i++){
+                            if(text[i]?.size()>intLargestRowSize){
+                                intLargestRowSize = text[i].size()
+                            }
+                        }
+                        for(int i = 0; i < text.size(); i++){
+                            if(text[i]?.size()<intLargestRowSize){
+                                for(int j = text[i].size(); j < intLargestRowSize; j++){
+                                    text[i].add("")
+                                }
+                            }
+                        }
+
                         if(text.size()<2 || text[0].size()<1){ // The text[0].size() check has been changed to <1, because having a column for units is not mandatory.
                             flow.message = "It appears the data does not have a valid layout."
                             return error()
