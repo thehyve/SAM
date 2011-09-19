@@ -427,7 +427,9 @@ class MeasurementController {
                     def samples = flow.assay.samples
                     
 					// Retrieve timepoints and convert them to RelTime strings
-					flow.timepoints = samples*.eventStartTime.unique().collect { new RelTime( it ).toString() }
+					flow.timepoints = samples*.eventStartTime.unique()
+					flow.timepoints.sort();
+					flow.timepoints = flow.timepoints.collect { new RelTime( it ).toString() }
                     
 					// TODO: retrieve the sorted subjects directly from the database for performance reasons
 					flow.subjects = samples*.subjectName.unique().sort()
