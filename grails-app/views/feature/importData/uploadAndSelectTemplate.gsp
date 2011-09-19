@@ -80,7 +80,7 @@
                                 <td width="100px"><span id="pasteField"><input type="file" id="fileUpload" name="fileUpload"/> or <a href="#" onclick="createTextfield('pasteField','${inputField?.encodeAsJavaScript()}'); return false;">paste in textfield</a></span></td>
                             </tr>
                             <tr>
-                                <td><div id="datatemplate">Choose type of data template:</div></td>
+                                <td><div id="datatemplate">Choose type of data template (not required):</div></td>
                                 <td id="templateSelection">
                                     <af:templateElement name="template" rel="template" description="" entity="${Feature}" ontologies="" value="${template}" error="template" addDummy="true" onChange="if(!\$( 'option:selected', \$(this) ).hasClass( 'modify' )){ }"></af:templateElement>
                                 </td>
