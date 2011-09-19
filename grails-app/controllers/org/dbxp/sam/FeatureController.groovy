@@ -73,6 +73,9 @@ class FeatureController {
 				hqlConstraints << "LOWER(" + columns[ i ] + ") LIKE :search"
 			}
 
+            // Template names should be searched seperately
+            hqlConstraints << "EXISTS ( FROM Template t WHERE t.id = f.template AND LOWER(t.name) LIKE :search)";
+
 			// Group names should be searched separately
 			hqlConstraints << "EXISTS ( FROM FeatureGroup fg, FeaturesAndGroups fag WHERE fg = fag.featureGroup AND fag.feature = f AND LOWER(fg.name) LIKE :search)";
 			
