@@ -2,6 +2,9 @@ import org.codehaus.groovy.grails.web.json.JSONObject
 
 class BootStrap {
 
+    // inject the datasource
+	def dataSource
+
     def init = { servletContext ->
         // Register your reader here, like this:
         // MatrixImporter.getInstance().registerReader( new ExcelReader() );
@@ -17,6 +20,9 @@ class BootStrap {
         } catch (Exception e) {
             println("BootStrap.groovy Error: "+e);
         }
+
+        // automatically handle database upgrades
+		DatabaseUpgrade.handleUpgrades(dataSource)
     }
     def destroy = {
     }
