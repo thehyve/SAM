@@ -9,7 +9,19 @@
                     </g:if>
                 </td>
                 <td valign="top" class="value ${hasErrors(bean: featureInstance, field: field.escapedName(), 'errors')}">
-                    <g:textField name="${field.escapedName()}" value="${values[ field.name ]}"/>
+                    <%-- <g:textField name="${field.escapedName()}" value="${values[ field.name ]}"/> --%>
+                    <%-- <af:renderTemplateField name="${field.escapedName()}" templateField="${field}" value="${values[ field.name ] !=null ? values[ field.name ] : ""}"/> --%>
+                    <g:if test="${featureInstance?.id!=null}">
+                        <af:renderTemplateField name="${field.escapedName()}" templateField="${field}" entity="${featureInstance}"/>
+                    </g:if>
+                    <g:else>
+                        <g:if test="${values.get(field.escapedName())!=null}">
+                            <af:renderTemplateField name="${field.escapedName()}" entity="${featureInstance}" templateField="${field}" value="${values[field.escapedName()]}"/>
+                        </g:if>
+                        <g:else>
+                            <af:renderTemplateField name="${field.escapedName()}" entity="${featureInstance}" templateField="${field}" value=""/>
+                        </g:else>
+                    </g:else>
                 </td>
             </tr>
         </g:each>

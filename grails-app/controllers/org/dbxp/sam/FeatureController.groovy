@@ -129,12 +129,39 @@ class FeatureController {
     }
 
     def save = {
-        def featureInstance = new Feature(params)
+        def featureInstance = new Feature()
+
+        // Was study template set on the 'create page'?
+        if( params.template) {
+            // Yes, so add the template
+            featureInstance.changeTemplate( params.template );
+        }
+
+        // does the study have a template set?
+        if (featureInstance.template) {
+            // yes, iterate through template fields
+            featureInstance.giveFields().each() {
+                // and set their values
+                if(it.type)
+                featureInstance.setFieldValue(it.name, params.get(it.escapedName()+"_"+it.escapedName()))
+            }
+        }
+
+        // set the new featuregroups
+        def featuregroups = params.list( 'featuregroups' ).findAll { it.isLong() }.collect { it.toLong() };
+        for(int i=0; i<featuregroups.size(); i++) {
+            FeaturesAndGroups.create(FeatureGroup.findById(featuregroups[i]),featureInstance);
+        }
+
+        // Remove the template parameter, since it is a string and that troubles the
+        // setting of properties.
+        def template = params.remove( 'template' )
+
+        featureInstance.properties = params
 
         // Trim the whitespace from the name and (if available) the unit, to enable accurate validation
         featureInstance.name = featureInstance.name?.trim()
         featureInstance.unit = featureInstance.unit?.trim()
-        
         if (featureInstance.save(flush: true)) {
             flash.message = "The feature ${featureInstance.name} has been created."
             if(params?.nextPage=="minimalCreate"){
@@ -210,7 +237,7 @@ class FeatureController {
                 // yes, iterate through template fields
                 featureInstance.giveFields().each() {
                     // and set their values
-                    featureInstance.setFieldValue(it.name, params.get(it.escapedName()))
+                    featureInstance.setFieldValue(it.name, params.get(it.escapedName()+"_"+it.escapedName()))
                 }
             }
 
@@ -283,8 +310,6 @@ class FeatureController {
     }
 	
 	def returnUpdatedTemplateSpecificFields = {
-        // Actually using this in a .gsp does not seem to lead to a working template editor
-        // TODO: fix this so that add/modify does not have to lead to a page refresh
 		def template = _determineTemplate();
 		def values = [:];
 		
@@ -292,7 +317,7 @@ class FeatureController {
 		try {
 			if( template ) {
 				template.fields.each {
-					values[it.name] = params.get(it.escapedName());
+					values[it.escapedName()] = params.get(it.escapedName()+"_"+it.escapedName());
 				}
 			}
 		} catch( Exception e ) {

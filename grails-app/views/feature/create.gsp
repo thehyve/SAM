@@ -4,6 +4,126 @@
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
         <meta name="layout" content="main"/>
         <title>Create a new feature</title>
+        <r:require module="featureTemplateFields"/>
+        <r:script type="text/javascript" disposition="head">
+            $(document).ready(function() {
+            	insertSelectAddMore();
+                onStudyWizardPage(); // Add datepickers
+            });
+
+            function insertSelectAddMore() {
+                new SelectAddMore().init({
+                    rel  : 'template',
+                    url  : baseUrl + '/templateEditor',
+                    vars        : 'entity,ontologies',
+                    label   : 'add / modify',
+                    style   : 'modify',
+                    onClose : function(scope) {
+                        handleTemplateChange();
+                    }
+                });
+            }
+
+            function handleTemplateChange( selectedOption ){
+                templateEditorHasBeenOpened = false
+
+                if( selectedOption == undefined ) {
+	                // If no selectedOptions is given, the template editor has been opened. In that case, we use
+	                // the template previously selected
+                	templateEditorHasBeenOpened = true;
+                } else if( $(selectedOption).hasClass( 'modify' ) ){
+                	// If the user has selected the add/modify option, the form shouldn't be updated yet.
+                	// That should only happen if the template editor is closed
+                	return;
+                }
+
+                // Collect all data to be sent to the controller
+                data = $( "form#create" ).serialize() + "&templateEditorHasBeenOpened=" + ( templateEditorHasBeenOpened ? "true" : "false" );
+
+	            // Always update the template specific fields, when the template has changed but also
+	            // when the template editor is closed
+                $.ajax({
+					url: baseUrl + "/feature/returnUpdatedTemplateSpecificFields",
+					data: data,
+					type: "POST",
+					success: function( returnHTML, textStatus, jqXHR ) {
+						$( "#templateSpecific" ).html( returnHTML );
+                        onStudyWizardPage(); // Add datepickers
+
+		                // Update the template select only if the template has been closed
+		                // This can only happen after the previous call has succeeded, because
+		                // otherwise Hibernate will show up with a 'collection associated with
+		                // two open sessions' error.
+		                if( templateEditorHasBeenOpened ) {
+			                $.ajax({
+								url: baseUrl + "/feature/templateSelection",
+								data: data,
+								type: "POST",
+								success: function( returnHTML, textStatus, jqXHR ) {
+									$( "td#templateSelection" ).html( returnHTML );
+									insertSelectAddMore();
+								}
+			                });
+			            }
+
+					}
+                });
+
+            }
+
+            function addFeatureGroup(){
+                // Add the new feature group to the list
+                var optId = $("select#newFeatureGroup option:selected").val();
+                var optText = $("select#newFeatureGroup option:selected").text();
+
+                if(optId!="") {
+                    var newA = $( '<a>' ).attr("href",baseUrl+"/featureGroup/show/"+optId)
+                        .attr("class","showLink")
+                        .text(optText);
+
+                    var newDELA = $( '<a>' ).attr("href","#")
+                        .attr("class","buttons button delete")
+                        .attr("onClick","removeFeatureGroup("+optId+");");
+
+                    var newSPAN = $( '<span>' ).attr("class"," buttons button")
+                        .append(newDELA);
+
+                    var newINPUT = $( '<input>' ).attr("type","hidden")
+                        .attr("name","featuregroups")
+                        .attr("value",optId);
+
+                    var newLI = $( '<li>' ).attr( "id", "fg_"+optId )
+                        .css( "display", "none")
+                        .css( "background-color", "#FFFF66")
+                        .append(newA).append(newSPAN).append(newINPUT);
+
+                    $("ul#fg").append(newLI);
+
+                    $("ul#fg #fg_"+optId).fadeIn( 'slow', function() { $("ul#fg #fg_"+optId).css("background-color",""); } );
+
+                    $("select#newFeatureGroup option:selected").remove();
+
+                    $("#noGroups").css("display","none");
+                }
+            }
+
+            function removeFeatureGroup( fagId ){
+                // Remove the new feature group from the list
+                var optText = $("ul#fg #fg_"+fagId+" a").text();
+                $("ul#fg #fg_"+fagId).css("background-color","#FF3333");
+
+                $("ul#fg #fg_"+fagId).fadeOut( 'slow', function() {
+                    $("ul#fg #fg_"+fagId).remove();
+                    if($('ul#fg li').size()==0) {
+                        $("#noGroups").css("display","block");
+                    }
+                });
+
+                $("select#newFeatureGroup").append("<option value="+fagId+">"+optText+"</option>");
+
+            }
+
+        </r:script>
     </head>
 
     <body>
@@ -18,7 +138,7 @@
         <h1>Create a new feature</h1>
 
         <div class="data">
-            <g:form action="save">
+            <g:form action="save" name="create">
                 <input type="hidden" name="nextPage" id="nextPage" value="list" />
                 <div class="dialog">
                     <table>
@@ -100,9 +220,10 @@
                             <td id="templateSpecific">
                             	<%
 									def values = [:];
-									featureInstance.template?.fields.each {
+									/*featureInstance.template?.fields.each {
 										values[ it.name ] = featureInstance.getFieldValue( it.name )
-									}
+									}*/
+                                    // This feature is brand new. As such, it will not have any template fields set
 								%>
                             	<g:render template="templateSpecific" model="['template': featureInstance.template, values: values ]" />
                             </td>

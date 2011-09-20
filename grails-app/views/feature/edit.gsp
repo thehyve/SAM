@@ -6,11 +6,13 @@
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
         <meta name="layout" content="main"/>
         <title>Edit feature ${featureInstance.name}</title>
+        <r:require module="featureTemplateFields"/>
         <r:script type="text/javascript" disposition="head">
             $(document).ready(function() {
             	insertSelectAddMore();
+                onStudyWizardPage(); // Add datepickers
             });
-            
+
             function insertSelectAddMore() {
                 new SelectAddMore().init({
                     rel  : 'template',
@@ -26,7 +28,7 @@
 
             function handleTemplateChange( selectedOption ){
                 templateEditorHasBeenOpened = false
-                
+
                 if( selectedOption == undefined ) {
 	                // If no selectedOptions is given, the template editor has been opened. In that case, we use
 	                // the template previously selected
@@ -36,10 +38,10 @@
                 	// That should only happen if the template editor is closed
                 	return;
                 }
-                
+
                 // Collect all data to be sent to the controller
                 data = $( "form#edit" ).serialize() + "&templateEditorHasBeenOpened=" + ( templateEditorHasBeenOpened ? "true" : "false" );
-                
+
 	            // Always update the template specific fields, when the template has changed but also
 	            // when the template editor is closed
                 $.ajax({
@@ -48,11 +50,12 @@
 					type: "POST",
 					success: function( returnHTML, textStatus, jqXHR ) {
 						$( "#templateSpecific" ).html( returnHTML );
-												
+                        onStudyWizardPage(); // Add datepickers
+
 		                // Update the template select only if the template has been closed
-		                // This can only happen after the previous call has succeeded, because 
-		                // otherwise Hibernate will show up with a 'collection associated with 
-		                // two open sessions' error. 
+		                // This can only happen after the previous call has succeeded, because
+		                // otherwise Hibernate will show up with a 'collection associated with
+		                // two open sessions' error.
 		                if( templateEditorHasBeenOpened ) {
 			                $.ajax({
 								url: baseUrl + "/feature/templateSelection",
@@ -64,10 +67,10 @@
 								}          	
 			                });
 			            }
-						
+
 					}          	
                 });
-	            
+
             }
 
             function addFeatureGroup(){
@@ -177,7 +180,7 @@
 			                            <td id="templateSelection">
 			                            	<g:render template="templateSelection" model="['template' : featureInstance.template]" />
 			                            </td>
-			                           </tr>                                    
+			                           </tr>
                                 </table>
                             </td>
                             <td rowspan="3" class="styleFeatureGroup">
@@ -216,13 +219,13 @@
                                 </g:if>
                             </td>
                         </tr>
-                        
+
                         <tr class="prop">
                             <td id="templateSpecific">
-                            	<% 
+                            	<%
 									def values = [:];
 									featureInstance.template?.fields.each {
-										values[ it.name ] = featureInstance.getFieldValue( it.name )
+										values[ it.escapedName() ] = featureInstance.getFieldValue( it.name )
 									}
 								%>
                             	<g:render template="templateSpecific" model="['template': featureInstance.template, values: values ]" />

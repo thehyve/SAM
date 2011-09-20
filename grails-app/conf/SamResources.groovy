@@ -18,4 +18,8 @@ modules = {
 		resource url: 'js/importer.js'
         resource url: 'css/importer.css'
 	}
+
+    featureTemplateFields {
+        resource url: 'js/templateFields.js'
+    }
 }
