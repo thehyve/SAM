@@ -85,6 +85,7 @@ class Feature extends TemplateEntity {
         def return_map = [:]
 
         String strMessage = ""
+        def lstFeatureStillReferenced = []
         boolean error = false;
         Logger log
         for( it in toDeleteList) {
@@ -96,10 +97,8 @@ class Feature extends TemplateEntity {
                     if(error==false){
                         log = Logger.getLogger(Feature)
                         error = true
-                    } else {
-                        strMessage += "<br>"
                     }
-                    strMessage += "Feature "+name+" cannot be deleted at this moment because it is still referenced by measurements."
+                    lstFeatureStillReferenced << name
                     continue;
                 }
                 def FaGList = FeaturesAndGroups.findAllByFeature(featureInstance)
@@ -135,8 +134,11 @@ class Feature extends TemplateEntity {
                 return_map["message"] = "The following features have been deleted: "+hasBeenDeletedList.toString()
             }
         } else {
+            if(lstFeatureStillReferenced.size()!=0){
+                strMessage += "<br>The following features cannot be deleted at this moment because they are still referenced by measurements: "+lstFeatureStillReferenced.toString()+"<br>"
+            }
             if(hasBeenDeletedList.size()!=0){
-                strMessage += "<br><br>The following features have been deleted: "+hasBeenDeletedList.toString()
+                strMessage += "<br>The following features have been deleted: "+hasBeenDeletedList.toString()+"<br>"
             }
             return_map["message"] = strMessage
         }
