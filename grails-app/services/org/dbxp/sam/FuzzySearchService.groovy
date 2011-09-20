@@ -6,12 +6,15 @@ class FuzzySearchService {
 	
 	/**
 	 * Matches the patterns with the candidates, and returns the best candidates for all patterns, but returning
-	 * the candidates only once
+	 * each candidate at most once.
 	 * 
 	 * @param patterns		List with patterns to search for
 	 * @param candidates	List with candidates to search in
 	 * @param treshold		Treshold the matches have to be above
-	 * @return				
+	 * @return				A list with each element being a map with three elements:
+	 * 							pattern:	the pattern that has been matched
+	 * 							candidate:	the best matching candidate for this pattern or null if no match has been found
+	 * 							index:		the index of the candidate in the original list				
 	 */
 	static def mostSimilarUnique( patterns, candidates, treshold ) {
 		def matches = []
@@ -126,6 +129,6 @@ class FuzzySearchService {
 
 		bestFit
 	}
-
+	
 	// </FUZZY MATCHING>
 }
