@@ -119,3 +119,11 @@ log4j = {
 
 module.synchronization.classes.sample = "org.dbxp.sam.SAMSample"
 
+
+//# Fuzzy matching configuration
+fuzzyMatching.threshold.default = 0.2
+fuzzyMatching.threshold.measurementImporter.feature = 0.4
+fuzzyMatching.threshold.measurementImporter.sample = 0.2
+fuzzyMatching.threshold.measurementImporter.timepoint = 0.5
+fuzzyMatching.threshold.measurementImporter.subject = 0.2
+fuzzyMatching.threshold.featureImporter.feature = 0.4
