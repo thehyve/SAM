@@ -4,6 +4,7 @@ import grails.converters.JSON
 import org.dbnp.gdt.Template
 
 import org.dbxp.matriximporter.MatrixImporter
+import org.codehaus.groovy.grails.commons.ConfigurationHolder
 
 class FeatureController {
 
@@ -536,7 +537,6 @@ class FeatureController {
                 }
 
                 // Compute fuzzy matching
-                def fuzzyMatchTreshold = 0.0;
                 flow.columnField = [:];
                 def lstFieldNames =  [];
                 for(int k=0; k<flow.templateFields.size(); k++) {
@@ -547,7 +547,7 @@ class FeatureController {
                     lstColumnHeaders += flow.text[0][j].toLowerCase();
                 }
 
-                def matches = fuzzySearchService.mostSimilarUnique( lstColumnHeaders, lstFieldNames, fuzzyMatchTreshold );
+                def matches = fuzzySearchService.mostSimilarUnique( lstColumnHeaders, lstFieldNames, Double.valueOf(ConfigurationHolder.config.fuzzyMatching.threshold.featureImporter.feature));
 
                 for(int i=0; i<flow.text[0].size(); i++) {
                     if(matches[i].index!=null) {

@@ -5,6 +5,7 @@ import org.dbxp.moduleBase.Assay
 import org.dbxp.moduleBase.Auth
 import org.dbxp.moduleBase.Sample
 import org.dbnp.gdt.RelTime
+import org.codehaus.groovy.grails.commons.ConfigurationHolder
 
 class MeasurementController {
     static allowedMethods = [save: "POST", update: "POST", delete: "POST"]
@@ -384,8 +385,7 @@ class MeasurementController {
         selectLayout {
             // Step x: Choose layout, preview data
 			on("next") {
-				def fuzzyMatchTreshold = 0.25;
-				
+
 				// We first check whether the user has selected a layout before. If he has, he might also have 
 				// matched columns etc. If he selects the same layout, we keep his changes. Otherwise, these changes 
 				// are removed again
@@ -398,15 +398,14 @@ class MeasurementController {
 				// Save data of this step
                 flow.layout = params.layoutselector
 				flow.features = Feature.list( sort: "name" )
-				
-                def possible_matches = [:]
+
                 if(params.layoutselector=="sample_layout"){
                     flow.samples = Sample.findAllByAssay( flow.assay, [ sort: "name" ] )
 
                     // Try to match first row to features
                     flow.feature_matches = [:]
                     for(int i = 1; i < flow.text[0].size(); i++){
-                        def index = fuzzySearchService.mostSimilarWithIndex(flow.text[0][i].toString().trim(), flow.features*.toString(), fuzzyMatchTreshold)
+                        def index = fuzzySearchService.mostSimilarWithIndex(flow.text[0][i].toString().trim(), flow.features*.toString(), Double.valueOf(ConfigurationHolder.config.fuzzyMatching.threshold.measurementImporter.feature))
                         if(index!=null){
                             flow.feature_matches[flow.text[0][i]] = index
                         } else {
@@ -416,7 +415,7 @@ class MeasurementController {
                     // Try to match first column to samples
                     flow.sample_matches = [:]
                     for(int i = 1; i < flow.text.size(); i++){
-                        def index = fuzzySearchService.mostSimilarWithIndex(flow.text[i][0].toString().trim(), flow.samples.name, fuzzyMatchTreshold)
+                        def index = fuzzySearchService.mostSimilarWithIndex(flow.text[i][0].toString().trim(), flow.samples.name, Double.valueOf(ConfigurationHolder.config.fuzzyMatching.threshold.measurementImporter.sample))
                         if(index!=null){
                             flow.sample_matches[flow.text[i][0]] = index
                         } else {
@@ -437,7 +436,7 @@ class MeasurementController {
                     // Try to match first row to features
                     flow.feature_matches = [:]
                     for(int i = 1; i < flow.text[0].size(); i++){
-                        def index = fuzzySearchService.mostSimilarWithIndex(flow.text[0][i].toString().trim(), flow.features*.toString(), fuzzyMatchTreshold)
+                        def index = fuzzySearchService.mostSimilarWithIndex(flow.text[0][i].toString().trim(), flow.features*.toString(), Double.valueOf(ConfigurationHolder.config.fuzzyMatching.threshold.measurementImporter.feature))
                         if(index!=null){
                             flow.feature_matches[flow.text[0][i]] = index
                         } else {
@@ -447,7 +446,7 @@ class MeasurementController {
                     // Try to match second row to timepoints
                     flow.timepoint_matches = [:]
                     for(int i = 1; i < flow.text[1].size(); i++){
-                        def index = fuzzySearchService.mostSimilarWithIndex(flow.text[1][i].toString().trim(), flow.timepoints, fuzzyMatchTreshold)
+                        def index = fuzzySearchService.mostSimilarWithIndex(flow.text[1][i].toString().trim(), flow.timepoints, Double.valueOf(ConfigurationHolder.config.fuzzyMatching.threshold.measurementImporter.timepoint))
                         if(index!=null){
                             flow.timepoint_matches[flow.text[1][i]] = index
                         } else {
@@ -457,7 +456,7 @@ class MeasurementController {
                     // Try to match first column to subjects
                     flow.subject_matches = [:]
                     for(int i = 2; i < flow.text.size(); i++){
-                        def index = fuzzySearchService.mostSimilarWithIndex(flow.text[i][0].toString().trim(), flow.subjects, fuzzyMatchTreshold)
+                        def index = fuzzySearchService.mostSimilarWithIndex(flow.text[i][0].toString().trim(), flow.subjects,Double.valueOf(ConfigurationHolder.config.fuzzyMatching.threshold.measurementImporter.subject))
                         if(index!=null){
                             flow.subject_matches[flow.text[i][0]] = index
                         } else {
