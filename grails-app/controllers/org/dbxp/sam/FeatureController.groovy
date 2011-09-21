@@ -449,13 +449,17 @@ class FeatureController {
         uploadDataCheck {
             // Check to make sure we actually received a file.
             action {
-
                 def text = "";
 
                 // Check if the user used the textarea
                 if(flow.inputField!=null && flow.inputField!="") {
                     // Parse the content of the textarea using the Matriximporter
                     text = MatrixImporter.getInstance().importString(flow.inputField,["delimiter":"\t"]);
+                    // TODO Unfortunately, between the 'matchColumns''s 'previous' action and arriving here from that action, the first list item seems to get lost if it contains only one empty string. I believe this happens in the 'uploadAndSelectTemplate.gsp' view, when re-setting the inputField from the flow. This can easily be confirmed by, at strategic locations, looking at the variable. For now, to prevent this problem, I am adding a space character to the empty list item (if said item exists). This needs to be done with 'flow.inputField', not 'text' or 'flow.text'! Note: I suspect the call 'inputField?.encodeAsJavaScript()' to be the culprit, but I haven't checked.
+                    if(text[0]==[""]){
+                        // Unfortunately, manipulating 'text' does not help, as such a change will not be reflected in 'flow.inputField'. This is why we directly edit 'flow.inputField'
+                        flow.inputField = "\n"+flow.inputField
+                    }
                 } else {
                     // Save the uploaded file into a variable
                     def f = flow.remove( 'inputfile' )
