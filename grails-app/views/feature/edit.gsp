@@ -140,7 +140,7 @@
         <h1>Edit feature ${featureInstance.name}</h1>
 
         <div class="data">
-            <g:form class="Feature" action="update" name="edit" method="post">
+            <g:form class="Feature" action="update" name="edit" method="post" novalidate="novalidate">
                 <g:hiddenField name="id" value="${featureInstance?.id}"/>
                 <g:hiddenField name="ids" value="${featureInstance?.id}"/>
                 <g:hiddenField name="version" value="${featureInstance?.version}"/>

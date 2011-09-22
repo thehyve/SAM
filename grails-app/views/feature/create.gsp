@@ -138,7 +138,7 @@
         <h1>Create a new feature</h1>
 
         <div class="data">
-            <g:form action="save" name="create">
+            <g:form action="save" name="create" novalidate="novalidate">
                 <input type="hidden" name="nextPage" id="nextPage" value="list" />
                 <div class="dialog">
                     <table>
