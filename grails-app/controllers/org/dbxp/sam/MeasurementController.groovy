@@ -405,7 +405,7 @@ class MeasurementController {
                     // Try to match first row to features
                     flow.feature_matches = [:]
                     for(int i = 1; i < flow.text[0].size(); i++){
-                        def index = fuzzySearchService.mostSimilarWithIndex(flow.text[0][i].toString().trim(), flow.features*.toString(), Double.valueOf(ConfigurationHolder.config.fuzzyMatching.threshold.measurementImporter.feature))
+                        def index = fuzzySearchService.mostSimilarWithIndex(flow.text[0][i].toString().trim(), flow.features*.toString(), ['controller': 'measurementImporter', 'item': 'feature'])
                         if(index!=null){
                             flow.feature_matches[flow.text[0][i]] = index
                         } else {
@@ -415,7 +415,7 @@ class MeasurementController {
                     // Try to match first column to samples
                     flow.sample_matches = [:]
                     for(int i = 1; i < flow.text.size(); i++){
-                        def index = fuzzySearchService.mostSimilarWithIndex(flow.text[i][0].toString().trim(), flow.samples.name, Double.valueOf(ConfigurationHolder.config.fuzzyMatching.threshold.measurementImporter.sample))
+                        def index = fuzzySearchService.mostSimilarWithIndex(flow.text[i][0].toString().trim(), flow.samples.name, ['controller': 'measurementImporter', 'item': 'sample'])
                         if(index!=null){
                             flow.sample_matches[flow.text[i][0]] = index
                         } else {
@@ -436,7 +436,7 @@ class MeasurementController {
                     // Try to match first row to features
                     flow.feature_matches = [:]
                     for(int i = 1; i < flow.text[0].size(); i++){
-                        def index = fuzzySearchService.mostSimilarWithIndex(flow.text[0][i].toString().trim(), flow.features*.toString(), Double.valueOf(ConfigurationHolder.config.fuzzyMatching.threshold.measurementImporter.feature))
+                        def index = fuzzySearchService.mostSimilarWithIndex(flow.text[0][i].toString().trim(), flow.features*.toString(), ['controller': 'measurementImporter', 'item': 'feature'])
                         if(index!=null){
                             flow.feature_matches[flow.text[0][i]] = index
                         } else {
@@ -446,7 +446,7 @@ class MeasurementController {
                     // Try to match second row to timepoints
                     flow.timepoint_matches = [:]
                     for(int i = 1; i < flow.text[1].size(); i++){
-                        def index = fuzzySearchService.mostSimilarWithIndex(flow.text[1][i].toString().trim(), flow.timepoints, Double.valueOf(ConfigurationHolder.config.fuzzyMatching.threshold.measurementImporter.timepoint))
+                        def index = fuzzySearchService.mostSimilarWithIndex(flow.text[1][i].toString().trim(), flow.timepoints, ['controller': 'measurementImporter', 'item': 'timepoint'])
                         if(index!=null){
                             flow.timepoint_matches[flow.text[1][i]] = index
                         } else {
@@ -456,7 +456,7 @@ class MeasurementController {
                     // Try to match first column to subjects
                     flow.subject_matches = [:]
                     for(int i = 2; i < flow.text.size(); i++){
-                        def index = fuzzySearchService.mostSimilarWithIndex(flow.text[i][0].toString().trim(), flow.subjects,Double.valueOf(ConfigurationHolder.config.fuzzyMatching.threshold.measurementImporter.subject))
+                        def index = fuzzySearchService.mostSimilarWithIndex(flow.text[i][0].toString().trim(), flow.subjects,['controller': 'measurementImporter', 'item': 'subject'])
                         if(index!=null){
                             flow.subject_matches[flow.text[i][0]] = index
                         } else {
