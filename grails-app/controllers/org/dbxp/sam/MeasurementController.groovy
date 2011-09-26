@@ -399,76 +399,68 @@ class MeasurementController {
                 flow.layout = params.layoutselector
 				flow.features = Feature.list( sort: "name" )
 
-                flow.samples = Sample.findAllByAssay( flow.assay, [ sort: "name" ] )
+                if(params.layoutselector=="sample_layout"){
+                    flow.samples = Sample.findAllByAssay( flow.assay, [ sort: "name" ] )
 
-                // Try to match first row to features
-                flow.feature_matches = [:]
-                flow.sample_matches = [:]
-
-                def lstFeatureNames =  [];
-                for(int k=0; k<flow.features.size(); k++) {
-                    lstFeatureNames += flow.features[k].name.toLowerCase();
-                }
-                def lstSampleNames =  [];
-                for(int k=0; k<flow.samples.size(); k++) {
-                    lstSampleNames += flow.samples[k].name.toLowerCase();
-                }
-                def lstTextColumnHeaders = [];
-                for(int j=0; j<flow.text[0].size(); j++) {
-                    lstTextColumnHeaders += flow.text[0][j].toLowerCase();
-                }
-                def lstTextRowHeaders = [];
-                for(int j=0; j<flow.text.size(); j++) {
-                    lstTextRowHeaders += flow.text[j][0].toLowerCase();
-                }
-
-                def matches = fuzzySearchService.mostSimilarUnique( lstTextColumnHeaders, lstFeatureNames, Double.valueOf(ConfigurationHolder.config.fuzzyMatching.threshold.measurementImporter.feature));
-
-                for(int i=0; i<flow.text[0].size(); i++) {
-                    if(matches[i].index!=null) {
-                        flow.feature_matches[i] = lstFeatureNames[matches[i].index];
-                    } else {
-                        flow.feature_matches[i] = "";
+                    // Try to match first row to features
+                    flow.feature_matches = [:]
+                    for(int i = 1; i < flow.text[0].size(); i++){
+                        def index = fuzzySearchService.mostSimilarWithIndex(flow.text[0][i].toString().trim(), flow.features*.toString(), Double.valueOf(ConfigurationHolder.config.fuzzyMatching.threshold.measurementImporter.feature))
+                        if(index!=null){
+                            flow.feature_matches[flow.text[0][i]] = index
+                        } else {
+                            flow.feature_matches[flow.text[0][i]] = 0
+                        }
                     }
-                }
-
-                matches = fuzzySearchService.mostSimilarUnique( lstTextRowHeaders, lstSampleNames, Double.valueOf(ConfigurationHolder.config.fuzzyMatching.threshold.measurementImporter.sample));
-
-                for(int i=0; i<flow.text.size(); i++) {
-                    if(matches[i].index!=null) {
-                        flow.sample_matches[i] = lstSampleNames[matches[i].index];
-                    } else {
-                        flow.sample_matches[i] = "";
+                    // Try to match first column to samples
+                    flow.sample_matches = [:]
+                    for(int i = 1; i < flow.text.size(); i++){
+                        def index = fuzzySearchService.mostSimilarWithIndex(flow.text[i][0].toString().trim(), flow.samples.name, Double.valueOf(ConfigurationHolder.config.fuzzyMatching.threshold.measurementImporter.sample))
+                        if(index!=null){
+                            flow.sample_matches[flow.text[i][0]] = index
+                        } else {
+                            flow.sample_matches[flow.text[i][0]] = 0
+                        }
                     }
-                }
-
-                if (params.layoutselector.equals("subject_layout")) {
-                    // If the layout is sample_layout we also need to compute a timepoint match
-
+                } else {
+                    def samples = flow.assay.samples
+                    
 					// Retrieve timepoints and convert them to RelTime strings
-					flow.timepoints = flow.samples*.eventStartTime.unique()
+					flow.timepoints = samples*.eventStartTime.unique()
 					flow.timepoints.sort();
 					flow.timepoints = flow.timepoints.collect { new RelTime( it ).toString() }
                     
+					// TODO: retrieve the sorted subjects directly from the database for performance reasons
+					flow.subjects = samples*.subjectName.unique().sort()
+
+                    // Try to match first row to features
+                    flow.feature_matches = [:]
+                    for(int i = 1; i < flow.text[0].size(); i++){
+                        def index = fuzzySearchService.mostSimilarWithIndex(flow.text[0][i].toString().trim(), flow.features*.toString(), Double.valueOf(ConfigurationHolder.config.fuzzyMatching.threshold.measurementImporter.feature))
+                        if(index!=null){
+                            flow.feature_matches[flow.text[0][i]] = index
+                        } else {
+                            flow.feature_matches[flow.text[0][i]] = 0
+                        }
+                    }
                     // Try to match second row to timepoints
                     flow.timepoint_matches = [:]
-
-                    def lstTimePoints =  [];
-                    for(int k=0; k<flow.timepoints.size(); k++) {
-                        lstTimePoints += flow.timepoints[k].toLowerCase();
-                    }
-                    def lstTextColumn2Headers = [];
-                    for(int j=0; j<flow.text[1].size(); j++) {
-                        lstTextColumn2Headers += flow.text[1][j].toLowerCase();
-                    }
-
-                    matches = fuzzySearchService.mostSimilarUnique( lstTextColumn2Headers, lstTimePoints, Double.valueOf(ConfigurationHolder.config.fuzzyMatching.threshold.measurementImporter.timepoint));
-
-                    for(int i=0; i<flow.text[1].size(); i++) {
-                        if(matches[i].index!=null) {
-                            flow.timepoint_matches[i] = lstTimePoints[matches[i].index];
+                    for(int i = 1; i < flow.text[1].size(); i++){
+                        def index = fuzzySearchService.mostSimilarWithIndex(flow.text[1][i].toString().trim(), flow.timepoints, Double.valueOf(ConfigurationHolder.config.fuzzyMatching.threshold.measurementImporter.timepoint))
+                        if(index!=null){
+                            flow.timepoint_matches[flow.text[1][i]] = index
                         } else {
-                            flow.timepoint_matches[i] = "";
+                            flow.timepoint_matches[flow.text[1][i]] = 0
+                        }
+                    }
+                    // Try to match first column to subjects
+                    flow.subject_matches = [:]
+                    for(int i = 2; i < flow.text.size(); i++){
+                        def index = fuzzySearchService.mostSimilarWithIndex(flow.text[i][0].toString().trim(), flow.subjects,Double.valueOf(ConfigurationHolder.config.fuzzyMatching.threshold.measurementImporter.subject))
+                        if(index!=null){
+                            flow.subject_matches[flow.text[i][0]] = index
+                        } else {
+                            flow.subject_matches[flow.text[i][0]] = 0
                         }
                     }
                 }
