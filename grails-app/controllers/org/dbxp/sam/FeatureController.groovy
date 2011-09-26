@@ -5,6 +5,7 @@ import org.dbnp.gdt.Template
 
 import org.dbxp.matriximporter.MatrixImporter
 import org.codehaus.groovy.grails.commons.ConfigurationHolder
+import org.dbnp.gdt.TemplateFieldType
 
 class FeatureController {
 
@@ -143,8 +144,12 @@ class FeatureController {
             // yes, iterate through template fields
             featureInstance.giveFields().each() {
                 // and set their values
-                if(it.type)
-                featureInstance.setFieldValue(it.name, params.get(it.escapedName()+"_"+it.escapedName()))
+                if(it.type==TemplateFieldType.BOOLEAN){ // This is a hack that allows us to set templatefields with type 'BOOLEAN'
+                    def value = params.get(it.escapedName()+"_"+it.escapedName())!=null // '' becomes true, and null becomes false, as intended.
+                    featureInstance.setFieldValue(it.name, value)
+                } else {
+                    featureInstance.setFieldValue(it.name, params.get(it.escapedName()+"_"+it.escapedName()))
+                }
             }
         }
 
@@ -238,7 +243,12 @@ class FeatureController {
                 // yes, iterate through template fields
                 featureInstance.giveFields().each() {
                     // and set their values
-                    featureInstance.setFieldValue(it.name, params.get(it.escapedName()+"_"+it.escapedName()))
+                    if(it.type==TemplateFieldType.BOOLEAN){ // This is a hack that allows us to set templatefields with type 'BOOLEAN'
+                        def value = params.get(it.escapedName()+"_"+it.escapedName())!=null // '' becomes true, and null becomes false, as intended.
+                        featureInstance.setFieldValue(it.name, value)
+                    } else {
+                        featureInstance.setFieldValue(it.name, params.get(it.escapedName()+"_"+it.escapedName()))
+                    }
                 }
             }
 
