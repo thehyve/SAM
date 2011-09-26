@@ -409,7 +409,7 @@ class MeasurementController {
                         if(index!=null){
                             flow.feature_matches[flow.text[0][i]] = index
                         } else {
-                            flow.feature_matches[flow.text[0][i]] = 0
+                            flow.feature_matches[flow.text[0][i]] = null
                         }
                     }
                     // Try to match first column to samples
@@ -419,7 +419,7 @@ class MeasurementController {
                         if(index!=null){
                             flow.sample_matches[flow.text[i][0]] = index
                         } else {
-                            flow.sample_matches[flow.text[i][0]] = 0
+                            flow.sample_matches[flow.text[i][0]] = null
                         }
                     }
                 } else {
@@ -440,7 +440,7 @@ class MeasurementController {
                         if(index!=null){
                             flow.feature_matches[flow.text[0][i]] = index
                         } else {
-                            flow.feature_matches[flow.text[0][i]] = 0
+                            flow.feature_matches[flow.text[0][i]] = null
                         }
                     }
                     // Try to match second row to timepoints
@@ -450,7 +450,7 @@ class MeasurementController {
                         if(index!=null){
                             flow.timepoint_matches[flow.text[1][i]] = index
                         } else {
-                            flow.timepoint_matches[flow.text[1][i]] = 0
+                            flow.timepoint_matches[flow.text[1][i]] = null
                         }
                     }
                     // Try to match first column to subjects
@@ -460,7 +460,7 @@ class MeasurementController {
                         if(index!=null){
                             flow.subject_matches[flow.text[i][0]] = index
                         } else {
-                            flow.subject_matches[flow.text[i][0]] = 0
+                            flow.subject_matches[flow.text[i][0]] = null
                         }
                     }
                 }

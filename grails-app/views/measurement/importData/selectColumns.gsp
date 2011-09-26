@@ -244,13 +244,7 @@
                                 <tr>
                                     <g:each in="${row}" var="column" status="j">
                                         <g:if test="${!(i==0&j==0)}">
-                                            <td class="
-                                            <g:if test="${(i==0&&j>0) || (j==0)}">
-                                                importerHeader">
-                                            </g:if>
-                                            <g:else>
-                                                importerCell">
-                                            </g:else>
+                                            <td class="${((i==0&&j>0) || (j==0)) ? 'importerHeader' : 'importerCell'}">
                                                 <div
                                                 <g:if test="${column.length()>25}">
                                                      class="tooltip importerInteractiveCell">
@@ -275,7 +269,7 @@
                                                             </g:else>
                                                         </g:if>
                                                         <g:else>
-                                                           	<g:set var="featureValue" value="${features[feature_matches[column]].id}" />
+                                                           	<g:set var="featureValue" value="${feature_matches[column]==null ? 'null' : features[feature_matches[column]].id}" />
                                                         </g:else>
                                                         
                                                         <g:select rel="featureSelector" name="${i},${j}" from="${features}" value="${featureValue}" optionKey="id" noSelection="[null:'[Discard]']" class="importerSelect featureSelect" onchange="selectChange('featureSelect');"/>
@@ -294,7 +288,7 @@
                                                             </g:else>
                                                         </g:if>
                                                         <g:else>
-                                                          	<g:set var="sampleValue" value="${samples[sample_matches[column]].id}" />
+                                                          	<g:set var="sampleValue" value="${sample_matches[column]==null ? 'null' : samples[sample_matches[column]].id}" />
                                                         </g:else>
 
                                                         <g:select name="${i},${j}" from="${samples}" value="${sampleValue}" optionKey="id" optionValue="name" noSelection="[null:'[Discard]']" class="importerSelect sampleSelect" onchange="selectChange('sampleSelect');"/>
@@ -352,7 +346,7 @@
                                                         </g:else>
                                                     </g:if>
                                                     <g:else>
-                                                        <g:select rel="featureSelector" name="${i},${j}" from="${features}" value="${features[feature_matches[column]].id}" optionKey="id" noSelection="[null:'[Discard]']" class="importerSelect featureSelect"/>
+                                                        <g:select rel="featureSelector" name="${i},${j}" from="${features}" value="${feature_matches[column]==null ? 'null' : features[feature_matches[column]].id}" optionKey="id" noSelection="[null:'[Discard]']" class="importerSelect featureSelect"/>
                                                     </g:else>
                                                 </g:if>
                                                 <g:if test="${i==1&&j>0}">
@@ -366,7 +360,7 @@
                                                         </g:else>
                                                     </g:if>
                                                     <g:else>
-                                                        <g:select name="${i},${j}" from="${timepoints}" value="${timepoints[timepoint_matches[column]]}" noSelection="[null:'[Discard]']" class="importerSelect timepointSelect"/>
+                                                        <g:select name="${i},${j}" from="${timepoints}" value="${timepoint_matches[column]==null ? 'null' : timepoints[timepoint_matches[column]]}" noSelection="[null:'[Discard]']" class="importerSelect timepointSelect"/>
                                                     </g:else>
                                                 </g:if>
                                                 <g:if test="${j==0 && i>1}">
@@ -380,7 +374,7 @@
                                                         </g:else>
                                                     </g:if>
                                                     <g:else>
-                                                        <g:select name="${i},${j}" from="${subjects}" value="${subjects[subject_matches[column]]}" noSelection="[null:'[Discard]']" class="importerSelect subjectSelect" onchange="selectChange('subjectSelect');"/>
+                                                        <g:select name="${i},${j}" from="${subjects}" value="${subject_matches[column]==null ? 'null' : subjects[subject_matches[column]]}" noSelection="[null:'[Discard]']" class="importerSelect subjectSelect" onchange="selectChange('subjectSelect');"/>
                                                     </g:else>
                                                 </g:if>
                                             </td>
