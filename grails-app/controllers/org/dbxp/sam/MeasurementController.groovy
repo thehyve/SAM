@@ -396,22 +396,17 @@ class MeasurementController {
 				}
 				
 				// Save data of this step
-                flow.layout = params.layoutselector
-				flow.features = Feature.list( sort: "name" )
-
-                flow.samples = Sample.findAllByAssay( flow.assay, [ sort: "name" ] )
+                flow.layout = params.layoutselector;
+				flow.features = Feature.list( sort: "name" );
+                flow.samples = Sample.findAllByAssay( flow.assay, [ sort: "name" ] );
 
                 // Try to match first row to features
-                flow.feature_matches = [:]
-                flow.sample_matches = [:]
+                flow.feature_matches = [:];
+
 
                 def lstFeatureNames =  [];
                 for(int k=0; k<flow.features.size(); k++) {
                     lstFeatureNames += flow.features[k].name.toLowerCase();
-                }
-                def lstSampleNames =  [];
-                for(int k=0; k<flow.samples.size(); k++) {
-                    lstSampleNames += flow.samples[k].name.toLowerCase();
                 }
                 def lstTextColumnHeaders = [];
                 for(int j=0; j<flow.text[0].size(); j++) {
@@ -432,26 +427,39 @@ class MeasurementController {
                     }
                 }
 
-                matches = fuzzySearchService.mostSimilarUnique( lstTextRowHeaders, lstSampleNames, Double.valueOf(ConfigurationHolder.config.fuzzyMatching.threshold.measurementImporter.sample));
+                if (params.layoutselector.equals("sample_layout")) {
 
-                for(int i=0; i<flow.text.size(); i++) {
-                    if(matches[i].index!=null) {
-                        flow.sample_matches[i] = lstSampleNames[matches[i].index];
-                    } else {
-                        flow.sample_matches[i] = "";
+                    flow.sample_matches = [:]
+
+                    def lstSampleNames =  [];
+                    for(int k=0; k<flow.samples.size(); k++) {
+                        lstSampleNames += flow.samples[k].name.toLowerCase();
                     }
-                }
 
-                if (params.layoutselector.equals("subject_layout")) {
-                    // If the layout is sample_layout we also need to compute a timepoint match
+                    matches = fuzzySearchService.mostSimilarUnique( lstTextRowHeaders, lstSampleNames, Double.valueOf(ConfigurationHolder.config.fuzzyMatching.threshold.measurementImporter.sample));
+
+                    for(int i=0; i<flow.text.size(); i++) {
+                        if(matches[i].index!=null) {
+                            flow.sample_matches[i] = lstSampleNames[matches[i].index];
+                        } else {
+                            flow.sample_matches[i] = "";
+                        }
+                    }
+
+                } else {
+                    // If the layout is subject_layout we also need to compute a timepoint match
 
 					// Retrieve timepoints and convert them to RelTime strings
 					flow.timepoints = flow.samples*.eventStartTime.unique()
 					flow.timepoints.sort();
 					flow.timepoints = flow.timepoints.collect { new RelTime( it ).toString() }
+
+                    // TODO: retrieve the sorted subjects directly from the database for performance reasons
+                    flow.subjects = flow.samples*.subjectName.unique().sort()
                     
                     // Try to match second row to timepoints
                     flow.timepoint_matches = [:]
+                    flow.subject_matches = [:]
 
                     def lstTimePoints =  [];
                     for(int k=0; k<flow.timepoints.size(); k++) {
@@ -460,6 +468,20 @@ class MeasurementController {
                     def lstTextColumn2Headers = [];
                     for(int j=0; j<flow.text[1].size(); j++) {
                         lstTextColumn2Headers += flow.text[1][j].toLowerCase();
+                    }
+                    def lstSubjectNames =  [];
+                    for(int k=0; k<flow.subjects.size(); k++) {
+                        lstSubjectNames += flow.subjects[k].toLowerCase();
+                    }
+
+                    matches = fuzzySearchService.mostSimilarUnique( lstTextColumnHeaders, lstSubjectNames, Double.valueOf(ConfigurationHolder.config.fuzzyMatching.threshold.measurementImporter.feature));
+
+                    for(int i=0; i<flow.text[0].size(); i++) {
+                        if(matches[i].index!=null) {
+                            flow.subject_matches[i] = lstSubjectNames[matches[i].index];
+                        } else {
+                            flow.subject_matches[i] = "";
+                        }
                     }
 
                     matches = fuzzySearchService.mostSimilarUnique( lstTextColumn2Headers, lstTimePoints, Double.valueOf(ConfigurationHolder.config.fuzzyMatching.threshold.measurementImporter.timepoint));

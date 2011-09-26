@@ -9,6 +9,7 @@
     		var selectsOK = new Array();
             var numRowSelectorProblems = 0;
             var numColumnSelectorProblems = 0;
+            var layout = "${layout}";
         	
             $(document).ready(function() {
                 new SelectAddMore().init({
@@ -67,26 +68,24 @@
 									}
                                 });
 
-                				<g:if test="${layout == 'sample_layout'}">
+                				if(layout== 'sample_layout') {
                 					// Check if duplicate values are selected
             	                	selectChange('featureSelect');
-            	                </g:if>
-            	                <g:else>
+                                } else {
             	                	// Check if maybe the add/modify option has been selected
 									checkSelectValue('featureSelect');
-								</g:else>
+                                }
                             }
                         );
                     }
                 });
 
-				<g:if test="${layout == 'sample_layout'}">
+				if(layout== 'sample_layout') {
 	                selectChange('featureSelect');
     	            selectChange('sampleSelect');
-    	        </g:if>
-    	        <g:else>
+                } else {
 	                selectChange('subjectSelect');
-    	        </g:else>
+                }
             });
 
             function selectChange(type) {
@@ -97,17 +96,29 @@
                 } // Resetting the selection problem counts per selection type
 
                 listSelects = $( 'select.' + type );
+                if(layout=="subject_layout" && type=="featureSelect") {
+                    listSelects2 = $( 'select.timepointSelect');
+                } else {
+                    listSelects2 = null;
+                }
                 
                 var mapSelected = new Object();
                 for(i=0; i<listSelects.length; i++) {
                     val = listSelects[ i ].value;
+                    if(listSelects2 != null) {
+                        val2 = listSelects2[ i ].value;
+                    }
 
 					// Value is "" if 'add/modify' is selected. Value is "null" if [discard] option is selected
-                    if( val!="" && val != "null" ) {
-                        if(mapSelected[val]==null) {
-                            mapSelected[val] = 1;
+                    if( val!="" && val != "null" && (listSelects2 == null || val2!="null")) {
+                        key = val;
+                        if(listSelects2 != null) {
+                            key = key + val2;
+                        }
+                        if(mapSelected[key]==null) {
+                            mapSelected[key] = 1;
                         } else {
-                            mapSelected[val]++;
+                            mapSelected[key]++;
                         }
                     }
                 }
@@ -119,9 +130,21 @@
                 for(i=0; i<listSelects.length; i++) {
                     val = listSelects[ i ].value;
                     listSelects[ i ].style.color = '';
-                    if(val!="null") {
-                        if(mapSelected[val] > 1 || val == "" ) {
+                    if(listSelects2 != null) {
+                        val2 = listSelects2[ i ].value;
+                        listSelects2[ i ].style.color = '';
+                    }
+
+                    if(val!="null" && (listSelects2 == null || val2!="null")) {
+                        key = val;
+                        if(listSelects2 != null) {
+                            key = key + val2;
+                        }
+                        if(mapSelected[key] > 1 || val == "" ) {
                             listSelects[ i ].style.color = 'red';
+                            if(listSelects2 != null) {
+                                listSelects2[ i ].style.color = 'red';
+                            }
                             blnOK = false;
                             if(type=='featureSelect'){
                                 numColumnSelectorProblems++;
@@ -286,14 +309,22 @@
                                                 <br>
                                                 <!-- Sample row -->
                                                 <div class="importerSelectBackground">
-
-                                                    <select rel="sampleSelector" id="${i},${j}" name="${i},${j}" class="importerSelect sampleSelect" onChange="selectChange('sampleSelect');">
-                                                        <option value="null">[Discard]</option>
-                                                        <g:each in="${samples}" var="s" status="k">
-                                                            <option value="${s.id}" ${sample_matches[i].equals(s.name.toLowerCase()) ? "SELECTED" : ""}>${s.name}</option>
-                                                        </g:each>
-                                                    </select>
-
+                                                    <g:if test="${layout=='sample_layout'}">
+                                                        <select rel="sampleSelector" id="${i},${j}" name="${i},${j}" class="importerSelect sampleSelect" onChange="selectChange('sampleSelect');">
+                                                            <option value="null">[Discard]</option>
+                                                            <g:each in="${samples}" var="s" status="k">
+                                                                <option value="${s.id}" ${sample_matches[i].equals(s.name.toLowerCase()) ? "SELECTED" : ""}>${s.name}</option>
+                                                            </g:each>
+                                                        </select>
+                                                    </g:if>
+                                                    <g:else>
+                                                        <select rel="subjectSelector" id="${i},${j}" name="${i},${j}" class="importerSelect subjectSelect" onChange="selectChange('subjectSelect');">
+                                                            <option value="null">[Discard]</option>
+                                                            <g:each in="${subjects}" var="s" status="k">
+                                                                <option value="${s}" ${subject_matches[i].equals(s.toLowerCase()) ? "SELECTED" : ""}>${s}</option>
+                                                            </g:each>
+                                                        </select>
+                                                    </g:else>
                                                 </div>
                                             </g:if>
                                             </div>
