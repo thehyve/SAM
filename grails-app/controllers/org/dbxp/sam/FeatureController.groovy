@@ -561,7 +561,7 @@ class FeatureController {
                     lstColumnHeaders += flow.text[0][j].toLowerCase();
                 }
 
-                def matches = fuzzySearchService.mostSimilarUnique( lstColumnHeaders, lstFieldNames, Double.valueOf(ConfigurationHolder.config.fuzzyMatching.threshold.featureImporter.feature));
+                def matches = fuzzySearchService.mostSimilarUnique( lstColumnHeaders, lstFieldNames, ['controller': 'featureImporter', 'item': 'feature']);
 
                 for(int i=0; i<flow.text[0].size(); i++) {
                     if(matches[i].index!=null) {

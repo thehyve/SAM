@@ -1,5 +1,7 @@
 package org.dbxp.sam
 
+import org.codehaus.groovy.grails.commons.ConfigurationHolder
+
 class FuzzySearchService {
 
     static transactional = false
@@ -10,13 +12,14 @@ class FuzzySearchService {
 	 * 
 	 * @param patterns		List with patterns to search for
 	 * @param candidates	List with candidates to search in
-	 * @param treshold		Treshold the matches have to be above
+	 * @param threshold		Threshold the matches have to be above
 	 * @return				A list with each element being a map with three elements:
 	 * 							pattern:	the pattern that has been matched
 	 * 							candidate:	the best matching candidate for this pattern or null if no match has been found
 	 * 							index:		the index of the candidate in the original list				
 	 */
-	static def mostSimilarUnique( patterns, candidates, treshold ) {
+	static def mostSimilarUnique( patterns, candidates, thresholdInput='default' ) {
+        def threshold = retrieveThresholdFromConfig(thresholdInput)
 		def matches = []
 		
 		// Find the best matching candidate for each pattern
@@ -26,7 +29,7 @@ class FuzzySearchService {
 			
 			candidates.eachWithIndex { candidate, idx ->
 				def score = stringSimilarity(pattern, candidate);
-				if( !score.isNaN() && score >= treshold )
+				if( !score.isNaN() && score >= threshold )
 					matches << [ 'pattern': pattern, 'candidate': candidate, 'score': score, 'index': idx ];
 			}
 		}
@@ -92,7 +95,8 @@ class FuzzySearchService {
 				degree)
 	}
 
-	static def mostSimilar(pattern, candidates, threshold=0) {
+	static def mostSimilar(pattern, candidates, thresholdInput='default' ) {
+        def threshold = retrieveThresholdFromConfig(thresholdInput)
 		def topScore = 0
 		def bestFit = null
 
@@ -111,7 +115,8 @@ class FuzzySearchService {
 		bestFit
 	}
 	
-	static def mostSimilarWithIndex(pattern, candidates, threshold=0) {
+	static def mostSimilarWithIndex(pattern, candidates, thresholdInput='default' ) {
+        def threshold = retrieveThresholdFromConfig(thresholdInput)
 		def topScore = 0
 		def bestFit = null
 
@@ -131,4 +136,22 @@ class FuzzySearchService {
 	}
 	
 	// </FUZZY MATCHING>
+
+
+    // Function for the retrieval of threshold values from the configuration, based on an input map.
+    // For example: input map '['controller': 'measurementImporter', 'item': 'subjectName']' would grab the value for 'fuzzyMatching.threshold.measurementImporter.subjectName'
+    static double retrieveThresholdFromConfig(thresholdInput){
+        Double defaultValue = Double.valueOf(ConfigurationHolder.config.fuzzyMatching.threshold.default)
+        if(thresholdInput=='default'){
+            return defaultValue
+        }
+
+        // Apparently it was not the default value that was requested so try to find the requested custom value
+        String requestedValueString = ConfigurationHolder.config.fuzzyMatching.threshold.get(thresholdInput['controller']).get(thresholdInput['item'])
+        if(requestedValueString!=null && requestedValueString!=''){
+            return Double.valueOf(requestedValueString)
+        } else {
+            return defaultValue
+        }
+    }
 }
