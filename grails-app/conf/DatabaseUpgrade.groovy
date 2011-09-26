@@ -52,6 +52,7 @@ class DatabaseUpgrade {
                 }
 
             } else if(db == "com.mysql.jdbc.Driver") {
+				// TODO: Maybe replace these statements with "SHOW INDEX FROM <tablename> where Key_name = <indexname>
                 // check if we need to perform this upgrade
                 if (sql.firstRow('''SELECT count(*) as total
                                      FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS
