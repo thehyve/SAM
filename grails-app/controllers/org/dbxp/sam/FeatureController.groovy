@@ -519,7 +519,7 @@ class FeatureController {
                 flow.columnField = [:];
                 def lstFieldNames =  [];
                 for(int k=0; k<flow.templateFields.size(); k++) {
-                    lstFieldNames += flow.templateFields[k].name.toLowerCase();
+                    lstFieldNames += flow.templateFields[k].escapedName();
                 }
                 def lstColumnHeaders = [];
                 for(int j=0; j<flow.text[0].size(); j++) {
@@ -700,7 +700,7 @@ class FeatureController {
 
                     // Set all variables from POST var
                     for(int j=0; j<flow.templateFields.size(); j++) {
-                        String strFieldVal = params.get("entity_"+strIdent+"_"+flow.templateFields[j].name.toLowerCase());
+                        String strFieldVal = params.get("entity_"+strIdent+"_"+flow.templateFields[j].escapedName());
                         if(flow.templateFields[j].required && strFieldVal==null) {
                             if(newMessage.length()>0) newMessage += "<br />";
                             newMessage += "Column ["+flow.templateFields[j]+"] is required";
