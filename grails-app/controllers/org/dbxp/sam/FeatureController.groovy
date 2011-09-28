@@ -74,9 +74,6 @@ class FeatureController {
 			for( int i = 0; i < 3; i++ ) {
 				hqlConstraints << "LOWER(" + columns[ i ] + ") LIKE :search"
 			}
-
-			// Group names should be searched separately
-			hqlConstraints << "EXISTS ( FROM FeatureGroup fg, FeaturesAndGroups fag WHERE fg = fag.featureGroup AND fag.feature = f AND LOWER(fg.name) LIKE :search)";
 			
 			hql += "WHERE " + hqlConstraints.join( " OR " ) + " "
 
@@ -111,7 +108,7 @@ class FeatureController {
 			iTotalDisplayRecords: filteredRecords.size(),
 			sEcho: params.int( 'sEcho' ),
 			aaData: records.collect {
-				[ it[0].id, it[0].name, it[0].unit, it[1]?.name, it[0]?.getFeatureGroups()*.name?.join( ", " ),
+				[ it[0].id, it[0].name, it[0].unit, it[1]?.name, null, // TODO: See ticket SAM-227
                     dt.buttonShow(id: it[0].id, controller: "feature", blnEnabled: true),
                     dt.buttonEdit(id: it[0].id, controller: "feature", blnEnabled: true),
                     dt.buttonDelete(id: it[0].id, controller: "feature", blnEnabled: true)]
@@ -151,12 +148,6 @@ class FeatureController {
                     featureInstance.setFieldValue(it.name, params.get(it.escapedName()+"_"+it.escapedName()))
                 }
             }
-        }
-
-        // set the new featuregroups
-        def featuregroups = params.list( 'featuregroups' ).findAll { it.isLong() }.collect { it.toLong() };
-        for(int i=0; i<featuregroups.size(); i++) {
-            FeaturesAndGroups.create(FeatureGroup.findById(featuregroups[i]),featureInstance);
         }
 
         // Remove the template parameter, since it is a string and that troubles the
@@ -208,15 +199,7 @@ class FeatureController {
 			// opening the template editor. See also _determineTemplate
 			session.templateId = featureInstance.template?.id
 
-            def groupList = FeaturesAndGroups.findAllByFeature(featureInstance);
-            def remainingGroups;
-
-            if( groupList )
-                remainingGroups = FeatureGroup.executeQuery( "FROM FeatureGroup fg WHERE fg NOT IN (:groups)", [ 'groups': groupList*.featureGroup ] )
-            else
-                remainingGroups = FeatureGroup.list()
-
-            return [featureInstance: featureInstance, groupList: groupList, remainingGroups: remainingGroups]
+            return [featureInstance: featureInstance]
         }
     }
 
@@ -252,25 +235,7 @@ class FeatureController {
                 }
             }
 
-            // set the new featuregroups
-            def groupList = FeaturesAndGroups.findAllByFeature(featureInstance);
-            def featuregroups = params.list( 'featuregroups' ).findAll { it.isLong() }.collect { it.toLong() };
-
-            // Delete groups
-            for(int i=0; i<groupList.size(); i++) {
-                if(featuregroups.contains(groupList[i].featureGroup.id)) {
-                    featuregroups.remove(groupList[i].featureGroup.id);
-                } else {
-                    groupList[i].delete();
-                }
-            }
-
-            // Add remaining groups
-            for(int i=0; i<featuregroups.size(); i++) {
-                FeaturesAndGroups.create(FeatureGroup.findById(featuregroups[i]),featureInstance);
-            }
-
-			// Remove the template parameter, since it is a string and that troubles the 
+			// Remove the template parameter, since it is a string and that troubles the
 			// setting of properties.
 			params.remove( 'template' ) 
 			

@@ -8,10 +8,6 @@ class Feature extends TemplateEntity {
     String name
     String unit
 
-    //static hasMany = [featureGroups:FeatureGroup]
-
-    //static belongsTo = FeatureGroup
-
     static constraints = {
         name(unique:false, blank:false,
             validator:{val,obj->
@@ -45,10 +41,6 @@ class Feature extends TemplateEntity {
 		return name + ( unit!=null ? " ("+unit+")" : "" )
 	}
 
-	public def getFeatureGroups() {
-		return FeatureGroup.executeQuery( "SELECT DISTINCT fg FROM FeatureGroup fg, FeaturesAndGroups fag WHERE fag.featureGroup = fg AND fag.feature = :feature", [ "feature": this ] )
-	}
-	
 	/**
 	 * Changes the template for this feature. If no template with the given name 
 	 * exists, the template is set to null.
@@ -101,15 +93,7 @@ class Feature extends TemplateEntity {
                     lstFeatureStillReferenced << name
                     continue;
                 }
-                def FaGList = FeaturesAndGroups.findAllByFeature(featureInstance)
-                if(FaGList.size()==0){
-                    featureInstance.delete(flush: true)
-                } else {
-                    FaGList.each {
-                        it.delete(flush: true)
-                    }
-                    featureInstance.delete(flush: true)
-                }
+                featureInstance.delete(flush: true)
                 hasBeenDeletedList.push(name);
             } catch(Exception e){
                 if(error==false){

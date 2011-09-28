@@ -19,37 +19,24 @@
         <div class="data">
             <div class="dialog">
                 <table class="">
-                    <tbody>
-                        <% def ii = 0%>
-                        <g:each in="${featureInstance.giveFields()}" var="field" status="i">
-                            <tr class="prop ${(i % 2) == 0 ? 'odd' : 'even'}">
-                                <td valign="top">
-                                    ${field.name.capitalize()}
-                                </td>
-                                <td valign="top" >
-                                    <%-- Here follows a hack, that enables us to show 'false' for a boolean template field, when it is not true (i.e., it is false). This is the sensible thing to do, but GDT disappears the boolean when it is not set, so it can't be shown to be 'false' (something that does not exist is, after all, null). --%>
-                                    <g:if test="${field.type==TemplateFieldType.BOOLEAN && featureInstance.getFieldValue(field.toString())==null}">
-                                        false
-                                    </g:if>
-                                    <g:else>
-                                        ${featureInstance.getFieldValue(field.toString())}
-                                    </g:else>
-                                </td>
-                                <% ii = i + 1%>
-                            </tr>
-                        </g:each>
-
-                        <tr class="prop  ${(ii % 2) == 0 ? 'odd' : 'even'}">
-                            <td valign="top" class="name">Feature Groups</td>
-
-                            <td valign="top" style="text-align: left;" class="value">
-                                <g:each in="${org.dbxp.sam.FeaturesAndGroups.findAllByFeature(featureInstance)}" var="f" status="i">
-                                    <g:link controller="featureGroup" action="show" id="${f?.featureGroup.id}">${f?.featureGroup.name.encodeAsHTML()}</g:link><br />
-                                </g:each>
+                    <% def ii = 0%>
+                    <g:each in="${featureInstance.giveFields()}" var="field" status="i">
+                        <tr class="prop ${(i % 2) == 0 ? 'odd' : 'even'}">
+                            <td valign="top">
+                                ${field.name.capitalize()}
                             </td>
-
+                            <td valign="top" >
+                                <%-- Here follows a hack, that enables us to show 'false' for a boolean template field, when it is not true (i.e., it is false). This is the sensible thing to do, but GDT disappears the boolean when it is not set, so it can't be shown to be 'false' (something that does not exist is, after all, null). --%>
+                                <g:if test="${field.type==TemplateFieldType.BOOLEAN && featureInstance.getFieldValue(field.toString())==null}">
+                                    false
+                                </g:if>
+                                <g:else>
+                                    ${featureInstance.getFieldValue(field.toString())}
+                                </g:else>
+                            </td>
+                            <% ii = i + 1%>
                         </tr>
-                    </tbody>
+                    </g:each>
                 </table>
             </div>
 
