@@ -1,4 +1,4 @@
-<%@ page import="org.dbxp.sam.FeaturesAndGroups; org.dbnp.gdt.Template; org.dbxp.sam.Feature" %>
+<%@ page import="org.dbnp.gdt.Template; org.dbxp.sam.Feature" %>
 <html>
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
