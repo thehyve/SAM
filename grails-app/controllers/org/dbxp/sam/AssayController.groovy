@@ -94,7 +94,7 @@ class AssayController {
 	   
 	   // Add authorization
 	   if( session.user ) {
-		   whereHQL += " EXISTS( FROM Auth auth WHERE auth.user = :user AND auth.study = a.study AND auth.canRead = true )"
+		   whereHQL += " ( a.study.isPublic = true OR EXISTS( FROM Auth auth WHERE auth.user = :user AND auth.study = a.study AND auth.canRead = true ) )"
 	   	   hqlParams[ "user" ] = session.user
 	   } else {
 	   		whereHQL += " a.study.isPublic = true ";
@@ -108,7 +108,7 @@ class AssayController {
 		   hqlConstraints << "LOWER(a.name) LIKE :search"
 		   hqlConstraints << "LOWER(a.study.name) LIKE :search"
 		   
-		   whereHQL += " AND " + hqlConstraints.join( " OR " ) + " "
+		   whereHQL += " AND ( " + hqlConstraints.join( " OR " ) + ") "
 	   }
 		   
 	   // Sort properties
@@ -120,7 +120,11 @@ class AssayController {
 
 	   // Display properties
 	   def records = Assay.executeQuery( columnsHQL + hql + joinHQL + whereHQL + groupByHQL + orderHQL, hqlParams, [ max: displayLength, offset: displayStart ] );
-	   def numTotalRecords = Assay.count();
+	   
+	   // Calculate the total records as the number of assays that are readable for the user
+	   def numTotalRecords = Assay.giveReadableAssays( session.user ).size()
+	   
+	   // Calculate filtered records
 	   def filteredRecords = Assay.executeQuery( "SELECT id " + hql + whereHQL, hqlParams );
 	   
 	   // Retrieve the number of samples with measurements for each assay
