@@ -850,9 +850,6 @@ class MeasurementController {
                         m ->
 						if( m && !status.isRollbackOnly() ) {
 							try {
-								println "Saving measurement: " + m
-								println "    Feature: " + m.feature
-								println "    Sample: " + m.sample
 	                            if(!m.save(flush : true)){
 	                                flash.message += "<br>"+m.getErrors().allErrors
 	                                println m.getErrors().allErrors
