@@ -849,11 +849,19 @@ class MeasurementController {
                     measurementsToSave.each {
                         m ->
 						if( m ) {
-                            if(!m.save(flush : true)){
-                                flash.message += "<br>"+m.getErrors().allErrors
-                                println m.getErrors().allErrors
-                                status.setRollbackOnly();
-                            }
+							try {
+	                            if(!m.save(flush : true)){
+	                                flash.message += "<br>"+m.getErrors().allErrors
+	                                println m.getErrors().allErrors
+	                                status.setRollbackOnly();
+	                            }
+							} catch( Exception e ) {
+								flash.message += "<br>" + e.getMessage();
+								println e.getMessage();
+								println e.getNextException();
+								e.printStackTrace();
+								status.setRollbackOnly();
+							}
 							
 							// Clear hibernate session, in order to handle large amounts of
 							// samples
