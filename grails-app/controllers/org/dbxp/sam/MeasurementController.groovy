@@ -850,6 +850,9 @@ class MeasurementController {
                         m ->
 						if( m ) {
 							try {
+								println "Saving measurement: " + m
+								println "    Feature: " + m.feature
+								println "    Sample: " + m.sample
 	                            if(!m.save(flush : true)){
 	                                flash.message += "<br>"+m.getErrors().allErrors
 	                                println m.getErrors().allErrors
@@ -857,8 +860,6 @@ class MeasurementController {
 	                            }
 							} catch( Exception e ) {
 								flash.message += "<br>" + e.getMessage();
-								println e.getMessage();
-								println e.getNextException();
 								e.printStackTrace();
 								status.setRollbackOnly();
 							}
