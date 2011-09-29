@@ -848,7 +848,7 @@ class MeasurementController {
 					def i = 0;
                     measurementsToSave.each {
                         m ->
-						if( m ) {
+						if( m && !status.isRollbackOnly() ) {
 							try {
 								println "Saving measurement: " + m
 								println "    Feature: " + m.feature
