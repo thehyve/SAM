@@ -430,7 +430,15 @@ class FeatureController {
                 if(flow.inputField!=null && flow.inputField!="") {
                     // Parse the content of the textarea using the Matriximporter
                     text = MatrixImporter.getInstance().importString(flow.inputField,["delimiter":"\t"]);
-                    // TODO Unfortunately, between the 'matchColumns''s 'previous' action and arriving here from that action, the first list item seems to get lost if it contains only one empty string. I believe this happens in the 'uploadAndSelectTemplate.gsp' view, when re-setting the inputField from the flow. This can easily be confirmed by, at strategic locations, looking at the variable. For now, to prevent this problem, I am adding a space character to the empty list item (if said item exists). This needs to be done with 'flow.inputField', not 'text' or 'flow.text'! Note: I suspect the call 'inputField?.encodeAsJavaScript()' to be the culprit, but I haven't checked.
+                    // TODO Unfortunately, between the 'matchColumns''s 'previous' action and arriving
+                    // here from that action, the first list item seems to get lost if it contains only
+                    // one empty string. I believe this happens in the 'uploadAndSelectTemplate.gsp' view,
+                    // when re-setting the inputField from the flow. This can easily be confirmed by, at
+                    // strategic locations, looking at the variable. For now, to prevent this problem, I
+                    // am adding a space character to the empty list item (if said item exists). This
+                    // needs to be done with 'flow.inputField', not 'text' or 'flow.text'! Note: I
+                    // suspect the call 'inputField?.encodeAsJavaScript()' to be the culprit, but I
+                    // haven't checked.
                     if(text[0]==[""]){
                         // Unfortunately, manipulating 'text' does not help, as such a change will not be reflected in 'flow.inputField'. This is why we directly edit 'flow.inputField'
                         flow.inputField = "\n"+flow.inputField
@@ -475,6 +483,7 @@ class FeatureController {
                             }
                         }
 
+                        // Checking if the data has the minimum amount of information it needs (one cell that could be a header cell, one cell that could be a data cell)
                         if(text.size()<2 || text[0].size()<1){ // The text[0].size() check has been changed to <1, because having a column for units is not mandatory.
                             flow.message = "It appears the data does not have a valid layout."
                             return error()
@@ -576,13 +585,20 @@ class FeatureController {
                             }
                         }
 
-                        flow.featureAndIndexList.put(objFeature.name+","+objFeature.unit,i);
+                        if(flow.featureAndIndexList.get(objFeature.name+","+objFeature.unit)!=null){
+                            def list = flow.featureAndIndexList.get(objFeature.name+","+objFeature.unit);
+                            list << i
+                            flow.featureAndIndexList.put(objFeature.name+","+objFeature.unit,list);
+                        } else {
+                            flow.featureAndIndexList.put(objFeature.name+","+objFeature.unit,[i]);
+                        }
+
                         objFeature.validate();
                         objFeature.getErrors().allErrors.each {
                             switch(it.code) {
                                 case "nullable":
                                     if(newMessage.length()>0) newMessage += "<br />";
-                                    newMessage += "The field ["+it.field+"] can't be null.";
+                                    newMessage += "The field ["+it.field+"] can't be null. ";
                                     break;
                                 case "validator.invalid":
                                     if(objFeature.unit==null || objFeature.unit==""){
@@ -679,14 +695,22 @@ class FeatureController {
                     // Here we check to see if this feature name and unit combination is presented more than once, in the user's input
                     // If it is we mark it as a duplicate and do not further process it
                     for(int j = 0; j < newFeatureList.size(); j++){
-                        if(newFeatureList[j].name.toLowerCase()==params.get("entity_"+strIdent+"_name").toLowerCase() && newFeatureList[j].unit==params.get("entity_"+strIdent+"_unit")) {
-                            if(objFeature.unit==null || objFeature.unit==""){
-                                lstUniqueErrorItemsFromInputList.add("feature "+objFeature.name)
-                            } else {
-                                lstUniqueErrorItemsFromInputList.add("feature "+objFeature.name+" with unit "+objFeature.unit)
+                        if(newFeatureList[j].name.toLowerCase()==params.get("entity_"+strIdent+"_name").toLowerCase() &&
+                            (   (newFeatureList[j].unit==null && params.get("entity_"+strIdent+"_unit")=='')
+                                    ||
+                                (newFeatureList[j].unit==params.get("entity_"+strIdent+"_unit"))
+                            )
+                        ) {
+                            // Now we will add all duplicates to the ignore list.
+                            flow.featureAndIndexList.each{ fai ->
+                                if(fai.key.toString()==(objFeature.name.toString()+","+objFeature.unit.toString())){
+                                    // We found a duplicate. Add all but one entry to the discard list.
+                                    fai.value.eachWithIndex { val, valIndex ->
+                                        if(valIndex!=0) flow.discardRow.add(val)
+                                    }
+                                }
                             }
-                            flow.discardRow.add(flow.featureAndIndexList.get(objFeature.name+","+objFeature.unit))
-
+                            (objFeature.unit==null)? lstUniqueErrorItemsFromInputList.add("feature "+objFeature.name) : lstUniqueErrorItemsFromInputList.add("feature "+objFeature.name+" with unit "+objFeature.unit)
                             // This feature occurs in the list more than once. We don't need to further check the list to see if it appears again
                             blnUniqueErrorHasOccured = true;
                             blnFeatureIsDuplicate = true;
@@ -741,6 +765,9 @@ class FeatureController {
                     }
                 }
 
+                lstUniqueErrorItemsFromInputList.unique()
+                lstUniqueErrorItemsFromDatabase.unique()
+                
                 if(blnUniqueErrorHasOccured || newMessage.length()>0) {
                     flow.featureList = newFeatureList;
                     flow.message = newMessage;
