@@ -18,6 +18,7 @@ class BootStrap {
                 new File("grails-app/views/_version.gsp").text = "hg id -i".execute().text;
             }
         } catch (Exception e) {
+            org.codehaus.groovy.grails.commons.ConfigurationHolder.config.module.showVersionInfo = false;
             println("BootStrap.groovy Error: "+e);
         }
 
