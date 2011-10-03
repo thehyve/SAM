@@ -13,10 +13,18 @@
             div .tableEditor .column .helpIcon {
                 display: none;
             }
+            div.spinner {
+                height: 16px;
+                width: 16px;
+                margin: 2px;
+                background-image: url(${resource(dir: 'images', file: 'spinner.gif')});
+                display: inline-block;
+            }
         </style>
         <r:script type="text/javascript" disposition="head">
             function disableButtons(that) {
-                $(that).after("<img src='${resource(dir: "images", file: "spinner.gif")}' alt='please wait...' />");
+                $("div.spinner").remove();
+                $(that).after("<div class='spinner'></div>");
             }
         </r:script>
     </head>
