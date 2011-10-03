@@ -22,8 +22,6 @@
                         <th>Unit</th>
 
                         <th>Template</th>
-                        
-                        <th class="nonsortable">Groups</th>
 
                         <dt:buttonsHeader/>
 

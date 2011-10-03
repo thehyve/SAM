@@ -108,7 +108,7 @@ class FeatureController {
 			iTotalDisplayRecords: filteredRecords.size(),
 			sEcho: params.int( 'sEcho' ),
 			aaData: records.collect {
-				[ it[0].id, it[0].name, it[0].unit, it[1]?.name, null, // TODO: See ticket SAM-227
+				[ it[0].id, it[0].name, it[0].unit, it[1]?.name,
                     dt.buttonShow(id: it[0].id, controller: "feature", blnEnabled: true),
                     dt.buttonEdit(id: it[0].id, controller: "feature", blnEnabled: true),
                     dt.buttonDelete(id: it[0].id, controller: "feature", blnEnabled: true)]
