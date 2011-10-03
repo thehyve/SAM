@@ -404,13 +404,12 @@ class MeasurementController {
 
                     // Try to match first row to features
                     flow.feature_matches = [:]
+					
+					def results = fuzzySearchService.mostSimilarUnique( flow.text[0]*.toString()*.trim(), flow.features*.toString(), ['controller': 'measurementImporter', 'item': 'feature'] )
+					
                     for(int i = 1; i < flow.text[0].size(); i++){
-                        def index = fuzzySearchService.mostSimilarWithIndex(flow.text[0][i].toString().trim(), flow.features*.toString(), ['controller': 'measurementImporter', 'item': 'feature'])
-                        if(index!=null){
-                            flow.feature_matches[flow.text[0][i]] = index
-                        } else {
-                            flow.feature_matches[flow.text[0][i]] = null
-                        }
+						def index = results.find { it.pattern == flow.text[0][i].toString().trim() }?.index
+                        flow.feature_matches[flow.text[0][i]] = index
                     }
                     // Try to match first column to samples
                     flow.sample_matches = [:]

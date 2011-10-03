@@ -94,8 +94,15 @@ class AssayController {
 	   
 	   // Add authorization
 	   if( session.user ) {
-		   whereHQL += " ( a.study.isPublic = true OR EXISTS( FROM Auth auth WHERE auth.user = :user AND auth.study = a.study AND auth.canRead = true ) )"
-	   	   hqlParams[ "user" ] = session.user
+		   if( !session.user.isAdministrator ) {
+			   // Make sure only visible studies are shown
+			   whereHQL += " ( a.study.isPublic = true OR EXISTS( FROM Auth auth WHERE auth.user = :user AND auth.study = a.study AND auth.canRead = true ) )"
+		   	   hqlParams[ "user" ] = session.user
+		   } else {
+		   		// Administrators are allowed to see all assays, but we have to add some HQL here,
+		   		// since otherwise the HQL on line 117 can't be added with a " AND " 
+		   		whereHQL += " 1 = 1 "
+		   }
 	   } else {
 	   		whereHQL += " a.study.isPublic = true ";
 	   }

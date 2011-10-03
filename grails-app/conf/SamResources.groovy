@@ -8,6 +8,7 @@ modules = {
 		resource url: 'css/tooltip.css'
         resource url:'/images/subjectlayout.png', attrs:[alt:''], disposition:'inline'
         resource url:'/images/samplelayout.png', attrs:[alt:''], disposition:'inline'
+        resource url:'/images/spinner.gif', attrs:[alt:''], disposition:'inline'
     }
 
     tableEditor {

@@ -9,6 +9,7 @@
     		var selectsOK = new Array();
             var numRowSelectorProblems = 0;
             var numColumnSelectorProblems = 0;
+            var layout = "${layout}";
         	
             $(document).ready(function() {
                 new SelectAddMore().init({
@@ -67,26 +68,24 @@
 									}
                                 });
 
-                				<g:if test="${layout == 'sample_layout'}">
+                				if(layout== 'sample_layout') {
                 					// Check if duplicate values are selected
             	                	selectChange('featureSelect');
-            	                </g:if>
-            	                <g:else>
+                                } else {
             	                	// Check if maybe the add/modify option has been selected
 									checkSelectValue('featureSelect');
-								</g:else>
+                                }
                             }
                         );
                     }
                 });
 
-				<g:if test="${layout == 'sample_layout'}">
+				if(layout== 'sample_layout') {
 	                selectChange('featureSelect');
     	            selectChange('sampleSelect');
-    	        </g:if>
-    	        <g:else>
+                } else {
 	                selectChange('subjectSelect');
-    	        </g:else>
+                }
             });
 
             function selectChange(type) {
@@ -97,17 +96,29 @@
                 } // Resetting the selection problem counts per selection type
 
                 listSelects = $( 'select.' + type );
+
+                listSelects2 = null;
+                if(layout=="subject_layout" && type=="featureSelect") {
+                    listSelects2 = $( 'select.timepointSelect' );
+                }
                 
                 var mapSelected = new Object();
                 for(i=0; i<listSelects.length; i++) {
                     val = listSelects[ i ].value;
+                    if(listSelects2!=null) {
+                        val2 = listSelects2[ i ].value;
+                    }
 
 					// Value is "" if 'add/modify' is selected. Value is "null" if [discard] option is selected
-                    if( val!="" && val != "null" ) {
-                        if(mapSelected[val]==null) {
-                            mapSelected[val] = 1;
+                    if( val!="" && val != "null" && (listSelects2 == null || val2!="null")) {
+                        key = val;
+                        if(listSelects2 != null) {
+                            key = key + val2;
+                        }
+                        if(mapSelected[key]==null) {
+                            mapSelected[key] = 1;
                         } else {
-                            mapSelected[val]++;
+                            mapSelected[key]++;
                         }
                     }
                 }
@@ -119,9 +130,20 @@
                 for(i=0; i<listSelects.length; i++) {
                     val = listSelects[ i ].value;
                     listSelects[ i ].style.color = '';
-                    if(val!="null") {
-                        if(mapSelected[val] > 1 || val == "" ) {
+                    if(listSelects2 != null) {
+                        val2 = listSelects2[ i ].value;
+                        listSelects2[ i ].style.color = '';
+                    }
+                    if(val!="null" && (listSelects2 == null || val2!="null")) {
+                        key = val;
+                            if(listSelects2 != null) {
+                                key = key + val2;
+                            }
+                            if(mapSelected[key] > 1 || val == "" ) {
                             listSelects[ i ].style.color = 'red';
+                            if(listSelects2 != null) {
+                                listSelects2[ i ].style.color = 'red';
+                            }
                             blnOK = false;
                             if(type=='featureSelect'){
                                 numColumnSelectorProblems++;
@@ -240,160 +262,138 @@
                  <% features = org.dbxp.sam.Feature.list( sort: "name" ); %>
 
 
-                <g:if test="${layout=='sample_layout'}">
-                    <table style="width: auto">
-                        <g:each in="${text}" var="row" status="i">
-                            <g:if test="${row?.size()==0}">
-                                <tr></tr>
-                            </g:if>
-                            <g:else>
-                                <tr>
-                                    <g:each in="${row}" var="column" status="j">
-                                        <g:if test="${!(i==0&j==0)}">
-                                            <td class="${((i==0&&j>0) || (j==0)) ? 'importerHeader' : 'importerCell'}">
-                                                <div
-                                                <g:if test="${column.length()>25}">
-                                                     class="tooltip importerInteractiveCell">
-                                                        ${column.substring(0,19)} &hellip;
-                                                        <span>
-                                                            ${column}
-                                                        </span>
-                                                </g:if>
-                                                <g:else>
-                                                    >${column}
-                                                </g:else>
-                                                <g:if test="${i==0&&j>0}">
-                                                    <br>
-                                                    <!-- Feature row -->
-                                                    <div class="importerSelectBackground">
-                                                        <g:if test="${edited_text != null}">
-                                                            <g:if test="${edited_text[i][j]!=null}">
-                                                            	<g:set var="featureValue" value="${edited_text[i][j].id}" />
-                                                            </g:if>
-                                                            <g:else>
-                                                            	<g:set var="featureValue" value="" />
-                                                            </g:else>
-                                                        </g:if>
-                                                        <g:else>
-                                                           	<g:set var="featureValue" value="${feature_matches[column]==null ? 'null' : features[feature_matches[column]].id}" />
-                                                        </g:else>
-                                                        
-                                                        <g:select rel="featureSelector" name="${i},${j}" from="${features}" value="${featureValue}" optionKey="id" noSelection="[null:'[Discard]']" class="importerSelect featureSelect" onchange="selectChange('featureSelect');"/>
-                                                    </div>
-                                                </g:if>
-                                                <g:if test="${j==0}">
-                                                    <br>
-                                                    <!-- Sample row -->
-                                                    <div class="importerSelectBackground">
-                                                        <g:if test="${edited_text!=null}">
-                                                            <g:if test="${edited_text[i][j]!=null}">
-                                                            	<g:set var="sampleValue" value="${edited_text[i][j].id}" />
-                                                            </g:if>
-                                                            <g:else>
-                                                            	<g:set var="sampleValue" value="" />
-                                                            </g:else>
-                                                        </g:if>
-                                                        <g:else>
-                                                          	<g:set var="sampleValue" value="${sample_matches[column]==null ? 'null' : samples[sample_matches[column]].id}" />
-                                                        </g:else>
+                <table style="width: auto">
+                    <g:each in="${text}" var="row" status="i">
+                        <g:if test="${row?.size()==0}">
+                            <tr></tr>
+                        </g:if>
+                        <g:else>
+                            <tr>
+                            <g:each in="${row}" var="column" status="j">
 
-                                                        <g:select name="${i},${j}" from="${samples}" value="${sampleValue}" optionKey="id" optionValue="name" noSelection="[null:'[Discard]']" class="importerSelect sampleSelect" onchange="selectChange('sampleSelect');"/>
+                                <g:if test="${layout=='sample_layout'}">
+                                    <g:if test="${!(i==0&j==0)}">
+                                        <td class="${((i==0&&j>0) || (j==0)) ? 'importerHeader' : 'importerCell'}">
+                                            <g:if test="${column.length()>25}">
+                                                 <div class="tooltip importerInteractiveCell">
+                                                    ${column.substring(0,19)} &hellip;
+                                                    <span>${column}</span>
+                                                 </div>
+                                            </g:if>
+                                            <g:else>
+                                                ${column}
+                                            </g:else>
+                                            <br />
+                                            <g:if test="${i==0&&j>0}">
+                                                <!-- Feature row -->
+                                                <div class="importerSelectBackground">
+                                                    <g:if test="${edited_text != null && edited_text[i][j]!=null}">
+                                                        <g:set var="featureValue" value="${edited_text[i][j].id}" />
+                                                    </g:if>
+                                                    <g:elseif test="${edited_text != null}">
+                                                        <g:set var="featureValue" value="" />
+                                                    </g:elseif>
+                                                    <g:else>
+                                                        <g:set var="featureValue" value="${feature_matches[column]==null ? 'null' : features[feature_matches[column]].id}" />
+                                                    </g:else>
 
-                                                    </div>
-                                                </g:if>
+                                                    <g:select rel="featureSelector" name="${i},${j}" from="${features}" value="${featureValue}" optionKey="id" noSelection="[null:'[Discard]']" class="importerSelect featureSelect" onChange="selectChange('featureSelect');"/>
+
                                                 </div>
-                                            </td>
+                                            </g:if>
+                                            <g:if test="${j==0}">
+                                                <!-- Sample row -->
+                                                <div class="importerSelectBackground">
+                                                    <g:if test="${edited_text!=null && edited_text[i][j]!=null}">
+                                                        <g:set var="sampleValue" value="${edited_text[i][j].id}" />
+                                                    </g:if>
+                                                    <g:elseif test="${edited_text!=null}">
+                                                        <g:set var="sampleValue" value="" />
+                                                    </g:elseif>
+                                                    <g:else>
+                                                        <g:set var="sampleValue" value="${sample_matches[column]==null ? 'null' : samples[sample_matches[column]].id}" />
+                                                    </g:else>
+
+                                                    <g:select name="${i},${j}" from="${samples}" value="${sampleValue}" optionKey="id" optionValue="name" noSelection="[null:'[Discard]']" class="importerSelect sampleSelect" onChange="selectChange('sampleSelect');"/>
+
+                                                </div>
+                                            </g:if>
+                                        </td>
+                                    </g:if>
+                                    <g:else>
+                                        <td></td>
+                                    </g:else>
+                                </g:if>
+                                <g:else>
+                                    <g:if test="${!(i==0&j==0)}">
+                                        <td class="${((i==0&&j>0) || (i==1&&j>0) || (j==0 && i>1)) ? 'importerHeader' : 'importerCell'}">
+                                        <g:if test="${column.length()>25}">
+                                            <div class="tooltip importerInteractiveCell">
+                                                ${column.substring(0,19)} &hellip;
+                                                <span>${column}</span>
+                                            </div>
                                         </g:if>
                                         <g:else>
-                                            <td></td>
+                                            ${column}
                                         </g:else>
-                                    </g:each>
-                                </tr>
-                            </g:else>
-                        </g:each>
-                    </table>
-                </g:if>
-                <g:else>
-                    <table style="width: auto">
-                        <g:each in="${text}" var="row" status="i">
-                            <g:if test="${row?.size()==0}">
-                                <tr></tr>
-                            </g:if>
-                            <g:else>
-                                <tr>
-                                    <g:each in="${row}" var="column" status="j">
-                                        <g:if test="${!(i==0&j==0)}">
-                                            <td class="
-                                                <g:if test="${(i==0&&j>0) || (i==1&&j>0) || (j==0 && i>1)}">
-                                                    importerHeader">
-                                                </g:if>
-                                                <g:else>
-                                                    importerCell">
-                                                </g:else>
-                                                <g:if test="${column.length()>25}">
-                                                    <div class="tooltip importerInteractiveCell">
-                                                        ${column.substring(0,19)} &hellip;
-                                                        <span>
-                                                            ${column}
-                                                        </span>
-                                                    </div>
-                                                </g:if>
-                                                <g:else>
-                                                    ${column}
-                                                </g:else>
-                                                <g:if test="${i==0&&j>0}">
-                                                    <!-- Feature row -->
-                                                    <g:if test="${edited_text!=null}">
-                                                        <g:if test="${edited_text[i][j]!=null}">
-                                                            <g:select rel="featureSelector" name="${i},${j}" from="${features}" value="${edited_text[i][j].id}" optionKey="id" noSelection="[null:'[Discard]']" class="importerSelect featureSelect"/>
-                                                        </g:if>
-                                                        <g:else>
-                                                            <g:select rel="featureSelector" name="${i},${j}" from="${features}" value="" optionKey="id" noSelection="[null:'[Discard]']" class="importerSelect featureSelect"/>
-                                                        </g:else>
-                                                    </g:if>
-                                                    <g:else>
-                                                        <g:select rel="featureSelector" name="${i},${j}" from="${features}" value="${feature_matches[column]==null ? 'null' : features[feature_matches[column]].id}" optionKey="id" noSelection="[null:'[Discard]']" class="importerSelect featureSelect"/>
-                                                    </g:else>
-                                                </g:if>
-                                                <g:if test="${i==1&&j>0}">
-                                                    <!-- Timepoint row -->
-                                                    <g:if test="${edited_text!=null}">
-                                                        <g:if test="${edited_text[i][j]!=null}">
-                                                            <g:select name="${i},${j}" from="${timepoints}" value="${edited_text[i][j]}" noSelection="[null:'[Discard]']" class="importerSelect timepointSelect"/>
-                                                        </g:if>
-                                                        <g:else>
-                                                            <g:select name="${i},${j}" from="${timepoints}" value="" noSelection="[null:'Discard']" class="importerSelect timepointSelect"/>
-                                                        </g:else>
-                                                    </g:if>
-                                                    <g:else>
-                                                        <g:select name="${i},${j}" from="${timepoints}" value="${timepoint_matches[column]==null ? 'null' : timepoints[timepoint_matches[column]]}" noSelection="[null:'[Discard]']" class="importerSelect timepointSelect"/>
-                                                    </g:else>
-                                                </g:if>
-                                                <g:if test="${j==0 && i>1}">
-                                                    <!-- Subject row -->
-                                                    <g:if test="${edited_text!=null}">
-                                                        <g:if test="${edited_text[i][j]!=null}">
-                                                            <g:select name="${i},${j}" from="${subjects}" value="${edited_text[i][j]}" noSelection="[null:'[Discard]']" class="importerSelect subjectSelect" onchange="selectChange('subjectSelect');"/>
-                                                        </g:if>
-                                                        <g:else>
-                                                            <g:select name="${i},${j}" from="${subjects}" value="" noSelection="[null:'[Discard]']" class="importerSelect subjectSelect" onchange="selectChange('subjectSelect');"/>
-                                                        </g:else>
-                                                    </g:if>
-                                                    <g:else>
-                                                        <g:select name="${i},${j}" from="${subjects}" value="${subject_matches[column]==null ? 'null' : subjects[subject_matches[column]]}" noSelection="[null:'[Discard]']" class="importerSelect subjectSelect" onchange="selectChange('subjectSelect');"/>
-                                                    </g:else>
-                                                </g:if>
-                                            </td>
+                                        <br />
+                                        <g:if test="${i==0&&j>0}">
+                                            <!-- Feature row -->
+                                            <g:if test="${edited_text!=null && edited_text[i][j]!=null}">
+                                                <g:set var="featureValue" value="${edited_text[i][j].id}" />
+                                            </g:if>
+                                            <g:elseif test="${edited_text!=null}">
+                                                <g:set var="featureValue" value="" />
+                                            </g:elseif>
+                                            <g:else>
+                                                <g:set var="featureValue" value="${feature_matches[column]==null ? 'null' : features[feature_matches[column]].id}" />
+                                            </g:else>
+
+                                            <g:select rel="featureSelector" name="${i},${j}" from="${features}" value="${featureValue}" optionKey="id" noSelection="[null:'[Discard]']" class="importerSelect featureSelect" onChange="selectChange('featureSelect');"/>
+
                                         </g:if>
-                                        <g:else>
-                                            <td></td>
-                                        </g:else>
-                                    </g:each>
-                                </tr>
-                            </g:else>
-                        </g:each>
-                    </table>
-                </g:else>
+                                        <g:if test="${i==1&&j>0}">
+                                            <!-- Timepoint row -->
+                                            <g:if test="${edited_text!=null && edited_text[i][j]!=null}">
+                                                <g:set var="timepointValue" value="${edited_text[i][j]}" />
+                                            </g:if>
+                                            <g:elseif test="${edited_text!=null}">
+                                                <g:set var="timepointValue" value="" />
+                                            </g:elseif>
+                                            <g:else>
+                                                <g:set var="timepointValue" value="${timepoint_matches[column]==null ? 'null' : timepoints[timepoint_matches[column]]}" />
+                                            </g:else>
+
+                                            <g:select rel="timepointSelector" name="${i},${j}" from="${timepoints}" value="${timepointValue}" noSelection="[null:'[Discard]']" class="importerSelect timepointSelect" onChange="selectChange('featureSelect');"/>
+
+                                        </g:if>
+                                        <g:if test="${j==0 && i>1}">
+                                            <!-- Subject row -->
+                                            <g:if test="${edited_text!=null && edited_text[i][j]!=null}">
+                                                <g:set var="subjectValue" value="${edited_text[i][j]}" />
+                                            </g:if>
+                                            <g:elseif test="${edited_text!=null}">
+                                                <g:set var="subjectValue" value="" />
+                                            </g:elseif>
+                                            <g:else>
+                                                <g:set var="subjectValue" value="${subject_matches[column]==null ? 'null' : subjects[subject_matches[column]]}" />
+                                            </g:else>
+
+                                            <g:select rel="subjectSelector" name="${i},${j}" from="${subjects}" value="${subjectValue}" noSelection="[null:'[Discard]']" class="importerSelect subjectSelect" onChange="selectChange('subjectSelect');"/>
+
+                                        </g:if>
+                                        </td>
+                                    </g:if>
+                                    <g:else>
+                                        <td></td>
+                                    </g:else>
+                                </g:else>
+
+                            </g:each>
+                            </tr>
+                        </g:else>
+                    </g:each>
+                </table>
                 <div id="importerNotes"></div>
                 <imp:importerFooter>
                     <g:submitButton name="previous" value="« Previous" action="previous"/>

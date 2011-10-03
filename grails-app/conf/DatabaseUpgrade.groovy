@@ -15,23 +15,26 @@ class DatabaseUpgrade {
 		// get a sql instance
 		groovy.sql.Sql sql = new groovy.sql.Sql(dataSource)
 
+        // get Database Name from proxy object
+        def databaseName = dataSource.getConnection().getCatalog();
+
 		// get configuration
 		def config = ConfigurationHolder.config
 		def db = config.dataSource.driverClassName
 
 		// execute per-change check and upgrade code
-		changeUniqueConstraints(sql, db)		// YouTrack Issue SAM-199
+		changeUniqueConstraints(sql, db, databaseName)		// YouTrack Issue SAM-199
 
 	}
 
-    public static void changeUniqueConstraints(sql, db) {
+    public static void changeUniqueConstraints(sql, db, databaseName) {
 
         try {
             if(db == "org.postgresql.Driver") {
                 // check if we need to perform this upgrade
                 if (sql.firstRow("""SELECT count(*) as total
                                      FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS
-                                     WHERE TABLE_CATALOG='sam'
+                                     WHERE TABLE_CATALOG='"""+databaseName+""""'
                                         AND CONSTRAINT_TYPE='UNIQUE'
                                         AND TABLE_NAME='feature'
                                         AND CONSTRAINT_NAME='feature_name_key';""").total > 0) {
@@ -42,7 +45,7 @@ class DatabaseUpgrade {
                 // check if we need to perform this upgrade
                 if (sql.firstRow("""SELECT count(*) as total
                                      FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS
-                                     WHERE TABLE_CATALOG='sam'
+                                     WHERE TABLE_CATALOG='"""+databaseName+""""'
                                         AND CONSTRAINT_TYPE='UNIQUE'
                                         AND TABLE_NAME='measurement'
                                         AND CONSTRAINT_NAME='measurement_featureid_sampleid';""").total == 0) {
@@ -56,7 +59,7 @@ class DatabaseUpgrade {
                 // check if we need to perform this upgrade
                 if (sql.firstRow('''SELECT count(*) as total
                                      FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS
-                                     WHERE TABLE_SCHEMA="sam"
+                                     WHERE TABLE_SCHEMA="'''+databaseName+'''"
                                         AND CONSTRAINT_TYPE="UNIQUE"
                                         AND TABLE_NAME="Feature"
                                         AND CONSTRAINT_NAME="name";''').total > 0) {
@@ -67,7 +70,7 @@ class DatabaseUpgrade {
                 // check if we need to perform this upgrade
                 if (sql.firstRow('''SELECT count(*) as total
                                      FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS
-                                     WHERE TABLE_SCHEMA="sam"
+                                     WHERE TABLE_SCHEMA="'''+databaseName+'''"
                                         AND CONSTRAINT_TYPE="UNIQUE"
                                         AND TABLE_NAME="Measurement"
                                         AND CONSTRAINT_NAME="measurement_featureid_sampleid";''').total == 0) {
