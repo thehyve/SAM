@@ -14,6 +14,11 @@
                 display: none;
             }
         </style>
+        <r:script type="text/javascript" disposition="head">
+            function disableButtons(that) {
+                $(that).after("<img src='${resource(dir: "images", file: "spinner.gif")}' alt='please wait...' />");
+            }
+        </r:script>
     </head>
     <body>
         <content tag="contextmenu">
@@ -53,8 +58,8 @@
                 <br />
 
                 <imp:importerFooter>
-                    <g:submitButton name="previous" value="« Previous" action="previous"/>
-                    <g:submitButton name="save" value="Save" action="save"/>
+                    <g:submitButton id="button_previous" name="previous" value="« Previous" action="previous" onClick="disableButtons(this);"/>
+                    <g:submitButton id="button_save" name="save" value="Save" action="save" onClick="disableButtons(this);"/>
                 </imp:importerFooter>
             </form>
         </div>
