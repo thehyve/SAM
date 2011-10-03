@@ -12,7 +12,7 @@ class FuzzySearchService {
 	 * 
 	 * @param patterns		List with patterns to search for
 	 * @param candidates	List with candidates to search in
-	 * @param threshold		Threshold the matches have to be above
+	 * @param threshold		Threshold the matches have to be above. This input variable is either 'default', or a map whose keys can be used to look up the requested threshold value. The 'retrieveThresholdFromConfig' function will look for a value associated to this key in a map located in the configurationHolder, at 'config.fuzzyMatching.threshold'.
 	 * @return				A list with each element being a map with three elements:
 	 * 							pattern:	the pattern that has been matched
 	 * 							candidate:	the best matching candidate for this pattern or null if no match has been found
@@ -137,9 +137,10 @@ class FuzzySearchService {
 	
 	// </FUZZY MATCHING>
 
-
-    // Function for the retrieval of threshold values from the configuration, based on an input map.
-    // For example: input map '['controller': 'measurementImporter', 'item': 'subjectName']' would grab the value for 'fuzzyMatching.threshold.measurementImporter.subjectName'
+    /** The 'retrieveThresholdFromConfig' function will look for a value located in the configurationHolder, at 'config.fuzzyMatching.threshold'. For example: input map '['controller': 'measurementImporter', 'item': 'subjectName']' would grab the value for 'fuzzyMatching.threshold.measurementImporter.subjectName'
+     * @param thresholdInput   Either consists of 'default', or consists of a map, with a 'controller' and an 'item' key.
+     * @return  A double
+     */
     static double retrieveThresholdFromConfig(thresholdInput){
         Double defaultValue = Double.valueOf(ConfigurationHolder.config.fuzzyMatching.threshold.default)
         if(thresholdInput=='default'){
