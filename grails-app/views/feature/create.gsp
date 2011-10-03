@@ -93,9 +93,6 @@
                             <td valign="top">
                                 Common fields:
                             </td>
-                            <td valign="top">
-                                Groups containing this feature:
-                            </td>
                         </tr>
 
                         <%--
