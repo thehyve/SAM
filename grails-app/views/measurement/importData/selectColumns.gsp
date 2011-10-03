@@ -229,6 +229,12 @@
             </g:if>
 
             <form method="post">
+                <g:if test="${featureTimepointDuplicatesMessage}">
+                    <div class="errors">
+                        ${featureTimepointDuplicatesMessage}
+                    </div>
+                    <br />
+                </g:if>
                 <g:if test="${subjectTimepointConflictsMessage}">
                     <div class="errors">
                         ${subjectTimepointConflictsMessage}

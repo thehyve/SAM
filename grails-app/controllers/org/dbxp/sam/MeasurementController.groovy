@@ -485,8 +485,7 @@ class MeasurementController {
 
                 // Generate extra information about cell contents and fold the user's selections into our data storage object flow.edited_text
                 def fresh // Is this a 'fresh start'?
-                def subjectTimepointConflicts = null
-                subjectTimepointConflicts = [] // Can that subject be combined with that timepoint?
+                def subjectTimepointConflicts = [] // Can that subject be combined with that timepoint?
                 flow.ignore = [] // Add datapoints that will be ignored to this array
                 if(!flow.edited_text){
                     flow.edited_text = new Object[flow.text.size()][flow.text[0].size()]
@@ -503,7 +502,8 @@ class MeasurementController {
                     for(int j = 0; j < flow.text[i].size(); j++){
                         if(flow.text[i][j]!=null) flow.text[i][j] = flow.text[i][j].trim() // Taking this opportunity to trim cells. This way extraneous whitespace will not show up as comments.
                         if(params[i+','+j]){
-                            // Here we are catching a user's feature or sample selection from the previous page and incorporating it into our new dataset
+                            // Here we are catching a user's feature, timepoint or sample selection from the previous page and incorporating it into our new dataset
+
                             // We receive an object's id and use this to add the object to the flow.edited_text
                             if(params[i+','+j] == 'null'){
                                 // We didn't actually receive a proper id, so set the field to null
@@ -515,6 +515,7 @@ class MeasurementController {
                                 continue;
                             }
 
+
                             if(flow.layout=="sample_layout"){
                                 if(j==0){
                                     flow.edited_text[i][j] = SAMSample.findById(params[i+','+j])
@@ -523,98 +524,18 @@ class MeasurementController {
                             } else {
                                 if(i==1 || j==0){
                                     flow.edited_text[i][j] = params[i+','+j]
-
-                                    // Check for a subject/timepoint conflict, for those timepoints that are not discarded (also check their features to make sure those are not discarded either)
-                                    // Empty cells should always be ignored.
-                                    if(i==1 && j!= 0 && params[1+','+j]!='null' && params[0+','+j]!='null'){
-										// Build a list of eventStartTimes and subjects, in order to lookup 
-										// conflicts fast. The map has the keys being the eventStartTimes and
-										// every value is a list on its own of sample names belonging to that startTime
-										def validCombinations = [:]
-										flow.assay.samples.each {
-											def startTime = new RelTime( it.eventStartTime ).toString();
-											def subjectName = it.subjectName;
-											
-											if( !validCombinations[ startTime ] )
-												validCombinations[ startTime ] = [ subjectName ]
-											else
-												validCombinations[ startTime ] << subjectName
-										}
-										
-                                        for(int k = 1; k < flow.text.size(); k++){
-                                            boolean blnNoDataInCell = false
-                                            if(flow.text[k][j]==null || flow.text[k][j].toString().trim()==""){
-                                                // Empty cells should always be ignored.
-                                                blnNoDataInCell = true
-                                            }
-                                            if((k>1 && params[k+','+0]!='null') || blnNoDataInCell) {
-                                                def sample
-												
-												def startTime = params[1+','+j]
-												def subjectName = params[k+','+0]
-												 
-                                                if(blnNoDataInCell || !validCombinations[ startTime ] || !validCombinations[ startTime ].contains( subjectName ) ) {
-                                                    if(!subjectTimepointConflicts.contains(['timepoint' : params[1+','+j], 'subjectName' : params[k+','+0]]) && !blnNoDataInCell){
-                                                        subjectTimepointConflicts.add(['timepoint' : params[1+','+j], 'subjectName' : params[k+','+0]]);
-                                                        // Here we don't add a timepoint/subjectName combination mmultiple times as this list is presented to the user, without any notion of features
-                                                        // The reason why combinations might occur more than once is that they can occur with different features
-                                                        // Also, we only add to this list in case the cell contains data
-                                                    }
-                                                    // Here we do add the combinations for each different feature as this list is used internally to represent which datapoints should never be saved to the database
-                                                    flow.ignore.add([k+","+j])
-                                                } 
-                                            }
-		                                }
-	                                }
-                                    
+                                    def subjectTimepointConflictsResult = checkForSubjectTimepointConflict(i, j, subjectTimepointConflicts, flow.assay, flow.ignore, flow.text)
+                                    subjectTimepointConflicts = subjectTimepointConflictsResult['subjectTimepointConflicts']
+                                    flow.ignore = subjectTimepointConflictsResult['ignore']
                                     continue;
                                 }
                             }
                         } else {
                             if(fresh){
-                                // This is a fresh start, so we will check the data for the occurence of values, operators and comments.
-                                flow.edited_text[i][j] = flow.text[i][j]
-                                def txt = flow.edited_text[i][j]
-                                if(i>0 && j>0 && txt!=null && txt!=""){
-                                    txt = txt.trim()
-
-                                    if(!txt.isDouble()){
-                                        // Apparently the value is not a valid double
-                                        // Let us check if the problem is a comma (Dutch integer-fraction separator)
-                                        def txt2 = txt.replace(',','.')
-                                        if(txt2.isDouble()){
-                                            // That did the trick...
-                                            // Apparently the measurement used a comma inside it's Double value
-                                            // We replace the comma with a dot in order to be able to proceed with importing
-                                            txt = txt2
-                                        }
-                                    }
-
-                                    // Values can have several formats:
-									//  - double values are stored in the value
-									//  - double values with a operator in front are stored in operator and value
-									//  - all other values are stored in the comments 
-									if(!txt.isDouble()){
-                                        // Apparently the value is not a valid double
-
-                                        // Is the first character a valid operator? This can only happen
-										// if the length of the string is 2 or larger. We perform the extra check 
-										// to avoid string-index out of bounds errors with the substring
-                                        if(txt.size() >= 2 && Measurement.validOperators.contains(txt.substring(0,1)) && txt.substring(1).trim().isDouble()){
-                                            // Apparently, it is.
-                                            flow.operator.put(i+","+j,txt.substring(0,1).trim())
-                                            flow.edited_text[i][j] = Double.valueOf(txt.substring(1).trim())
-                                        } else {
-                                            // Apparently it is not.
-                                            // We'll use the comments field instead.
-                                            flow.comments.put(i+","+j,flow.edited_text[i][j])
-                                            flow.edited_text[i][j] = ""
-                                        }
-                                    } else {
-                                        // This is a simple double value
-                                        flow.edited_text[i][j] = txt
-                                    }
-                                }
+                                def flowObjects = buildCheckInputFlowObjects(i, j, flow.text, flow.edited_text, flow.operator, flow.comments)
+                                flow.edited_text = flowObjects['edited_text']
+                                flow.operator = flowObjects['operator']
+                                flow.comments = flowObjects['comments']
                             }
                         }
 						
@@ -653,6 +574,20 @@ class MeasurementController {
                 if(countRows<1 || countColumns<1){
                     flash.message = "With the selection that had been made, no data would be uploaded. Please make a different selection."
 					return error();
+                }
+
+                // Check to see if features and timepoint combinations occur more than once (which is not allowed)
+                if(flow.layout=='subject_layout') {
+                    def featureTimepointDuplicates = checkForFeatureTimepointDuplicates(flow.edited_text[0], flow.edited_text[1])
+                    if(featureTimepointDuplicates?.size()>0){
+                        flash.featureTimepointDuplicatesMessage="Unfortunately, the iput data contains multiple entries for the following features and timepoints: "
+                        featureTimepointDuplicates.each {
+                            flash.featureTimepointDuplicatesMessage+="<br/> - "+it.key.toString()+" and "+it.value.toString()
+                        }
+                        flash.featureTimepointDuplicatesMessage+="<br/>Please make a different selection."
+                        // This can not be ignored! Return error.
+                        return error();
+                    }
                 }
                 
                 // Did we have subject/timepoint conflicts?
@@ -982,4 +917,115 @@ class MeasurementController {
 		redirect( controller: "assay", view: "list" );
 	}
 
+    def checkForFeatureTimepointDuplicates(features, timepoints) {
+        def featureTimepointDuplicates = [:] // This list will hold information about the combinations that occurs more than once - something that is not allowed
+        def featureTimepointList = [] // List of combinations that have already been seen. If one encounters a combination that already exists in this list, one knows one has found a duplicate
+        features.eachWithIndex {f, fi ->
+            if(f!=null){
+                if(featureTimepointList.contains(f.toString()+"@SEP@"+timepoints[fi])){
+                    featureTimepointDuplicates.put(f, timepoints[fi])
+                } else {
+                    featureTimepointList.add(f.toString()+"@SEP@"+timepoints[fi])
+                }
+            }
+        }
+        println "featureTimepointDuplicates"
+        featureTimepointDuplicates.each {
+            println it.key.toString()+", "+it.value.toString()
+        }
+        return featureTimepointDuplicates
+    }
+
+    def checkForSubjectTimepointConflict(int i, int j, subjectTimepointConflicts, assay, ignore, text) {
+        // Check for a subject/timepoint conflict, for those timepoints that are not discarded (also check their features to make sure those are not discarded either)
+        // Empty cells should always be ignored.
+        if(i==1 && j!= 0 && params[1+','+j]!='null' && params[0+','+j]!='null'){
+            // Build a list of eventStartTimes and subjects, in order to lookup
+            // conflicts fast. The map has the keys being the eventStartTimes and
+            // every value is a list on its own of sample names belonging to that startTime
+            def validCombinations = [:]
+            assay.samples.each {
+                def startTime = new RelTime( it.eventStartTime ).toString();
+                def subjectName = it.subjectName;
+
+                if( !validCombinations[ startTime ] )
+                    validCombinations[ startTime ] = [ subjectName ]
+                else
+                    validCombinations[ startTime ] << subjectName
+            }
+
+            for(int k = 1; k < text.size(); k++){
+                boolean blnNoDataInCell = false
+                if(text[k][j]==null || text[k][j].toString().trim()==""){
+                    // Empty cells should always be ignored.
+                    blnNoDataInCell = true
+                }
+                if((k>1 && params[k+','+0]!='null') || blnNoDataInCell) {
+                    def sample
+
+                    def startTime = params[1+','+j]
+                    def subjectName = params[k+','+0]
+
+                    if(blnNoDataInCell || !validCombinations[ startTime ] || !validCombinations[ startTime ].contains( subjectName ) ) {
+                        if(!subjectTimepointConflicts.contains(['timepoint' : params[1+','+j], 'subjectName' : params[k+','+0]]) && !blnNoDataInCell){
+                            subjectTimepointConflicts.add(['timepoint' : params[1+','+j], 'subjectName' : params[k+','+0]]);
+                            // Here we don't add a timepoint/subjectName combination mmultiple times as this list is presented to the user, without any notion of features
+                            // The reason why combinations might occur more than once is that they can occur with different features
+                            // Also, we only add to this list in case the cell contains data
+                        }
+                        // Here we do add the combinations for each different feature as this list is used internally to represent which datapoints should never be saved to the database
+                        ignore.add([k+","+j])
+                    }
+                }
+            }
+        }
+        return ['subjectTimepointConflicts': subjectTimepointConflicts, 'ignore': ignore]
+    }
+
+    def buildCheckInputFlowObjects(int i, int j, text, edited_text, operator, comments){
+        // This is a fresh start, so we will check the data for the occurence of values, operators and comments.
+        edited_text[i][j] = text[i][j]
+        def txt = edited_text[i][j]
+        if(i>0 && j>0 && txt!=null && txt!=""){
+            txt = txt.trim()
+
+            if(!txt.isDouble()){
+                // Apparently the value is not a valid double
+                // Let us check if the problem is a comma (Dutch integer-fraction separator)
+                def txt2 = txt.replace(',','.')
+                if(txt2.isDouble()){
+                    // That did the trick...
+                    // Apparently the measurement used a comma inside it's Double value
+                    // We replace the comma with a dot in order to be able to proceed with importing
+                    txt = txt2
+                }
+            }
+
+            // Values can have several formats:
+            //  - double values are stored in the value
+            //  - double values with a operator in front are stored in operator and value
+            //  - all other values are stored in the comments
+            if(!txt.isDouble()){
+                // Apparently the value is not a valid double
+
+                // Is the first character a valid operator? This can only happen
+                // if the length of the string is 2 or larger. We perform the extra check
+                // to avoid string-index out of bounds errors with the substring
+                if(txt.size() >= 2 && Measurement.validOperators.contains(txt.substring(0,1)) && txt.substring(1).trim().isDouble()){
+                    // Apparently, it is.
+                    operator.put(i+","+j,txt.substring(0,1).trim())
+                    edited_text[i][j] = Double.valueOf(txt.substring(1).trim())
+                } else {
+                    // Apparently it is not.
+                    // We'll use the comments field instead.
+                    comments.put(i+","+j,edited_text[i][j])
+                    edited_text[i][j] = ""
+                }
+            } else {
+                // This is a simple double value
+                edited_text[i][j] = txt
+            }
+        }
+        return ['operator': operator, 'comments': comments, 'edited_text': edited_text]
+    }
 }
