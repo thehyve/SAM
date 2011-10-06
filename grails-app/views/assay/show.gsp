@@ -1,4 +1,4 @@
-<%@ page import="org.dbxp.moduleBase.Study" %>
+<%@ page import="java.math.MathContext; org.dbxp.moduleBase.Study" %>
 <html>
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
@@ -64,13 +64,21 @@
 									<g:if test="${cellMeasurements.size() > 0}">
 										<% def comments = cellMeasurements[ 0 ].comments?.encodeAsHTML(); %>
 										<g:if test="${cellMeasurements.size() > 1}">
-											<%  
+											<%
+                                                // Multiple measurements are no longer allowed, so this code should not be triggered
+                                                // TODO: Remove the multiple measurements code
 												comments = cellMeasurements.collect {
 													def description = ""
 													
-													if( it.value )
-														description += (it.operator ?: "") + it.value;
-														
+													if( it.value ){
+														description += (it.operator ?: "")
+                                                        if(it.value ==  it.value.round(3)){
+                                                            description += it.value
+                                                        } else {
+                                                            description += "<span class='tooltip'>"+it.value.round(3).toString()+"<span>"+it.value+"</span></span>";
+                                                        }
+                                                    }
+
 													if( it.comments )
 														description += ( description ? "<br />" : "" ) + "<span class='comments'>" + it.comments.encodeAsHTML() + "</span>";
 														 
@@ -82,8 +90,21 @@
 											<input type="checkbox" name="ids" value="${cellMeasurements[0].id}" />
 										
 											<g:if test="${cellMeasurements[0].operator}">${cellMeasurements[0].operator}</g:if>
-											${cellMeasurements[0].value}
-											
+                                            <g:if test="${cellMeasurements[0].value}">
+                                                <!-- You can't put a tooltip in a tooltip, so check if we are in a tooltip -->
+                                                <g:if test="${comments}">
+                                                    ${cellMeasurements[0].value}
+                                                </g:if>
+                                                <g:else>
+                                                    <g:if test="${cellMeasurements[0].value==cellMeasurements[0].value.round(3)}">
+                                                        ${cellMeasurements[0].value}
+                                                    </g:if>
+                                                    <g:else>
+                                                        <span class='tooltip'> ${cellMeasurements[0].value.round(3).toString()}<span>${cellMeasurements[0].value}</span></span>
+                                                    </g:else>
+                                                </g:else>
+                                            </g:if>
+                                            
 											<g:if test="${comments}">
 												<span>
 													${comments}
