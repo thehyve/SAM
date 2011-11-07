@@ -69,16 +69,16 @@ class RestController extends org.dbxp.moduleBase.RestController {
 		
 		if( measurementTokens ) {
 			// Return all requested features for the given assay
-			features = Feature.executeQuery( "SELECT DISTINCT f FROM Feature f, Measurement m, m.sample s WHERE m.feature = f AND s.assay = :assay AND f.name IN (:measurementTokens)", [ "assay": assay, "measurementTokens": measurementTokens ] )
+			features = Feature.executeQuery( "SELECT DISTINCT f FROM Feature f, Measurement m, SAMSample s WHERE m.sample = s AND m.feature = f AND s.assay = :assay AND f.name IN (:measurementTokens)", [ "assay": assay, "measurementTokens": measurementTokens ] )
 		} else {
 			// If no measurement tokens are given, return values for all features
-			features = Feature.executeQuery( "SELECT DISTINCT f FROM Feature f, Measurement m, m.sample s WHERE m.feature = f AND s.assay = :assay", [ "assay": assay ] )
+			features = Feature.executeQuery( "SELECT DISTINCT f FROM Feature f, Measurement m, SAMSample s WHERE m.sample = s AND m.feature = f AND s.assay = :assay", [ "assay": assay ] )
 		}
 		
-		render feature.collect { feature -> 
+		render features.collect { feature -> 
 			def obj = [:];
 			feature.giveFields().each { field ->
-				obj[ field.name ] = feature.giveFieldValue( field.name );
+				obj[ field.name ] = feature.getFieldValue( field.name );
 			}
 			return obj;
 		} as JSON
