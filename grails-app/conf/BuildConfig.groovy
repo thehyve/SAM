@@ -36,4 +36,4 @@ grails.project.dependency.resolution = {
 //grails.plugin.location.'matrixImporter' = '../MatrixImporter'
 //grails.plugin.location.'gdt' = '../gdt'
 
-grails.server.port.http = "8191"  // The modern way of setting the server port
+grails.server.port.http = "8182"  // The modern way of setting the server port
