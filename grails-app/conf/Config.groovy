@@ -12,7 +12,7 @@ grails.config.locations = [
 	"file:${ basedir }/grails-app/conf/default.properties", /*<- "run-app" mode */
 
 	// the external configuration to override the default
-	// configuration (e.g. ~/.dbnp/ci-gscf.properties)
+	// configuration (e.g. ~/.dbxp/production-sam.properties)
 	"file:${userHome}/.dbxp/${grails.util.GrailsUtil.environment}-${appName}.properties",
 ]
 
