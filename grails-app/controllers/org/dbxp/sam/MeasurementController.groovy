@@ -288,7 +288,7 @@ class MeasurementController {
                     if(!f.empty) {
                         // Save data of this step
                         try{
-                            text = MatrixImporter.getInstance().importInputStream(f.getInputStream());
+                            text = MatrixImporter.getInstance().importInputStream(f.getInputStream(),[:],false,false);
                         } catch(Exception e){
                             // Something went wrong with the file...
                             flow.message = "It appears this file cannot be read in. The precise error is as follows: "+e

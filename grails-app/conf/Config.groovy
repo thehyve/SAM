@@ -13,7 +13,7 @@ grails.config.locations = [
 
 	// the external configuration to override the default
 	// configuration (e.g. ~/.dbnp/ci-gscf.properties)
-	"file:${userHome}/.dbnp/${grails.util.GrailsUtil.environment}-${appName}.properties",
+	"file:${userHome}/.dbxp/${grails.util.GrailsUtil.environment}-${appName}.properties",
 ]
 
 if(System.properties["${appName}.config.location"]) {

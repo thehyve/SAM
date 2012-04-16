@@ -451,7 +451,7 @@ class FeatureController {
                         // Save data of this step
                         flow.message = "It appears this file cannot be read in." // In case we get an error before finishing
                         try{
-							text = MatrixImporter.getInstance().importInputStream( f.getInputStream() )
+							text = MatrixImporter.getInstance().importInputStream(f.getInputStream(),[:],false,false)
                         } catch(Exception e){
                             // Something went wrong with the file...
                             flow.message += " The precise error is as follows: "+e

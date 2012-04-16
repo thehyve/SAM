@@ -79,7 +79,7 @@ class DatabaseUpgrade {
                     println "Constraint measurement_featureid_sampleid on (Measurement.feature_id, Measurement.sample_id) is added";
                 }
             } else {
-                println "ERROR: Unknown db in DatabaseUpgrade: "+db;
+                println "WARNING: Unknown db in DatabaseUpgrade: "+db;
             }
         } catch (Exception e) {
             println "changeUniqueConstraints database upgrade failed: " + e.getMessage()
