@@ -187,7 +187,7 @@ class MeasurementController {
     }
 
 	def noassays = {
-		flash.message = "You have no assays. Without samples, you can't add measurements."
+		flash.message = "You have no assays that you are allowed to edit. Without writable samples, you can't add measurements."
 		redirect( controller: 'assay', action: 'list' );
 	}
     
@@ -223,7 +223,7 @@ class MeasurementController {
 	            // Grabs the Ids of assays that contain samples and the user can write to
 	            def assayIdList = Assay.executeQuery( "SELECT DISTINCT a.id FROM Assay a, Auth auth LEFT JOIN  a.samples s WHERE ( auth.user = :user AND auth.study = a.study AND auth.canWrite = true) GROUP BY a HAVING COUNT(s) > 0", [ "user": session.user ] )
 
-	            if( assayIdList.count() == 0 ) {
+	            if( assayIdList.empty ) {
 		            redirect(action: 'noassays')
 	            }
 
