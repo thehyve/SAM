@@ -33,7 +33,7 @@ grails.project.dependency.resolution = {
 	plugins {
 
 		compile(":hibernate:$grailsVersion")
-		compile ':tomcat:1.3.7.2'
+		compile(":tomcat:$grailsVersion")
 		compile ':jquery:1.7.1'
 		compile ':jquery-datatables:1.7.5'
 		compile ':jquery-ui:1.8.15'
