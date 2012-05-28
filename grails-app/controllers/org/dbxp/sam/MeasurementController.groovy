@@ -27,17 +27,16 @@ class MeasurementController {
 
     def create = {
 		// If no samples are present, we can't add measurements
-		if( Sample.count() == 0 ) {
-			flash.message = "No samples have been created in GSCF yet. Without samples, you can't add measurements."
-			redirect( controller: 'assay', action: 'list' );
+	    def features = Feature.list();
+	    def samples = SAMSample.giveWritableSamples( session.user )
+
+	    if( samples.count() == 0 ) {
+			redirect(action: 'noassays')
 		}
 		
         def measurementInstance = new Measurement()
         measurementInstance.properties = params
-		
-		def features = Feature.list();
-		def samples = SAMSample.giveWritableSamples( session.user )
-		
+
         return [measurementInstance: measurementInstance, samples: samples, features: features]
     }
 
@@ -178,7 +177,19 @@ class MeasurementController {
 		}
     }
 
-    def nofeatures = {}
+	void checkForFeatures() {
+
+	}
+
+    def nofeatures = {
+	    flash.message = "There are no features defined. Without features, you can't add measurements."
+	    redirect( controller: 'feature', action: 'list' );
+    }
+
+	def noassays = {
+		flash.message = "You have no assays. Without samples, you can't add measurements."
+		redirect( controller: 'assay', action: 'list' );
+	}
     
 	def importData = {
 		// If no samples are present, we can't add measurements
@@ -208,10 +219,15 @@ class MeasurementController {
                     redirect(action: 'nofeatures')
                 }
 
-                // TODO: Maybe we want to make this search functionality available in, for example, Assay.groovy
-                // Grabs the Ids of assays that contain samples and the user can write to
-                def assayIdList = Assay.executeQuery( "SELECT DISTINCT a.id FROM Assay a, Auth auth LEFT JOIN  a.samples s WHERE ( auth.user = :user AND auth.study = a.study AND auth.canWrite = true) GROUP BY a HAVING COUNT(s) > 0", [ "user": session.user ] )
-                flow.assayList = Assay.executeQuery( "SELECT DISTINCT a FROM Assay a WHERE  a.id in (:list)", [ "list": assayIdList ])
+	            // TODO: Maybe we want to make this search functionality available in, for example, Assay.groovy
+	            // Grabs the Ids of assays that contain samples and the user can write to
+	            def assayIdList = Assay.executeQuery( "SELECT DISTINCT a.id FROM Assay a, Auth auth LEFT JOIN  a.samples s WHERE ( auth.user = :user AND auth.study = a.study AND auth.canWrite = true) GROUP BY a HAVING COUNT(s) > 0", [ "user": session.user ] )
+
+	            if( assayIdList.count() == 0 ) {
+		            redirect(action: 'noassays')
+	            }
+
+	            flow.assayList = Assay.executeQuery( "SELECT DISTINCT a FROM Assay a WHERE  a.id in (:list)", [ "list": assayIdList ])
 
                 flow.pages = [
                     "chooseAssay": "Choose Assay",
