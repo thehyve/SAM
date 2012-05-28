@@ -30,6 +30,33 @@ grails.project.dependency.resolution = {
 
         // runtime 'mysql:mysql-connector-java:5.1.13'
     }
+	plugins {
+
+		compile(":hibernate:$grailsVersion")
+		compile ':tomcat:1.3.7.2'
+		compile ':jquery:1.7.1'
+		compile ':jquery-datatables:1.7.5'
+		compile ':jquery-ui:1.8.15'
+
+		compile ':grom:0.2.3'
+		compile ':ajaxflow:0.2.1'
+		compile ':crypto:2.0'
+
+		compile ':dbxp-module-base:0.4.16'
+		compile ':matrix-importer:0.2.3.6'
+
+		compile ':resources:1.1.6'
+
+		compile(':gdt:0.2.1') {
+			// disable plugin dependency transition because it's horribly broken
+			// note: this assumes that ajaxflow, jquery and cryto stay included
+			transitive = false
+		}
+
+		compile ':famfamfam:1.0.1'
+		compile ':webflow:1.3.7'
+
+	}
 }
 
 //grails.plugin.location.'dbxpModuleBase' = '../dbxpModuleBase'
