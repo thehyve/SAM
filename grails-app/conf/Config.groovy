@@ -108,12 +108,6 @@ log4j = {
 			info	"grails.app", 
 					"dbxp.moduleBase"
 		}
-		dbnptest {
-			info	"grails.app",
-					"dbxp.moduleBase"
-		}
-		ci {
-		}
 	}
 }
 

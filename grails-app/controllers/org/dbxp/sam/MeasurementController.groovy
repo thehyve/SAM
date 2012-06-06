@@ -27,17 +27,16 @@ class MeasurementController {
 
     def create = {
 		// If no samples are present, we can't add measurements
-		if( Sample.count() == 0 ) {
-			flash.message = "No samples have been created in GSCF yet. Without samples, you can't add measurements."
-			redirect( controller: 'assay', action: 'list' );
+	    def features = Feature.list();
+	    def samples = SAMSample.giveWritableSamples( session.user )
+
+	    if( samples.count() == 0 ) {
+			redirect(action: 'noassays')
 		}
 		
         def measurementInstance = new Measurement()
         measurementInstance.properties = params
-		
-		def features = Feature.list();
-		def samples = SAMSample.giveWritableSamples( session.user )
-		
+
         return [measurementInstance: measurementInstance, samples: samples, features: features]
     }
 
@@ -178,7 +177,19 @@ class MeasurementController {
 		}
     }
 
-    def nofeatures = {}
+	void checkForFeatures() {
+
+	}
+
+    def nofeatures = {
+	    flash.message = "There are no features defined. Without features, you can't add measurements."
+	    redirect( controller: 'feature', action: 'list' );
+    }
+
+	def noassays = {
+		flash.message = "You have no assays that you are allowed to edit. Without writable samples, you can't add measurements."
+		redirect( controller: 'assay', action: 'list' );
+	}
     
 	def importData = {
 		// If no samples are present, we can't add measurements
@@ -208,17 +219,21 @@ class MeasurementController {
                     redirect(action: 'nofeatures')
                 }
 
-                // TODO: Maybe we want to make this search functionality available in, for example, Assay.groovy
-                // Grabs the Ids of assays that contain samples and the user can write to
-                def assayIdList = Assay.executeQuery( "SELECT DISTINCT a.id FROM Assay a, Auth auth LEFT JOIN  a.samples s WHERE ( auth.user = :user AND auth.study = a.study AND auth.canWrite = true) GROUP BY a HAVING COUNT(s) > 0", [ "user": session.user ] )
-                flow.assayList = Assay.executeQuery( "SELECT DISTINCT a FROM Assay a WHERE  a.id in (:list)", [ "list": assayIdList ])
+	            // TODO: Maybe we want to make this search functionality available in, for example, Assay.groovy
+	            // Grabs the Ids of assays that contain samples and the user can write to
+	            def assayIdList = Assay.executeQuery( "SELECT DISTINCT a.id FROM Assay a, Auth auth LEFT JOIN  a.samples s WHERE ( auth.user = :user AND auth.study = a.study AND auth.canWrite = true) GROUP BY a HAVING COUNT(s) > 0", [ "user": session.user ] )
+
+	            if( assayIdList.empty ) {
+		            redirect(action: 'noassays')
+	            }
+
+	            flow.assayList = Assay.executeQuery( "SELECT DISTINCT a FROM Assay a WHERE  a.id in (:list)", [ "list": assayIdList ])
 
                 flow.pages = [
                     "chooseAssay": "Choose Assay",
                     "uploadData": "Upload",
                     "selectLayout": "Select Layout",
                     "selectColumns": "Select Columns",
-                    "checkInput": "Check Input",
                     "saveData": "Done"
                 ]
             }
@@ -602,7 +617,7 @@ class MeasurementController {
                         return error();
                     }
                 }
-			}.to "checkInput"
+			}.to "saveData"
 			on("previous") {
 				// Save data of this step
                 // This is done to be able to redo matching when going back to, for example, the selectLayout step
@@ -646,41 +661,6 @@ class MeasurementController {
 			on("error").to "selectColumns"
 		}
 
-		checkInput {
-			on("save").to "saveData"
-			on("previous"){
-                // Save edits into the flow.edited_text object
-                for(int i = 1; i < flow.edited_text.size(); i++){
-                    for(int j = 1; j < flow.edited_text[0].size(); j++){
-                        def txt = params?.get('valueHidden'+i+','+j)
-                        def comm = params?.get('commentHidden'+i+','+j)
-                        def op = params?.get('operatorHidden'+i+','+j)
-                        if(txt?.class==java.lang.String){
-                            flow.edited_text[i][j] = txt
-                        }
-                        if(op?.class==java.lang.String){
-                            if(op==""){
-                                flow.operator.remove(i+","+j)
-                            } else {
-                                flow.operator.put(i+","+j,op)
-                            }
-                        }
-                        if(comm?.class==java.lang.String){
-                            if(comm==""){
-                                flow.comments.remove(i+","+j)
-                            } else {
-                                flow.comments.put(i+","+j,comm)
-                            }
-                        }
-
-                    }
-                }
-
-                // Update feature list in case the user has created new features on their previous visit to the selectColumns page
-                flow.features = Feature.list().sort(){it.name}
-            }.to "selectColumns"
-		}
-
 		saveData {
 			action {
 				// Save data into the database
@@ -689,7 +669,10 @@ class MeasurementController {
 				def t = System.currentTimeMillis();
 				
                 def measurementList = []
-                if(flow.layout=="sample_layout"){
+				// Update feature list in case the user has created new features on their previous visit to the selectColumns page
+				flow.features = Feature.list().sort(){it.name}
+
+				if(flow.layout=="sample_layout"){
                     for(int i = 1; i < flow.edited_text.size(); i++){
                         // For a particular sample
                         if(flow.edited_text[i][0]!=null && flow.edited_text[i][0]!="null"){
@@ -699,11 +682,9 @@ class MeasurementController {
                                 if(flow.edited_text[0][j]!=null && flow.edited_text[0][j]!="null"){
                                     Feature f = flow.edited_text[0][j]
                                     // ... a measurement will be created
-                                    def txt = params?.get('valueHidden'+i+','+j)
-                                    def comm = params?.get('commentHidden'+i+','+j)
-                                    def op = params?.get('operatorHidden'+i+','+j)
-                                    flow.edited_text[i][j] = op+""+txt+" "+comm
-                                    measurementList.add(importerCreateMeasurement(s, f, txt, comm, op));
+	                                if (flow.edited_text[i][j] != null) {
+		                                measurementList.add(importerCreateMeasurement(s, f, flow.edited_text[i][j], null, null))
+	                                }
                                 }
                             }
                         }
@@ -730,11 +711,9 @@ class MeasurementController {
                                     Feature f = flow.edited_text[0][j]
 									
                                     // ... a measurement will be created
-                                    def txt = params?.get('valueHidden'+i+','+j)
-                                    def comm = params?.get('commentHidden'+i+','+j)
-                                    def op = params?.get('operatorHidden'+i+','+j)
-                                    flow.edited_text[i][j] = op+""+txt+" "+comm
-                                    measurementList.add(importerCreateMeasurement(s, f, txt, comm, op));
+	                                if (flow.edited_text[i][j] != null) {
+		                                measurementList.add(importerCreateMeasurement(s, f, flow.edited_text[i][j], null, null))
+	                                }
                                 }
                             }
                         }
@@ -812,12 +791,12 @@ class MeasurementController {
 		}
 
         errorSaving {
-			on("previous").to "checkInput"
+			on("previous").to "selectColumns"
 		}
 
-        finishScreen()
+        finishScreen ()
 	}
-	
+
 	/**
 	 * When saving lots of measurements, the hibernate session must be cleaned, otherwise
 	 * the import will be very very slow. See http://naleid.com/blog/2009/10/01/batch-import-performance-with-grails-and-mysql/
@@ -839,6 +818,12 @@ class MeasurementController {
         def operator
         def comments
         def val
+
+	    // If there is no value, don't save the measurement
+	    // TODO: check if there is a case where comments can be entered on an empty measurement
+	    if (txt == null) {
+		    return null
+	    }
 
         // Check if the measurement value has an operator or is a comment
         if(!txt.isDouble()){
