@@ -167,3 +167,15 @@ pip-log.txt
 # Intellij
 .idea
 *.iml
+
+# Grails
+*.iws
+*Db.properties
+*Db.script
+.settings
+eclipse
+stacktrace.log
+target
+/plugins
+/web-app/plugins
+/web-app/WEB-INF/classes
