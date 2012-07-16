@@ -52,13 +52,15 @@ grails.project.dependency.resolution = {
 			transitive = false
 		}
 
+		compile ':dbxp-module-base:0.4.20'
+
 		compile ':famfamfam:1.0.1'
 		compile ':webflow:1.3.7'
 
 	}
 }
 
-grails.plugin.location.'dbxpModuleBase' = '../dbxpModuleBase'
+//grails.plugin.location.'dbxpModuleBase' = '../dbxpModuleBase'
 //grails.plugin.location.'matrixImporter' = '../MatrixImporter'
 //grails.plugin.location.'gdt' = '../gdt'
 

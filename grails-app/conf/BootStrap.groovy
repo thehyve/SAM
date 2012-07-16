@@ -15,7 +15,7 @@ class BootStrap {
 
         try {
             if(org.codehaus.groovy.grails.commons.ConfigurationHolder.config.module.showVersionInfo) {
-                new File("grails-app/views/_version.gsp").text = "hg id -i".execute().text;
+                new File("grails-app/views/_version.gsp").text = "git rev-parse HEAD".execute().text;
             }
         } catch (Exception e) {
             org.codehaus.groovy.grails.commons.ConfigurationHolder.config.module.showVersionInfo = false;
