@@ -42,7 +42,6 @@ grails.project.dependency.resolution = {
 		compile ':ajaxflow:0.2.1'
 		compile ':crypto:2.0'
 
-		compile ':dbxp-module-base:0.4.16'
 		compile ':matrix-importer:0.2.3.6'
 
 		compile ':resources:1.1.6'
@@ -59,7 +58,7 @@ grails.project.dependency.resolution = {
 	}
 }
 
-//grails.plugin.location.'dbxpModuleBase' = '../dbxpModuleBase'
+grails.plugin.location.'dbxpModuleBase' = '../dbxpModuleBase'
 //grails.plugin.location.'matrixImporter' = '../MatrixImporter'
 //grails.plugin.location.'gdt' = '../gdt'
 
