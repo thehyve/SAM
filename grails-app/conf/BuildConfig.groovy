@@ -34,28 +34,24 @@ grails.project.dependency.resolution = {
 
 		compile(":hibernate:$grailsVersion")
 		compile(":tomcat:$grailsVersion")
-		compile ':jquery:1.7.1'
+		compile ':jquery:1.7.2'
 		compile ':jquery-datatables:1.7.5'
 		compile ':jquery-ui:1.8.15'
 
 		compile ':grom:0.2.3'
-		compile ':ajaxflow:0.2.1'
+		compile ':ajaxflow:0.2.4'
 		compile ':crypto:2.0'
 
 		compile ':matrix-importer:0.2.3.6'
 
 		compile ':resources:1.1.6'
 
-		compile(':gdt:0.2.1') {
-			// disable plugin dependency transition because it's horribly broken
-			// note: this assumes that ajaxflow, jquery and cryto stay included
-			transitive = false
-		}
+		compile ':gdt:0.3.1'
 
-		compile ':dbxp-module-base:0.4.20'
+		compile ':dbxp-module-base:0.5.0'
 
 		compile ':famfamfam:1.0.1'
-		compile ':webflow:1.3.7'
+		compile ':webflow:1.3.8'
 
 	}
 }
