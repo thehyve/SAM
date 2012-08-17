@@ -10,11 +10,27 @@ grails.project.dependency.resolution = {
     }
     log "warn" // log level of Ivy resolver, either 'error', 'warn', 'info', 'debug' or 'verbose'
     repositories {
-        grailsPlugins()
-        grailsHome()
-        grailsCentral()
-        mavenRepo "http://nexus.nmcdsp.org/content/repositories/releases"
-		mavenRepo "http://nexus.nmcdsp.org/content/repositories/snapshots"
+	    grailsCentral()
+	    grailsRepo "http://grails.org/plugins"
+	    mavenCentral()
+
+	    // grails 1.3.9 does not seem to properly inherit maven repo's from plugins
+	    // so explicitely put ontocat in here. When upgraded to Grails 2.x this can
+	    // probably be removed
+	    mavenRepo "http://ontocat.sourceforge.net/maven/repo"
+
+	    // other maven repo's
+	    mavenRepo "http://nexus.nmcdsp.org/content/repositories/releases"
+//	    mavenRepo "http://repository.springsource.com/maven/bundles/release"
+//	    mavenRepo "http://repository.springsource.com/maven/bundles/external"
+//	    mavenRepo "http://repository.springsource.com/maven/libraries/release"
+//	    mavenRepo "http://repository.springsource.com/maven/libraries/external"
+
+//        grailsPlugins()
+//        grailsHome()
+//        grailsCentral()
+//        mavenRepo "http://nexus.nmcdsp.org/content/repositories/releases"
+//		mavenRepo "http://nexus.nmcdsp.org/content/repositories/snapshots"
 		
         // uncomment the below to enable remote dependency resolution
         // from public Maven repositories
