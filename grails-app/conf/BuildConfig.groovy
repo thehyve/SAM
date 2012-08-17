@@ -25,21 +25,6 @@ grails.project.dependency.resolution = {
 //	    mavenRepo "http://repository.springsource.com/maven/bundles/external"
 //	    mavenRepo "http://repository.springsource.com/maven/libraries/release"
 //	    mavenRepo "http://repository.springsource.com/maven/libraries/external"
-
-//        grailsPlugins()
-//        grailsHome()
-//        grailsCentral()
-//        mavenRepo "http://nexus.nmcdsp.org/content/repositories/releases"
-//		mavenRepo "http://nexus.nmcdsp.org/content/repositories/snapshots"
-		
-        // uncomment the below to enable remote dependency resolution
-        // from public Maven repositories
-        //mavenLocal()
-        //mavenCentral()
-        //mavenRepo "http://snapshots.repository.codehaus.org"
-        //mavenRepo "http://repository.codehaus.org"
-        //mavenRepo "http://download.java.net/maven/2/"
-        //mavenRepo "http://repository.jboss.com/maven2/"
     }
     dependencies {
         // specify dependencies here under either 'build', 'compile', 'runtime', 'test' or 'provided' scopes eg.
