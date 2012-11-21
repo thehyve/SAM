@@ -30,12 +30,14 @@ grails.project.dependency.resolution = {
         // specify dependencies here under either 'build', 'compile', 'runtime', 'test' or 'provided' scopes eg.
 
         // runtime 'mysql:mysql-connector-java:5.1.13'
+	// we seem to be needing XStream at compile time in some cases
+	compile("com.thoughtworks.xstream:xstream:1.3.1")
     }
-	plugins {
+    plugins {
 
 		compile(":hibernate:$grailsVersion")
 		compile(":tomcat:$grailsVersion")
-		compile ':jquery:1.7.2'
+		compile ':jquery:1.8.3'
 		compile ':jquery-datatables:1.7.5'
 		compile ':jquery-ui:1.8.15'
 
@@ -47,13 +49,12 @@ grails.project.dependency.resolution = {
 
 		compile ':resources:1.1.6'
 
-		compile ':gdt:0.3.1'
-
+		compile ':gdt:0.3.0.1'
+			  	
 		compile ':dbxp-module-base:0.5.0'
 
 		compile ':famfamfam:1.0.1'
 		compile ':webflow:1.3.8'
-
 	}
 }
 

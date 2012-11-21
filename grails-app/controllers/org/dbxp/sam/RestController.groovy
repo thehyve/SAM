@@ -206,43 +206,55 @@ class RestController extends org.dbxp.moduleBase.RestController {
 		
 		def features
 		def samples
+		def results
 		
 		if( measurementTokens ) {
 			// Return all requested features for the given assay
 			features = Feature.executeQuery( "SELECT DISTINCT f FROM Feature f, Measurement m, Sample s WHERE m.sample = s AND m.feature = f AND s.assay = :assay AND f.name IN (:measurementTokens)", [ "assay": assay, "measurementTokens": measurementTokens ] )
+			log.debug("Found ${features.size()} features matching the ${measurementTokens.size()} measurement tokens")		
 		} else {
 			// If no measurement tokens are given, return values for all features
 			features = Feature.executeQuery( "SELECT DISTINCT f FROM Feature f, Measurement m, Sample s  WHERE m.sample = s AND m.feature = f AND s.assay = :assay", [ "assay": assay ] )
+			log.debug("Using all ${features.size()} features")
 		}
 		
 		if( sampleTokens ) {
 			// Return all requested samples
 			samples = Sample.executeQuery( "SELECT s FROM Sample s WHERE s.assay = :assay AND s.sampleToken IN (:sampleTokens)", [ "assay": assay, "sampleTokens": sampleTokens ] )
+			log.debug("Found ${samples.size()} samples matching the ${sampleTokens.size()} sample tokens")
+			/*log.debug("i got this: ${sampleTokens}")
+			def alles = Sample.executeQuery( "SELECT s.sampleToken FROM Sample s WHERE s.assay = :assay", [ "assay": assay] )
+			log.debug("alles is ${alles}")
+			alles.each {
+					log.debug(it.dump())
+			}*/
 		} else {
 			// If no sampleTokens are given, return all	
 			samples = assay.samples;
+			log.debug("Using all ${samples.size()} samples")
 		}
 		
 		// If no samples or features are selected, return an empty list
-		if( !samples || !features ) { 
-			render [] as JSON
-			return
+		if( !samples || !features ) {
+			results = []
+			log.debug("No samples or no features, returning empty result")
 		}
+		else {
 		
-		// Retrieve all measurements from the database
-		def measurements = Measurement.executeQuery( "SELECT m, m.feature, m.sample FROM Measurement m WHERE m.feature IN (:features) AND m.sample IN (:samples)", [ "features": features, "samples": samples ] )
-		
-		// Convert the measurements into the desired format
-		def results = measurements.collect { [ 
-			"sampleToken": 		it[ 2 ].sampleToken, 
-			"measurementToken": it[ 1 ].name,
-			"value":			it[ 0 ].value
-		] }	
-		
-		if(!verbose) {
-			results = compactTable( results )
-		}
-		
+			// Retrieve all measurements from the database
+			def measurements = Measurement.executeQuery( "SELECT m, m.feature, m.sample FROM Measurement m WHERE m.feature IN (:features) AND m.sample IN (:samples)", [ "features": features, "samples": samples ] )
+			
+			// Convert the measurements into the desired format
+			results = measurements.collect { [ 
+				"sampleToken": 		it[ 2 ].sampleToken, 
+				"measurementToken": it[ 1 ].name,
+				"value":			it[ 0 ].value
+			] }	
+			
+			if(!verbose) {
+				results = compactTable( results )
+			}
+		}		
 		render results as JSON
 	}
 	
