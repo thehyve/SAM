@@ -98,12 +98,14 @@ log4j = {
 
     warn   'org.mortbay.log'
 
-    trace   "grails.app",
-            //'org.codehaus.groovy.grails.plugins' // plugins
-            "dbxp.moduleBase"
 			
 	// Change log4j properties for production
 	environments {
+        development {
+            warn   "grails.app"
+                    //'org.codehaus.groovy.grails.plugins' // plugins
+            trace   "dbxp.moduleBase"
+        }
 		production {
 			info	"grails.app", 
 					"dbxp.moduleBase"
