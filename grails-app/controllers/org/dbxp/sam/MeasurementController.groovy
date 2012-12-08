@@ -223,7 +223,7 @@ class MeasurementController {
 	            // Grabs the Ids of assays that contain samples and the user can write to
 	            def assayIdList = Assay.executeQuery( "SELECT DISTINCT a.id FROM Assay a, Auth auth LEFT JOIN  a.samples s WHERE ( auth.user = :user AND auth.study = a.study AND auth.canWrite = true) GROUP BY a HAVING COUNT(s) > 0", [ "user": session.user ] )
 
-	            if( assayIdList.empty ) {
+	            if( assayIdList.isEmpty() ) {
 		            redirect(action: 'noassays')
 	            }
 

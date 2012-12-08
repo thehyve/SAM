@@ -46,7 +46,7 @@ class FeatureController {
 		// Display parameters
 		int displayStart = params.int( 'iDisplayStart' );
 		int displayLength = params.int( 'iDisplayLength' );
-		int numColumns = params.int( 'columns' );
+		int numColumns = params.int( 'iColumns' );
 		
 		// Search parameters; searchable columns are determined serverside
 		String search = params.sSearch;
@@ -511,7 +511,7 @@ class FeatureController {
                 flow.message = null;
 
                 // Store the domainfields in the flow
-                flow.templateFields = Feature.giveDomainFields()
+                flow.templateFields = Feature.domainFields
 
                 // Store the selected template in the flow
                 flow.template = params.template;

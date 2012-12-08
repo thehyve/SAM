@@ -41,20 +41,21 @@ grails.project.dependency.resolution = {
 		compile ':jquery-datatables:1.7.5'
 		compile ':jquery-ui:1.8.15'
 
-		compile ':grom:0.2.3'
-		compile ':ajaxflow:0.2.4'
+        compile ":grom:latest.integration"
+		compile ":ajaxflow:latest.integration"
+
 		compile ':crypto:2.0'
 
 		compile ':matrix-importer:0.2.3.6'
 
 		compile ':resources:1.1.6'
 
-		compile ':gdt:0.3.0.1'
+		compile ':gdt:0.3.7.1'
 			  	
 		compile ':dbxp-module-base:0.5.0'
 
 		compile ':famfamfam:1.0.1'
-		compile ':webflow:1.3.8'
+		compile ':webflow:2.0.0'
 	}
 }
 

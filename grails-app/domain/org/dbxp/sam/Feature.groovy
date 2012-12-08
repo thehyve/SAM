@@ -9,31 +9,9 @@ class Feature extends TemplateEntity {
     String unit
 
     static constraints = {
-        name(unique:false, blank:false,
-            validator:{val,obj->
-                if(obj.id!=null){
-                    if(obj.unit!=null){
-                        // The Feature has an id and a unit
-                        // Look for features with a different id (exact match), that have the same name (case-insensitive) and have the same unit (case-insensitive)
-                        Feature.find("from Feature as f where lower(f.name) like :name and lower(f.unit) = :unit and not f.id = :id",[name:val.toLowerCase(),unit:obj.unit.toLowerCase(),id:obj.id])==null
-                    } else {
-                        // The Feature has an id but not a unit
-                        // Look for features with a different id (exact match), that have the same name (case-insensitive) and also have no unit
-                        Feature.find("from Feature as f where lower(f.name) like :name and f.unit = null and not f.id=:id",[name:val.toLowerCase(),id:obj.id])==null
-                    }
-                } else {
-                    if(obj.unit!=null){
-                        // The Feature does not have an id but does have a unit
-                        // Look for features that have the same name (case-insensitive) and have the same unit (case-insensitive)
-                        Feature.find("from Feature as f where lower(f.name) like :name and lower(f.unit) = :unit",[name:val.toLowerCase(),unit:obj.unit.toLowerCase()])==null
-                    } else {
-                        // The Feature does not have an id and does not have a unit
-                        // Look for features that have the same name (case-insensitive) and also have no unit
-                        Feature.find("from Feature as f where lower(f.name) like :name and (f.unit = null or f.unit = '')",[name:val.toLowerCase()])==null
-                    }
-                }
-            }
-        )
+        // The unit name constraint is case-sensitive.
+        // Features that have the same name with a different case can still exist - it is up to the user to resolve this; a custom validator places too much of a performance impact.
+        name(unique:true, blank:false)
         unit(nullable:true, blank:true)
     }
 
@@ -55,19 +33,20 @@ class Feature extends TemplateEntity {
 	 * return the domain fields for this domain class
 	 * @return List
 	 */
-	static List<TemplateField> giveDomainFields() { return Feature.domainFields }
+    @Override
+    List<TemplateField> giveDomainFields() { return domainFields }
 
-    static List<TemplateField> domainFields = [
+    static final List<TemplateField> domainFields = [
 		new TemplateField(
 			name: 'name',
 			type: TemplateFieldType.STRING,
 			preferredIdentifier: true,
-			comment: '...',
+			comment: 'The name of the feature',
 			required: true),
 		new TemplateField(
 			name: 'unit',
 			type: TemplateFieldType.STRING,
-			comment: "...",
+			comment: "The measurement unit of the feature",
 			required: false)
 	]
 

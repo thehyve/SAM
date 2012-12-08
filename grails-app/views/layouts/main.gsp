@@ -28,6 +28,12 @@
 		    		</ul>
 		    	</li>
                 <li>
+                    <g:link controller="assay" action="synchronize">
+                        Sync
+                        <img src="${fam.icon(name:"arrow_refresh")}" alt="(synchronize)" style="vertical-align:text-bottom;"/>
+                    </g:link>
+                </li>
+                <li>
                     <a href="${resource(dir: 'guides', file: 'SAM_User_Guide.pdf')}" target="_blank">
                         User Guide
                         <img src="${fam.icon(name:"page_white_acrobat")}" alt="(pdf)" style="vertical-align:text-bottom;"/>

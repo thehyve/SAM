@@ -67,7 +67,7 @@ class AssayController {
 	   // Display parameters
 	   int displayStart = params.int( 'iDisplayStart' ) ?: 0;
 	   int displayLength = params.int( 'iDisplayLength' ) ?: 10;
-	   int numColumns = params.int( 'columns' );
+	   int numColumns = params.int( 'iColumns' );
 	   
 	   // Search parameters; searchable columns are determined serverside
 	   String search = params.sSearch;
