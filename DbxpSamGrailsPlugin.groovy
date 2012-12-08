@@ -23,7 +23,7 @@ It can be used to store clinical data, such as Rules Based Medicine assays, but 
 '''
 
     // URL to the plugin's documentation
-    def documentation = "http://dbxp.org",
+    def documentation = "http://dbxp.org"
     def license = "APACHE"
 
     // Details of company behind the plugin (if there is one)
