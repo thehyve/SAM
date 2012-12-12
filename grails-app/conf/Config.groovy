@@ -115,6 +115,11 @@ log4j = {
 
 module.synchronization.classes.sample = "org.dbxp.sam.SAMSample"
 
+environments {
+    production {
+        grails.plugin.excludes='tomcat'
+    }
+} 
 
 // Fuzzy matching configuration
 fuzzyMatching.threshold = [
