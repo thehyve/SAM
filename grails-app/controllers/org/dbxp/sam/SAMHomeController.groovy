@@ -1,6 +1,6 @@
 package org.dbxp.sam
 
-class HomeController {
+class SAMHomeController {
     def index = {
 		 
 	}

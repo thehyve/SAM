@@ -1,9 +1,7 @@
 package org.dbxp.sam
 
 import org.dbxp.matriximporter.MatrixImporter
-import org.dbxp.moduleBase.Assay
-import org.dbxp.moduleBase.Auth
-import org.dbxp.moduleBase.Sample
+import dbnp.studycapturing.*
 import org.dbnp.gdt.RelTime
 import org.codehaus.groovy.grails.commons.ConfigurationHolder
 

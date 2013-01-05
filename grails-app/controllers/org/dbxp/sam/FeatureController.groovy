@@ -23,7 +23,6 @@ class FeatureController {
 	/**
 	 * Returns data for datatable. 
 	 * @see ! http://www.datatables.net/usage/server-side
-	 * @see ../moduleBase/datatables.js
 	 */
 	def datatables_list = {
 		/*	Input:

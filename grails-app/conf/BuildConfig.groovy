@@ -50,9 +50,7 @@ grails.project.dependency.resolution = {
 
 		compile ':resources:1.1.6'
 
-		compile ':gdt:0.3.7.1'
-			  	
-		compile ':dbxp-module-base:0.5.0'
+		compile ':gdt:0.3.7.4'
 
 		compile ':famfamfam:1.0.1'
 		compile ':webflow:2.0.0'
@@ -62,5 +60,6 @@ grails.project.dependency.resolution = {
 //grails.plugin.location.'dbxpModuleBase' = '../dbxpModuleBase'
 //grails.plugin.location.'matrixImporter' = '../MatrixImporter'
 //grails.plugin.location.'gdt' = '../gdt'
+grails.plugin.location.'dbxp-base' = '../dbxpBase'
 
 grails.server.port.http = "8182"  // The modern way of setting the server port

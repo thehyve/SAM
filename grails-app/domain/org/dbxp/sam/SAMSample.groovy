@@ -1,6 +1,6 @@
 package org.dbxp.sam
-import org.dbxp.moduleBase.Sample
-import org.dbxp.moduleBase.Assay
+import dbnp.studycapturing.Sample
+import dbnp.studycapturing.Assay
 
 class SAMSample extends Sample {
 	String subjectName

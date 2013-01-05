@@ -1,9 +1,9 @@
 package org.dbxp.sam
 
 import grails.converters.JSON
-import org.dbxp.moduleBase.*
+import dbnp.studycapturing.*
 
-class RestController extends org.dbxp.moduleBase.RestController {
+class RestController {
 
 	/****************************************************************/
 	/* REST resources for providing basic data to the GSCF          */
@@ -272,4 +272,35 @@ class RestController extends org.dbxp.moduleBase.RestController {
 
 		return assay;
 	}
+
+
+    /* helper function for getMeasurementData
+     *
+     * Return compact JSON object for data. The format of the returned array is as follows.
+     *
+     * The list contains three elements:
+     *
+     * (1) a list of sampleTokens,
+     * (2) a list of measurementTokens,
+     * (3) a list of values.
+     *
+     * The list of values is a matrix represented as a list. Each row of the matrix
+     * contains the values of a measurementToken (in the order given in the measurement
+     * token list, (2)). Each column of the matrix contains the values for the sampleTokens
+     * (in the order given in the list of sampleTokens, (1)).
+     */
+    def compactTable( results ) {
+        def sampleTokens = results.collect( { it['sampleToken'] } ).unique()
+        def measurementTokens = results.collect( { it['measurementToken'] } ).unique()
+
+        def data = []
+        measurementTokens.each{ m ->
+            sampleTokens.each{ s ->
+                def item = results.find{ it['sampleToken']==s && it['measurementToken']==m }
+                data.push item ? item['value'] : null
+            }
+        }
+
+        return [ sampleTokens, measurementTokens, data ]
+    }
 }

@@ -1,6 +1,6 @@
 package org.dbxp.sam
 
-import org.dbxp.moduleBase.Assay
+import dbnp.studycapturing.Assay
 
 class Measurement {
 

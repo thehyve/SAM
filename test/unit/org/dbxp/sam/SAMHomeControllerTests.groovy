@@ -2,7 +2,7 @@ package org.dbxp.sam
 
 import grails.test.*
 
-class HomeControllerTests extends ControllerUnitTestCase {
+class SAMHomeControllerTests extends ControllerUnitTestCase {
     protected void setUp() {
         super.setUp()
     }

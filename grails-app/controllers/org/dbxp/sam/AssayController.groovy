@@ -1,35 +1,22 @@
 package org.dbxp.sam
 
 import grails.converters.JSON
-import org.dbxp.moduleBase.*;
 import org.dbxp.matriximporter.*
 
-@NoAuthenticationRequired
 class AssayController {
 
     static allowedMethods = [save: "POST", update: "POST", delete: "POST"]
 	
 	def synchronizationService
-	
-	@RefreshUserInformation
+
 	def index = {
         redirect(action: "list", params: params)
     }
-		
-	@RefreshUserInformation
+
 	def synchronize = {
-		try { 
-			synchronizationService.initSynchronization( session.sessionToken, session.user ) ;
-			synchronizationService.fullSynchronization();
-		} catch( Exception e ) {
-			e.printStackTrace();
-			flash.error = "An error occurred while synchronizing: " + e.getMessage() + "; Please try again."
-		}
-		
 		redirect(action: "list", params: params)
 	}
 
-	@RefreshUserInformation
     def list = {
 		// First synchronize all studies that have been changed
 		try {
@@ -44,7 +31,6 @@ class AssayController {
 	/**
 	* Returns data for datatable.
 	* @see ! http://www.datatables.net/usage/server-side
-	* @see ../moduleBase/datatables.js
 	*/
    def datatables_list = {
 	   /*	Input:
@@ -81,14 +67,14 @@ class AssayController {
 	   
 	   // What columns to return?
 	   def columns = [ 'name', 'unit' ]
-	   
+	   /*
 	   // Create the HQL query
 	   def hqlParams = [:];
-	   def columnsHQL = "SELECT a.id, a.study.name, a.name, COUNT( s ) "
+	   def columnsHQL = "SELECT a.id, a.study.title AS name, a.name, COUNT( s ) "
 	   def hql = "FROM Assay a ";
 	   
 	   def joinHQL  = " LEFT JOIN a.samples s "
-	   def groupByHQL = " GROUP BY a.id, a.study.name, a.name "
+	   def groupByHQL = " GROUP BY a.id, a.study.title, a.name "
 	   def whereHQL = "WHERE ";
 	   def orderHQL = "";
 	   
@@ -127,12 +113,14 @@ class AssayController {
 
 	   // Display properties
 	   def records = Assay.executeQuery( columnsHQL + hql + joinHQL + whereHQL + groupByHQL + orderHQL, hqlParams, [ max: displayLength, offset: displayStart ] );
-	   
+	   */
+       def records = Assay.giveReadableAssays( session.user )
+
 	   // Calculate the total records as the number of assays that are readable for the user
 	   def numTotalRecords = Assay.giveReadableAssays( session.user ).size()
 	   
 	   // Calculate filtered records
-	   def filteredRecords = Assay.executeQuery( "SELECT id " + hql + whereHQL, hqlParams );
+	   def filteredRecords = records //Assay.executeQuery( "SELECT id " + hql + whereHQL, hqlParams );
 	   
 	   // Retrieve the number of samples with measurements for each assay
 	   // This is not the most efficient way of performing this query, but still 
@@ -173,8 +161,7 @@ class AssayController {
 	   render returnValues as JSON
 	   
    }
-	
-	@RefreshUserInformation
+
     def show = {
 		def hideEmpty = params.hideEmpty ? Boolean.parseBoolean( params.hideEmpty ) : true
         def assayInstance = Assay.get(params.id)

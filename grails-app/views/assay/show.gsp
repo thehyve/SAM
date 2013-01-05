@@ -1,4 +1,4 @@
-<%@ page import="java.math.MathContext; org.dbxp.moduleBase.Study" %>
+<%@ page import="java.math.MathContext" %>
 <html>
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />

@@ -11,7 +11,7 @@
 	    <body>
 			<content tag="topnav">
 				<% /* Insert only li tags for the top navigation, without surrounding ul */ %>
-				<li><g:link controller="home">Home</g:link></li>
+				<li><g:link controller="SAMHome">Home</g:link></li>
 				<li>
 					<a href="#">Browse</a>
 					<ul class="subnav">

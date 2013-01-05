@@ -1,4 +1,3 @@
-<%@ page import="org.dbxp.moduleBase.Study; org.dbxp.moduleBase.Assay" %>
 <html>
     <head>
       <meta name="layout" content="main"/>

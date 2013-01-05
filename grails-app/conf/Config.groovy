@@ -104,11 +104,9 @@ log4j = {
         development {
             warn   "grails.app"
                     //'org.codehaus.groovy.grails.plugins' // plugins
-            trace   "dbxp.moduleBase"
         }
 		production {
-			info	"grails.app", 
-					"dbxp.moduleBase"
+			info	"grails.app"
 		}
 	}
 }
