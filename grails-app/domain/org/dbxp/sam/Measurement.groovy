@@ -11,7 +11,6 @@ class Measurement {
     static final validOperators = ['<', '>','',null]
 
     static mapping = {
-        datasource 'sam'
         comments type: 'text'
     }
 

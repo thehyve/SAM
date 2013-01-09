@@ -14,7 +14,6 @@ class SAMSample extends Sample {
 	}
 	
 	static mapping = {
-        datasource 'sam'
 		measurements cascade: "all-delete-orphan"
 	}
 	

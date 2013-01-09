@@ -1,4 +1,4 @@
-dataSource_sam {
+dataSource {
     pooled = true
     driverClassName = "org.h2.Driver"
     username = "sa"
@@ -14,20 +14,20 @@ hibernate {
 // environment specific settings
 environments {
     development {
-        dataSource_sam {
+        dataSource {
             dbCreate = "create-drop" // one of 'create', 'create-drop', 'update', 'validate', ''
             url = "jdbc:h2:mem:devDb;MVCC=TRUE;LOCK_TIMEOUT=10000"
             //logSql = true
         }
     }
     test {
-        dataSource_sam {
+        dataSource {
             dbCreate = "update"
             url = "jdbc:h2:mem:testDb;MVCC=TRUE;LOCK_TIMEOUT=10000"
         }
     }
     production {
-        dataSource_sam {
+        dataSource {
             dbCreate = "update"
             url = "jdbc:h2:prodDb;MVCC=TRUE;LOCK_TIMEOUT=10000"
             pooled = true
