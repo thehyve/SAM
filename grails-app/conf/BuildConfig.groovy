@@ -35,31 +35,30 @@ grails.project.dependency.resolution = {
     }
     plugins {
 
-		compile(":hibernate:$grailsVersion")
-		compile(":tomcat:$grailsVersion")
-		compile ':jquery:1.8.3'
-		compile ':jquery-datatables:1.7.5'
-		compile ':jquery-ui:1.8.15'
+        compile(
+            ":dbxp-base:0.1.0.5",
+            ":hibernate:$grailsVersion",
+            ":tomcat:$grailsVersion",
+            ":grom:latest.integration",
+            ':crypto:2.0',
+            ':resources:latest.integration',
+            ':famfamfam:1.0.1') {
+                export = false
+        }
 
-        compile ":grom:latest.integration"
-		compile ":ajaxflow:latest.integration"
-
-		compile ':crypto:2.0'
-
-		compile ':matrix-importer:0.2.3.6'
-
-		compile ':resources:1.1.6'
-
-		compile ':gdt:0.3.7.4'
-
-		compile ':famfamfam:1.0.1'
-		compile ':webflow:2.0.0'
-	}
+        compile(
+            ':matrix-importer:0.2.3.6',
+            ':jquery:latest.integration',
+            ':jquery-datatables:1.7.5',
+            ':jquery-ui:1.8.15') {
+            export = true
+        }
+    }
 }
 
 //grails.plugin.location.'dbxpModuleBase' = '../dbxpModuleBase'
 //grails.plugin.location.'matrixImporter' = '../MatrixImporter'
 //grails.plugin.location.'gdt' = '../gdt'
-grails.plugin.location.'dbxp-base' = '../dbxpBase'
+//grails.plugin.location.'dbxp-base' = '../dbxpBase'
 
-grails.server.port.http = "8182"  // The modern way of setting the server port
+//grails.server.port.http = "8182"  // The modern way of setting the server port
