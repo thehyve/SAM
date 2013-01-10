@@ -1,6 +1,6 @@
 <html>
     <head>
-        <meta name="layout" content="main"/>
+        <meta name="layout" content="sammain"/>
         <title>Measurement importer</title>
         <script type="text/javascript">
 			// Associative array of booleans representing the state of the

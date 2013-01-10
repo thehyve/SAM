@@ -1,6 +1,6 @@
 <html>
     <head>
-        <meta name="layout" content="main"/>
+        <meta name="layout" content="sammain"/>
         <title>Measurement importer</title>
 
         <r:script type="text/javascript" disposition="head">

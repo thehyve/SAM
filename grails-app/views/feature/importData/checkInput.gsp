@@ -1,6 +1,6 @@
 <html>
     <head>
-        <meta name="layout" content="main"/>
+        <meta name="layout" content="sammain"/>
         <title>Feature importer</title>
         
         <r:require modules="tableEditor"/>

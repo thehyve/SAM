@@ -1,6 +1,6 @@
 <html>
     <head>
-		<meta name="layout" content="main"/>
+		<meta name="layout" content="sammain"/>
 		<title>Measurement importer</title>
         
 		<r:require module="importer" />
@@ -19,7 +19,7 @@
 
             <imp:importerHeader pages="${pages}" page="saveData" />
 
-            <p>Your data has been successfully imported and is available now. It can be seen on the <g:link controller="assay" action="show" id="${assay.id}">${assay.name}</g:link> overview page. If you wish to add more data you can do so <g:link controller="measurement" action="importData">by clicking here</g:link>.</p>
+            <p>Your data has been successfully imported and is available now. It can be seen on the <g:link controller="SAMAssay" action="show" id="${assay.id}">${assay.name}</g:link> overview page. If you wish to add more data you can do so <g:link controller="measurement" action="importData">by clicking here</g:link>.</p>
             <g:if test="${message}">
 				<p class="message">${message.toString()}</p>
 			</g:if>

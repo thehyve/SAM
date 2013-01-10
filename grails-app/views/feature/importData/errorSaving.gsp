@@ -1,6 +1,6 @@
 <html>
     <head>
-      <meta name="layout" content="main"/>
+      <meta name="layout" content="sammain"/>
       <title>Your data has not been saved</title>
         
         <r:require module="importer" />

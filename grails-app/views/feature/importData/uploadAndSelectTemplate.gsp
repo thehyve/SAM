@@ -1,7 +1,7 @@
 <%@ page import="org.dbxp.sam.Feature; org.dbnp.gdt.Template" %>
 <html>
     <head>
-        <meta name="layout" content="main"/>
+        <meta name="layout" content="sammain"/>
         <title>Feature importer</title>
         <r:script type="text/javascript" disposition="head">
             $(document).ready(function() {

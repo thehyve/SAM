@@ -1,6 +1,6 @@
 <html>
     <head>
-        <meta name="layout" content="main"/>
+        <meta name="layout" content="sammain"/>
         <title>Measurement importer</title>
         
         <r:require module="importer" />
@@ -28,7 +28,7 @@
                     <g:each in="${assayList}" status="i" var="assayInstance">
                         <tr class="${(i % 2) == 0 ? 'odd' : 'even'}" id="rowid_${assayInstance.id}">
                             <td>
-                                ${assayInstance.study.name}
+                                ${assayInstance.parent.title}
                             </td>
                             <td>
                                 ${assayInstance.name}
