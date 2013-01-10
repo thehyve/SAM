@@ -1,6 +1,6 @@
 class DbxpSamGrailsPlugin {
     // the plugin version
-    def version = "0.9.3"
+    def version = "0.9.3.1"
     // the version or versions of Grails the plugin is designed for
     def grailsVersion = "2.1 > *"
     // the other plugins this plugin depends on
@@ -10,7 +10,7 @@ class DbxpSamGrailsPlugin {
         "grails-app/views/error.gsp",
         "grails-app/conf/DataSource.groovy"
     ]
-
+    def loadAfter = ['gdt','dbxpBase','dbxpModuleBase','springSecurity']
     // TODO Fill in these fields
     def title = "dbXP SAM Plugin" // Headline display name of the plugin
     def author = "Kees van Bochove"
