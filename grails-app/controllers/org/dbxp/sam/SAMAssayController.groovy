@@ -100,12 +100,9 @@ class SAMAssayController {
 		   orderHQL = "ORDER BY " + sortOn.collect { ( it.column + 2 ) + " " + it.direction }.join( " " );
 	   }
 
-       println columnsHQL + hql + joinHQL + whereHQL + groupByHQL + orderHQL + " // " + hqlParams
-
 	   // Display properties
 	   def records = Assay.executeQuery( columnsHQL + hql + joinHQL + whereHQL + groupByHQL + orderHQL, hqlParams, [ max: displayLength, offset: displayStart ] );
-
-       //def records = Assay.giveReadableAssays( session.gscfUser )
+       //Should roughly equal to: def records = Assay.giveReadableAssays( session.gscfUser )
 
 	   // Calculate the total records as the number of assays that are readable for the user
 	   def numTotalRecords = records.size()
