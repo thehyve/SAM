@@ -2,21 +2,28 @@ package org.dbxp.sam
 import dbnp.studycapturing.Sample
 import dbnp.studycapturing.Assay
 
-class SAMSample extends Sample {
-	String subjectName
-	Long eventStartTime
+// This class saves additional information on GSCF samples specifically for SAM
+// It does not extend Sample because that would generated a very complicated Hibernate mapping
+// Instead, we store the parent sample in a field called parentSample and the parent (SAM) Assay in a field called parentAssay
+class SAMSample {
 
-	static hasMany = [measurements: Measurement]
-	
-	static constraints = {
-		subjectName(nullable: true)
-		eventStartTime(nullable: true)
-	}
+    static belongsTo = [
+            // Define the relation to the parent sample
+            parentSample: Sample,
+            // And also remember the parent assay that generated this sample
+            parentAssay: Assay
+    ]
+
+    static hasMany = [measurements: Measurement]
 	
 	static mapping = {
 		measurements cascade: "all-delete-orphan"
 	}
-	
+
+    public String getName() {
+        parentSample.name
+    }
+
 	/**
 	 * Sets the properties of this object, based on the JSON object given by GSCF
 	 * @param jsonObject	Object with sample data from GSCF

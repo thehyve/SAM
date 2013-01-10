@@ -2,30 +2,17 @@ package org.dbxp.sam
 
 import grails.converters.JSON
 import org.dbxp.matriximporter.*
+import dbnp.studycapturing.*
 
-class AssayController {
+class SAMAssayController {
 
     static allowedMethods = [save: "POST", update: "POST", delete: "POST"]
 	
-	def synchronizationService
-
 	def index = {
         redirect(action: "list", params: params)
     }
 
-	def synchronize = {
-		redirect(action: "list", params: params)
-	}
-
     def list = {
-		// First synchronize all studies that have been changed
-		try {
-			synchronizationService.initSynchronization( session.sessionToken, session.user );
-			synchronizationService.synchronizeChangedStudies()
-		} catch( Exception e ) {
-			e.printStackTrace();
-			flash.error = "An error occurred while synchronizing: " + e.getMessage()
-		}
     }
 
 	/**
@@ -67,30 +54,32 @@ class AssayController {
 	   
 	   // What columns to return?
 	   def columns = [ 'name', 'unit' ]
-	   /*
+
 	   // Create the HQL query
 	   def hqlParams = [:];
-	   def columnsHQL = "SELECT a.id, a.study.title AS name, a.name, COUNT( s ) "
+	   def columnsHQL = "SELECT a.id, a.parent.title AS name, a.name, COUNT( s ) "
 	   def hql = "FROM Assay a ";
 	   
 	   def joinHQL  = " LEFT JOIN a.samples s "
-	   def groupByHQL = " GROUP BY a.id, a.study.title, a.name "
+	   def groupByHQL = " GROUP BY a.id, a.parent.title, a.name "
 	   def whereHQL = "WHERE ";
 	   def orderHQL = "";
 	   
 	   // Add authorization
-	   if( session.user ) {
-		   if( !session.user.isAdministrator ) {
+	   if( session.gscfUser ) {
+		   if( !session.gscfUser.hasAdminRights() ) {
 			   // Make sure only visible studies are shown
-			   whereHQL += " ( a.study.isPublic = true OR EXISTS( FROM Auth auth WHERE auth.user = :user AND auth.study = a.study AND auth.canRead = true ) )"
-		   	   hqlParams[ "user" ] = session.user
+               // 			   whereHQL += " ( a.parent.publicstudy = true OR a.parent.owner = :user OR :user IN a.parent.readers OR :user IN a.parent.writers )" renders a very interesting query, possible Hibernate bug
+			   //same here: whereHQL += " ( a.parent.publicstudy = true OR a.parent.owner = :user OR EXISTS( FROM Study x WHERE x.id = a.parent.id AND :user IN x.readers OR :user IN x.writers) )"
+               whereHQL += " ( a.parent.publicstudy = true OR a.parent.owner = :user OR :user in elements(a.parent.readers) OR :user in elements(a.parent.writers))"
+		   	   hqlParams[ "user" ] = session.gscfUser
 		   } else {
 		   		// Administrators are allowed to see all assays, but we have to add some HQL here,
 		   		// since otherwise the HQL on line 117 can't be added with a " AND " 
 		   		whereHQL += " 1 = 1 "
 		   }
 	   } else {
-	   		whereHQL += " a.study.isPublic = true ";
+	   		whereHQL += " a.parent.publicstudy = true ";
 	   }
 	   
 	   // Search properties
@@ -99,7 +88,7 @@ class AssayController {
 		   
 		   def hqlConstraints = [];
 		   hqlConstraints << "LOWER(a.name) LIKE :search"
-		   hqlConstraints << "LOWER(a.study.name) LIKE :search"
+		   hqlConstraints << "LOWER(a.parent.name) LIKE :search"
 		   
 		   whereHQL += " AND ( " + hqlConstraints.join( " OR " ) + ") "
 	   }
@@ -111,23 +100,25 @@ class AssayController {
 		   orderHQL = "ORDER BY " + sortOn.collect { ( it.column + 2 ) + " " + it.direction }.join( " " );
 	   }
 
+       println columnsHQL + hql + joinHQL + whereHQL + groupByHQL + orderHQL + " // " + hqlParams
+
 	   // Display properties
 	   def records = Assay.executeQuery( columnsHQL + hql + joinHQL + whereHQL + groupByHQL + orderHQL, hqlParams, [ max: displayLength, offset: displayStart ] );
-	   */
-       def records = Assay.giveReadableAssays( session.user )
+
+       //def records = Assay.giveReadableAssays( session.gscfUser )
 
 	   // Calculate the total records as the number of assays that are readable for the user
-	   def numTotalRecords = Assay.giveReadableAssays( session.user ).size()
+	   def numTotalRecords = records.size()
 	   
 	   // Calculate filtered records
-	   def filteredRecords = records //Assay.executeQuery( "SELECT id " + hql + whereHQL, hqlParams );
-	   
+	   def filteredRecords = Assay.executeQuery( "SELECT id " + hql + whereHQL, hqlParams );
+
 	   // Retrieve the number of samples with measurements for each assay
 	   // This is not the most efficient way of performing this query, but still 
 	   def extendedRecords = []
 	   if( records.size() > 0 ) {
 		   records.each { record ->
-			   def retrieveFilledSampleCountHQL = "SELECT COUNT(*) FROM Assay a LEFT JOIN a.samples s WHERE a.id = :assayId AND EXISTS( FROM Measurement m WHERE m.sample = s )"
+               def retrieveFilledSampleCountHQL = "SELECT COUNT(s) FROM SAMSample s WHERE s.parentAssay.id = :assayId AND s.measurements.size > 0"
 			   def numFilledSamples = Assay.executeQuery( retrieveFilledSampleCountHQL, [ "assayId": record[ 0 ] ] )
 			   
 			   def extendedRecord = record as List;
@@ -152,7 +143,7 @@ class AssayController {
 		   aaData: extendedRecords.collect {
                [
                 it[1], it[2], it[3],
-			    dt.buttonShow( 'controller': "assay", 'id': it[ 0 ] ) ]
+			    dt.buttonShow( 'controller': "SAMAssay", 'id': it[ 0 ] ) ]
 		   },
 		   aIds: filteredRecords
 	   ]
@@ -172,21 +163,22 @@ class AssayController {
 			return
         }
 		
-		if( !assayInstance.study.canRead( session.user ) ) {
+		if( !assayInstance.parent.canRead( session.gscfUser ) ) {
 			flash.message = "You are not allowed to access assay " + assayInstance
 			redirect(action: "list")
 			return
 		}
 		
 		// Lookup all samples for this assay
-		def numberOfSamples = SAMSample.countByAssay( assayInstance );
+		def numberOfSamples = assayInstance.samples.size();
 		def samples;
 		
 		// If samples without measurements should be hidden, we don't retrieve them from the database at all
 		if( hideEmpty ) {
-			samples = SAMSample.findAll( "from SAMSample s WHERE s.assay = :assay AND EXISTS( FROM Measurement m WHERE m.sample = s ) ORDER BY s.name", [ assay: assayInstance ] );
+            //samples = assayInstance.samples.sort { it.name}
+			samples = SAMSample.findAll( "from SAMSample s WHERE s.parentAssay = :assay AND s.measurements.size > 0 ORDER BY s.parentSample.name", [ assay: assayInstance ] );
 		} else {
-			samples = SAMSample.findAll( "from SAMSample s WHERE s.assay = :assay ORDER BY s.name", [ assay: assayInstance ] );
+			samples = SAMSample.findAll( "from SAMSample s WHERE s.parentAssay = :assay ORDER BY s.name", [ assay: assayInstance ] );
 		} 
 		
 		// Compute the number of samples without measurements
@@ -198,7 +190,7 @@ class AssayController {
 		if( samples ) {
 			// If samples are found lookup all measurements. They are ordered by sample name and after that feature name.
 			// This order ensures that we can easily walk through the list when showing them on screen
-			measurements = Measurement.findAll( "from Measurement m WHERE m.sample IN (:samples) ORDER BY m.sample.name, m.feature.name", [ samples: samples ] );
+			measurements = Measurement.findAll( "from Measurement m WHERE m.sample IN (:samples) ORDER BY m.sample.parentSample.name, m.feature.name", [ samples: samples ] );
 			if( measurements ) {
 				features = Feature.findAll( "from Feature f WHERE EXISTS( FROM Measurement m WHERE m IN (:measurements) AND m.feature = f ) ORDER BY f.name", [ measurements: measurements ] )
 			}

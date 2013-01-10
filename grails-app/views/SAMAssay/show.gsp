@@ -2,7 +2,7 @@
 <html>
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-        <meta name="layout" content="main" />
+        <meta name="layout" content="sammain" />
         <g:set var="entityName" value="${message(code: 'study.label', default: 'Study')}" />
         <title>Show assay ${assayInstance.name}</title>
         
@@ -15,7 +15,7 @@
         <content tag="contextmenu">
       		<li><g:link action="list" class="list">Back to list</g:link></li>
         </content>    
-		<h1>${assayInstance.name} / ${assayInstance.study.name}</h1>
+		<h1>${assayInstance.name} / ${assayInstance.parent.title}</h1>
 		
 		<g:if test="${measurements.size() > 0}">
             <ul class="data_nav buttons ontop">

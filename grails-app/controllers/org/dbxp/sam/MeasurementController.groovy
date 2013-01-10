@@ -69,7 +69,7 @@ class MeasurementController {
         if (!measurementInstance) {
             flash.message = "The requested measurement could not be found."
             redirect(action: "list")
-        } else if( !measurementInstance.sample.assay.study.canRead( session.user ) ) {
+        } else if( !measurementInstance.sample.parentAssay.parent.canRead( session.user ) ) {
 			flash.message = "You are not allowed to access the requested measurement."
 			redirect( action: "list" );
         } else {
@@ -169,7 +169,7 @@ class MeasurementController {
 		// Redirect to the assay list, because that is the only place where a 
 		// delete button exists.
 		if( params.assayId ) {
-			redirect( controller: "assay", action: "show", id: params.assayId )
+			redirect( controller: "SAMAssay", action: "show", id: params.assayId )
 		} else {
 			redirect(action: "list")
 		}
@@ -186,14 +186,14 @@ class MeasurementController {
 
 	def noassays = {
 		flash.message = "You have no assays that you are allowed to edit. Without writable samples, you can't add measurements."
-		redirect( controller: 'assay', action: 'list' );
+		redirect( controller: 'SAMAssay', action: 'list' );
 	}
     
 	def importData = {
 		// If no samples are present, we can't add measurements
 		if( Sample.count() == 0 ) {
 			flash.message = "No samples have been created in GSCF yet. Without samples, you can't import measurements."
-			redirect( controller: 'assay', action: 'list' );
+			redirect( controller: 'SAMAssay', action: 'list' );
 		}
 		
 		redirect( action: 'importDataFlow' )
@@ -203,29 +203,18 @@ class MeasurementController {
 
         startUp {
             action{
-				// First synchronize all studies that have been changed
-				try {
-					synchronizationService.initSynchronization( session.sessionToken, session.user );
-					synchronizationService.synchronizeChangedStudies()
-				} catch( Exception e ) {
-					// If an exception occurs, probably the synchronization is already running. Notify the user,
-					// but still continue
-					flash.error = "Synchronization with GSCF failed: " + e.getMessage();
-				}
 
                 if(Feature.count() == 0){
                     redirect(action: 'nofeatures')
                 }
 
-	            // TODO: Maybe we want to make this search functionality available in, for example, Assay.groovy
-	            // Grabs the Ids of assays that contain samples and the user can write to
-	            def assayIdList = Assay.executeQuery( "SELECT DISTINCT a.id FROM Assay a, Auth auth LEFT JOIN  a.samples s WHERE ( auth.user = :user AND auth.study = a.study AND auth.canWrite = true) GROUP BY a HAVING COUNT(s) > 0", [ "user": session.user ] )
+	            flow.assayList = Assay.giveWritableAssays(session.gscfUser)
 
-	            if( assayIdList.isEmpty() ) {
+	            if( flow.assayList.isEmpty() ) {
 		            redirect(action: 'noassays')
 	            }
 
-	            flow.assayList = Assay.executeQuery( "SELECT DISTINCT a FROM Assay a WHERE  a.id in (:list)", [ "list": assayIdList ])
+	            //flow.assayList = Assay.executeQuery( "SELECT DISTINCT a FROM Assay a WHERE  a.id in (:list)", [ "list": assayIdList ])
 
                 flow.pages = [
                     "chooseAssay": "Choose Assay",
@@ -242,7 +231,7 @@ class MeasurementController {
 			// Step 1: choose study and assay (update assay dropdown based on the study selected)
 			on("next") {
                 flow.assay = Assay.get(params.assay)
-                flow.studyName = flow.assay.study.name
+                flow.studyName = flow.assay.parent.title
 
                 // Reset the relevant data that might have been entered by the user before, in the next step(s) of the wizard
                 flow.inputField = null;
@@ -326,7 +315,7 @@ class MeasurementController {
                 }
 
                 // Before doing all the layout detection calculations, check if subject_layout is even possible
-                def tmp1 = flow.assay.samples.eventStartTime.unique()
+                def tmp1 = flow.assay.samples.samplingTime.unique()
                 def tmp2 = flow.assay.samples.subjectName.unique()
                 if(tmp1.size()==0 || tmp1.contains(null) ||  tmp2.size()==0 || tmp2.contains(null)){
                     // No start times? No subject names? Cannot select subject layout then!
@@ -413,7 +402,7 @@ class MeasurementController {
 				flow.features = Feature.list( sort: "name" )
 
                 if(params.layoutselector=="sample_layout"){
-                    flow.samples = Sample.findAllByAssay( flow.assay, [ sort: "name" ] )
+                    flow.samples = flow.assay.samples.sort {it.name}
 
                     // Try to match first row to features
                     flow.feature_matches = [:]
@@ -440,7 +429,7 @@ class MeasurementController {
                     def samples = flow.assay.samples
                     
 					// Retrieve timepoints and convert them to RelTime strings
-					flow.timepoints = samples*.eventStartTime.unique()
+					flow.timepoints = samples*.samplingTime.unique()
 					flow.timepoints.sort();
 					flow.timepoints = flow.timepoints.collect { new RelTime( it ).toString() }
                     
@@ -528,10 +517,9 @@ class MeasurementController {
                                 continue;
                             }
 
-
                             if(flow.layout=="sample_layout"){
                                 if(j==0){
-                                    flow.edited_text[i][j] = SAMSample.findById(params[i+','+j])
+                                    flow.edited_text[i][j] = Sample.findById(params[i+','+j])
                                     continue;
                                 }
                             } else {
@@ -641,7 +629,7 @@ class MeasurementController {
                             }
                             if(flow.layout=="sample_layout"){
                                 if(j==0){
-                                    flow.edited_text[i][j] = SAMSample.findById(params[i+','+j])
+                                    flow.edited_text[i][j] = Sample.findById(params[i+','+j])
                                     continue;
                                 }
                             } else {
@@ -674,14 +662,14 @@ class MeasurementController {
                     for(int i = 1; i < flow.edited_text.size(); i++){
                         // For a particular sample
                         if(flow.edited_text[i][0]!=null && flow.edited_text[i][0]!="null"){
-                            SAMSample s = flow.edited_text[i][0]
+                            Sample s = flow.edited_text[i][0]
                             for(int j = 1; j < flow.edited_text[0].size(); j++){
                                 // ... and a particular feature
                                 if(flow.edited_text[0][j]!=null && flow.edited_text[0][j]!="null"){
                                     Feature f = flow.edited_text[0][j]
                                     // ... a measurement will be created
 	                                if (flow.edited_text[i][j] != null) {
-		                                measurementList.add(importerCreateMeasurement(s, f, flow.edited_text[i][j], null, null))
+		  	                                measurementList.add(importerCreateMeasurement(s, flow.assay, f, flow.edited_text[i][j], null, null))
 	                                }
                                 }
                             }
@@ -699,7 +687,7 @@ class MeasurementController {
 									// In order for that to work, reconvert the timepoint into seconds
 									def timepoint = new RelTime( flow.edited_text[1][j] ).getValue();
 									
-                                    SAMSample s = assaySamples.find { it.eventStartTime == timepoint && it.subjectName == flow.edited_text[i][0] }
+                                    Sample s = assaySamples.find { it.samplingTime == timepoint && it.subjectName == flow.edited_text[i][0] }
 
                                     if(s==null){
                                         // This datapoint needs to be ignored on account of a subject/timepoint conflict; adding a datapoint for this particular eventStartTime and subjectName combination is simply not allowed.
@@ -710,7 +698,7 @@ class MeasurementController {
 									
                                     // ... a measurement will be created
 	                                if (flow.edited_text[i][j] != null) {
-		                                measurementList.add(importerCreateMeasurement(s, f, flow.edited_text[i][j], null, null))
+		                                measurementList.add(importerCreateMeasurement(s, flow.assay, f, flow.edited_text[i][j], null, null))
 	                                }
                                 }
                             }
@@ -722,7 +710,7 @@ class MeasurementController {
 				t = System.currentTimeMillis();
 				
 				// Check whether the assay is still writable
-				if( !flow.assay.study.canWrite( session.user ) ) {
+				if( !flow.assay.parent.canWrite( session.gscfUser ) ) {
 					flash.message = "The authorization of your study has changed while you were adding measurements. Please choose another assay."
 					return error();
 				}
@@ -812,7 +800,7 @@ class MeasurementController {
 		propertyInstanceMap.get().clear()
 	}		
 
-    Measurement importerCreateMeasurement(SAMSample s, Feature f, def txt, def comm, def op) {
+    Measurement importerCreateMeasurement(Sample s, Assay a, Feature f, def txt, def comm, def op) {
         def operator
         def comments
         def val
@@ -864,9 +852,18 @@ class MeasurementController {
             }
         }
 
+        // Find the SAMSample
+        def ss = SAMSample.findByParentSampleAndParentAssay(s,a)
+        //def ss = SAMSample.find { parentSample == s && parentAssay == a}
+        if (!ss) {
+            ss = new SAMSample(parentSample: s, parentAssay: a)
+            // Flushing is necessary here, because otherwise a lot of SAMSamples with the same s and a would be created and only flushed at the end of the transaction
+            ss.save(flush:true)
+        }
+
 		// A measurement needs a value or a comments field
 		if( val != null || comments ) 
-        	return new Measurement(sample:s,feature:f,value:val,operator:operator,comments:comments)
+        	return new Measurement(sample:ss,feature:f,value:val,operator:operator,comments:comments)
 		else
 			return null
     }
@@ -879,7 +876,7 @@ class MeasurementController {
 		
 		if( !assayId || !assayId.isLong() ) {
 			flash.error = "No assay selected"
-			redirect( controller: "assay", view: "list" );
+			redirect( controller: "SAMAssay", view: "list" );
 			return;
 		}
 		
@@ -887,7 +884,7 @@ class MeasurementController {
 		
 		if( !assay ) {
 			flash.error = "Incorrect assay Id given"
-			redirect( controller: "assay", view: "list" );
+			redirect( controller: "SAMAssay", view: "list" );
 			return;
 		}
 		
@@ -897,7 +894,7 @@ class MeasurementController {
 			flash.error = "An error occurred while deleting measurements for this assay. Please try again or contact your system administrator."
 		}
 		
-		redirect( controller: "assay", view: "list" );
+		redirect( controller: "SAMAssay", view: "list" );
 	}
 
     def checkForFeatureTimepointDuplicates(features, timepoints) {

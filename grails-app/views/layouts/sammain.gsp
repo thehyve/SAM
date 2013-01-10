@@ -17,7 +17,7 @@
 					<ul class="subnav">
 		    			<!-- <li><g:link controller="measurement">Measurements</g:link></li> -->
 						<li><g:link controller="feature">Features</g:link></li>
-						<li><g:link controller="assay">Assays</g:link></li>
+						<li><g:link controller="SAMAssay">Assays</g:link></li>
 		    		</ul>
 		    	</li>
 				<li>
@@ -27,12 +27,6 @@
 		    			<li><g:link controller="measurement" action="importData">Measurements</g:link></li>
 		    		</ul>
 		    	</li>
-                <li>
-                    <g:link controller="assay" action="synchronize">
-                        Sync
-                        <img src="${fam.icon(name:"arrow_refresh")}" alt="(synchronize)" style="vertical-align:text-bottom;"/>
-                    </g:link>
-                </li>
                 <li>
                     <a href="${resource(dir: 'guides', file: 'SAM_User_Guide.pdf')}" target="_blank">
                         User Guide
