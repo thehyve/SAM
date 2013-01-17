@@ -39,7 +39,7 @@ grails.project.dependency.resolution = {
         }
 
         compile(
-            ":dbxp-base:0.1.0.8",
+            ":dbxp-base:0.1.0.9",
             ":hibernate:$grailsVersion",
             ":tomcat:$grailsVersion",
             ":grom:latest.integration",
@@ -49,7 +49,7 @@ grails.project.dependency.resolution = {
         }
 
         compile(
-	    ':matrix-importer:0.2.3.7',
+	        ':matrix-importer:0.2.3.7',
             ':dbxp-module-base:0.6.1',
             ':resources:latest.integration',
             ':jquery:latest.integration',
