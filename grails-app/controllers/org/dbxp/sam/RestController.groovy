@@ -69,10 +69,10 @@ class RestController {
 		
 		if( measurementTokens ) {
 			// Return all requested features for the given assay
-			features = Feature.executeQuery( "SELECT DISTINCT f FROM Feature f, Measurement m, SAMSample s WHERE m.sample = s AND m.feature = f AND s.assay = :assay AND f.name IN (:measurementTokens)", [ "assay": assay, "measurementTokens": measurementTokens ] )
+			features = Feature.executeQuery( "SELECT DISTINCT f FROM Feature f, Measurement m, SAMSample s WHERE m.sample = s AND m.feature = f AND s.parentAssay = :assay AND f.name IN (:measurementTokens)", [ "assay": assay, "measurementTokens": measurementTokens ] )
 		} else {
 			// If no measurement tokens are given, return values for all features
-			features = Feature.executeQuery( "SELECT DISTINCT f FROM Feature f, Measurement m, SAMSample s WHERE m.sample = s AND m.feature = f AND s.assay = :assay", [ "assay": assay ] )
+			features = Feature.executeQuery( "SELECT DISTINCT f FROM Feature f, Measurement m, SAMSample s WHERE m.sample = s AND m.feature = f AND s.parentAssay = :assay", [ "assay": assay ] )
 		}
 		
 		render features.collect { feature -> 
@@ -210,17 +210,17 @@ class RestController {
 		
 		if( measurementTokens ) {
 			// Return all requested features for the given assay
-			features = Feature.executeQuery( "SELECT DISTINCT f FROM Feature f, Measurement m, Sample s WHERE m.sample = s AND m.feature = f AND s.assay = :assay AND f.name IN (:measurementTokens)", [ "assay": assay, "measurementTokens": measurementTokens ] )
+			features = Feature.executeQuery( "SELECT DISTINCT f FROM Feature f, Measurement m, SAMSample s WHERE m.sample = s AND m.feature = f AND s.parentAssay = :assay AND f.name IN (:measurementTokens)", [ "assay": assay, "measurementTokens": measurementTokens ] )
 			log.debug("Found ${features.size()} features matching the ${measurementTokens.size()} measurement tokens")		
 		} else {
 			// If no measurement tokens are given, return values for all features
-			features = Feature.executeQuery( "SELECT DISTINCT f FROM Feature f, Measurement m, Sample s  WHERE m.sample = s AND m.feature = f AND s.assay = :assay", [ "assay": assay ] )
+			features = Feature.executeQuery( "SELECT DISTINCT f FROM Feature f, Measurement m, SAMSample s  WHERE m.sample = s AND m.feature = f AND s.parentAssay = :assay", [ "assay": assay ] )
 			log.debug("Using all ${features.size()} features")
 		}
 		
 		if( sampleTokens ) {
 			// Return all requested samples
-			samples = Sample.executeQuery( "SELECT s FROM Sample s WHERE s.assay = :assay AND s.sampleToken IN (:sampleTokens)", [ "assay": assay, "sampleTokens": sampleTokens ] )
+			samples = SAMSample.executeQuery( "SELECT s FROM SAMSample s WHERE s.parentAssay = :assay AND s.parentSample.UUID IN (:sampleTokens)", [ "assay": assay, "sampleTokens": sampleTokens ] )
 			log.debug("Found ${samples.size()} samples matching the ${sampleTokens.size()} sample tokens")
 			/*log.debug("i got this: ${sampleTokens}")
 			def alles = Sample.executeQuery( "SELECT s.sampleToken FROM Sample s WHERE s.assay = :assay", [ "assay": assay] )
@@ -246,7 +246,7 @@ class RestController {
 			
 			// Convert the measurements into the desired format
 			results = measurements.collect { [ 
-				"sampleToken": 		it[ 2 ].sampleToken, 
+				"sampleToken": 		it[ 2 ].parentSample.UUID,
 				"measurementToken": it[ 1 ].name,
 				"value":			it[ 0 ].value
 			] }	
@@ -268,7 +268,7 @@ class RestController {
 			return null
 		}
 		def list = []
-		def assay = Assay.findByAssayToken( assayToken )
+		def assay = Assay.findWhere(UUID: assayToken )
 
 		return assay;
 	}
