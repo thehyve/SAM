@@ -17,6 +17,8 @@
                 <thead>
                     <tr>
 
+                        <th>Platform</th>
+
                         <th>Name</th>
 
                         <th>Unit</th>

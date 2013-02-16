@@ -20,7 +20,7 @@ modules = {
         resource url: 'css/importer.css'
 	}
 
-    featureTemplateFields {
+    templateFieldsMisc {
         resource url: 'js/templateFields.js'
     }
 }

@@ -8,6 +8,8 @@ class Feature extends TemplateEntity {
     String name
     String unit
 
+    static belongsTo = [platform:Platform]
+
     static constraints = {
         // The unit name constraint is case-sensitive.
         // Features that have the same name with a different case can still exist - it is up to the user to resolve this; a custom validator places too much of a performance impact.

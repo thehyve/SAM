@@ -1,11 +1,11 @@
-<%@ page import="org.dbnp.gdt.TemplateField; org.dbxp.sam.Feature" %>
+<%@ page import="org.dbnp.gdt.TemplateField; org.dbxp.sam.Feature; org.dbxp.sam.Platform" %>
 <%@ page import="org.dbnp.gdt.GdtTagLib" %>
 <html>
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
         <meta name="layout" content="sammain"/>
         <title>Edit feature ${featureInstance.name}</title>
-        <r:require module="featureTemplateFields"/>
+        <r:require module="templateFieldsMisc"/>
         <r:script type="text/javascript" disposition="head">
             $(document).ready(function() {
             	insertSelectAddMore();
@@ -105,6 +105,14 @@
                          <tr>
                             <td>
                                 <table>
+                                    <tr class="prop even">
+                                        <td valign="top" class="fieldName">
+                                            Platform
+                                        </td>
+                                        <td valign="top">
+                                            <g:select name="platform" from="${Platform.list()}" optionKey="id"/>
+                                        </td>
+                                    </tr>
                                     <g:each in="${featureInstance.giveDomainFields()}" var="field" status="i">
                                         <tr class="prop ${(i % 2) == 0 ? 'odd' : 'even'}">
                                             <td valign="top" class='fieldName'>

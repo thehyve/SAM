@@ -1,10 +1,9 @@
 <!DOCTYPE html>
 <html>
     <head>
-	    <script type="text/javascript">var baseUrl = '${resource(dir: '')}';</script>
+	    <script type="text/javascript">var baseUrl = '${g.createLink(absolute: true, url: '/')}/'</script>
 
         <g:javascript library="jquery" plugin="jquery"/>
-		<jqui:resources themeCss="${createLinkTo(dir: 'css/cupertino', file: 'jquery-ui-1.8.13.custom.css')}" />
 
         <script type="text/javascript" src="${resource(dir: 'js', file: 'SelectAddMore.js', plugin: 'gdt')}"></script>
         <link rel="stylesheet" href="${resource(dir: 'css', file: 'templateEditor.css', plugin: 'gdt')}"/>

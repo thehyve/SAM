@@ -1,4 +1,4 @@
-<%@ page import="org.dbnp.gdt.TemplateFieldType; org.dbxp.sam.Feature" %>
+<%@ page import="org.dbnp.gdt.TemplateFieldType; org.dbxp.sam.Feature; org.dbxp.sam.Platform" %>
 <html>
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
@@ -19,6 +19,14 @@
         <div class="data">
             <div class="dialog">
                 <table class="">
+                    <tr class="prop even">
+                        <td valign="top" class="fieldName">
+                            Platform
+                        </td>
+                        <td valign="top">
+                            ${featureInstance.platform.name}
+                        </td>
+                    </tr>
                     <% def ii = 0%>
                     <g:each in="${featureInstance.giveFields()}" var="field" status="i">
                         <tr class="prop ${(i % 2) == 0 ? 'odd' : 'even'}">

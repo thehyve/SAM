@@ -58,7 +58,7 @@ class FeatureController {
 		}
 		
 		// What columns to return?
-		def columns = [ 'f.name', 'f.unit', 't.name' ]
+		def columns = [ 'f.platform.name', 'f.name', 'f.unit', 't.name' ]
 		
 		// Create the HQL query
 		def hqlParams = [:];
@@ -75,8 +75,6 @@ class FeatureController {
 			}
 			
 			hql += "WHERE " + hqlConstraints.join( " OR " ) + " "
-
-            println(hql);
 		}
 			
 		// Sort properties
@@ -84,8 +82,6 @@ class FeatureController {
 			orderHQL = "ORDER BY " + sortOn.collect { columns[it.column] + " " + it.direction }.join( " " );
             println(orderHQL)
 		}
-
-        println(hql+orderHQL);
 
         // Display properties
 		def records = Feature.executeQuery( hql + orderHQL, hqlParams, [ max: displayLength, offset: displayStart ] );
@@ -107,7 +103,7 @@ class FeatureController {
 			iTotalDisplayRecords: filteredRecords.size(),
 			sEcho: params.int( 'sEcho' ),
 			aaData: records.collect {
-				[ it[0].id, it[0].name, it[0].unit, it[1]?.name,
+				[ it[0].id, it[0].platform.name, it[0].name, it[0].unit, it[1]?.name,
                     dt.buttonShow(id: it[0].id, controller: "feature", blnEnabled: true),
                     dt.buttonEdit(id: it[0].id, controller: "feature", blnEnabled: true),
                     dt.buttonDelete(id: it[0].id, controller: "feature", blnEnabled: true)]
@@ -148,6 +144,10 @@ class FeatureController {
                 }
             }
         }
+
+        def platform = params.long('platform')
+        if (platform) featureInstance.platform = Platform.get(platform)
+        params.remove('platform')
 
         // Remove the template parameter, since it is a string and that troubles the
         // setting of properties.
@@ -234,7 +234,11 @@ class FeatureController {
                 }
             }
 
-			// Remove the template parameter, since it is a string and that troubles the
+            def platform = params.long('platform')
+            if (platform) featureInstance.platform = Platform.get(platform)
+            params.remove('platform')
+
+            // Remove the template parameter, since it is a string and that troubles the
 			// setting of properties.
 			params.remove( 'template' ) 
 			
@@ -305,7 +309,7 @@ class FeatureController {
 	/**
 	 * Returns the template that should be shown on the screen
 	 */
-	def _determineTemplate = {
+	private _determineTemplate()  {
 		def template = null;
 		
 		if( params.templateEditorHasBeenOpened == 'true') {

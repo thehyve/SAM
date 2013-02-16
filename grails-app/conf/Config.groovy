@@ -116,7 +116,7 @@ module.synchronization.classes.sample = "org.dbxp.sam.SAMSample"
 
 // Fuzzy matching configuration
 fuzzyMatching.threshold = [
-    'default': [0.2],
+    'default': 0.2,
     'featureImporter' : [
         'feature': 0.4
     ],
