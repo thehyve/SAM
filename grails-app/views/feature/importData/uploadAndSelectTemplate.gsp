@@ -1,4 +1,4 @@
-<%@ page import="org.dbxp.sam.Feature; org.dbnp.gdt.Template" %>
+<%@ page import="org.dbxp.sam.Feature; org.dbxp.sam.Platform; org.dbnp.gdt.Template" %>
 <html>
     <head>
         <meta name="layout" content="sammain"/>
@@ -110,6 +110,14 @@
                                     <af:templateElement name="template" rel="template" description="" entity="${Feature}" ontologies="" value="${template}" error="template" addDummy="true" onChange="handleTemplateChange()"></af:templateElement>
                                 </td>
                             </tr>
+                        <tr>
+                            <td>
+                                Select the target platform for these features:
+                            </td>
+                            <td>
+                                <g:select name="platform" from="${Platform.list()}" optionKey="id"/>
+                            </td>
+                        </tr>
                         </tbody>
 
                     </table>

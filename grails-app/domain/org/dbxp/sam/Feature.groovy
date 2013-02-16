@@ -18,7 +18,7 @@ class Feature extends TemplateEntity {
     }
 
     public String toString() {
-		return name + ( unit!=null ? " ("+unit+")" : "" )
+		return platform.name + " - " + name + ( unit!=null ? " ("+unit+")" : "" )
 	}
 
 	/**

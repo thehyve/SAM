@@ -32,7 +32,7 @@ class RestController {
 		}
 		
 		// Return all features for the given assay
-		def features = Feature.executeQuery( "SELECT DISTINCT f FROM Feature f, Measurement m, Sample s WHERE m.feature = f AND m.sample = s AND s.assay = :assay", [ "assay": assay ] )
+		def features = Feature.executeQuery( "SELECT DISTINCT f FROM Feature f, Measurement m, SAMSample s WHERE m.feature = f AND m.sample = s AND s.parentAssay = :assay", [ "assay": assay ] )
 		
 		render features.collect { it.name } as JSON
 	}
@@ -289,7 +289,7 @@ class RestController {
      * token list, (2)). Each column of the matrix contains the values for the sampleTokens
      * (in the order given in the list of sampleTokens, (1)).
      */
-    def compactTable( results ) {
+    private def compactTable( results ) {
         def sampleTokens = results.collect( { it['sampleToken'] } ).unique()
         def measurementTokens = results.collect( { it['measurementToken'] } ).unique()
 

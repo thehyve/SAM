@@ -13,9 +13,10 @@
 		<link rel="stylesheet" href="${resource(dir: 'css', file: 'dialog.css')}"/>
         
         <g:layoutHead />
-        
+        <r:layoutResources />
     </head>
     <body>
         <g:layoutBody />
+        <r:layoutResources />
     </body>
 </html>

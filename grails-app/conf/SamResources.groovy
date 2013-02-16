@@ -16,8 +16,8 @@ modules = {
     }
 	
 	importer { 
-		resource url: 'js/importer.js'
-        resource url: 'css/importer.css'
+		resource url: 'js/samimporter.js'
+        resource url: 'css/samimporter.css'
 	}
 
     templateFieldsMisc {

@@ -80,7 +80,6 @@ class FeatureController {
 		// Sort properties
 		if( sortOn ) {
 			orderHQL = "ORDER BY " + sortOn.collect { columns[it.column] + " " + it.direction }.join( " " );
-            println(orderHQL)
 		}
 
         // Display properties
@@ -295,7 +294,11 @@ class FeatureController {
 		// Set the correct value of all domain fields and template fields (if template exists) 
 		try {
 			if( template ) {
+                println "template ${template.dump()}"
+                println template.getFields()
+                println "template nu ${template.dump()}"
 				template.fields.each {
+                    println it
 					values[it.escapedName()] = params.get(it.escapedName()+"_"+it.escapedName());
 				}
 			}
@@ -418,6 +421,8 @@ class FeatureController {
                     flow.inputfile = request.getFile('fileUpload')
                     flow.inputField = null;
                 }
+
+                flow.platform = Platform.get(params.platform);
 
                 // Empty flow.discardRow to make sure that we don't discard the same rows as we did with a different file
                 flow.discardRow = [];
@@ -596,6 +601,8 @@ class FeatureController {
                             flow.featureAndIndexList.put(objFeature.name+","+objFeature.unit,[i]);
                         }
 
+                        objFeature.platform = flow.platform
+
                         objFeature.validate();
                         objFeature.getErrors().allErrors.each {
                             switch(it.code) {
@@ -740,6 +747,8 @@ class FeatureController {
                             }
                         }
                     }
+
+                    objFeature.platform = flow.platform
 
                     objFeature.validate();
                     objFeature.getErrors().allErrors.each {

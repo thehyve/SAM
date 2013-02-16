@@ -51,7 +51,7 @@ grails.project.dependency.resolution = {
         compile(
 	        ':matrix-importer:0.2.3.7',
             ':ajaxflow:latest.integration',
-            //':dbxp-module-base:0.6.1',
+            ':dbxp-module-base:0.6.1.2',
             ':resources:latest.integration',
             ':jquery:latest.integration',
             ':jquery-datatables:1.7.5',
@@ -61,7 +61,7 @@ grails.project.dependency.resolution = {
     }
 }
 
-grails.plugin.location.'dbxpModuleBase' = '../dbxpModuleBase'
+//grails.plugin.location.'dbxpModuleBase' = '../dbxpModuleBase'
 //grails.plugin.location.'matrixImporter' = '../MatrixImporter'
 //grails.plugin.location.'gdt' = '../gdt'
 //grails.plugin.location.'dbxpBase' = '../dbxpBase'
