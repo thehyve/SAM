@@ -28,7 +28,7 @@ class MeasurementController {
 	    def features = Feature.list();
 	    def samples = SAMSample.giveWritableSamples( session.user )
 
-	    if( samples.count() == 0 ) {
+	    if( samples.size() == 0 ) {
 			redirect(action: 'noassays')
 		}
 		
