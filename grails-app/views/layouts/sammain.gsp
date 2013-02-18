@@ -18,6 +18,7 @@
 		    			<!-- <li><g:link controller="measurement">Measurements</g:link></li> -->
 						<li><g:link controller="feature">Features</g:link></li>
 						<li><g:link controller="SAMAssay">Assays</g:link></li>
+                        <li><g:link controller="platform">Platforms</g:link></li>
 		    		</ul>
 		    	</li>
 				<li>
