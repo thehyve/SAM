@@ -39,7 +39,7 @@ class MeasurementController {
     }
 
     def save = {
-        def measurementInstance = Measurement.findByFeatureAndSample(Feature.get(params.feature.id), Sample.get(params.sample.id))
+        def measurementInstance = Measurement.findByFeatureAndSample(Feature.get(params.feature.id), SAMSample.get(params.sample.id))
         if(measurementInstance!=null){
             bindData(measurementInstance, params)
         } else {
@@ -191,7 +191,7 @@ class MeasurementController {
     
 	def importData = {
 		// If no samples are present, we can't add measurements
-		if( Sample.count() == 0 ) {
+		if( Sample.count() == 0 ) { // NB: this is checking in GSCF, so using Sample instead of SAMSample
 			flash.message = "No samples have been created in GSCF yet. Without samples, you can't import measurements."
 			redirect( controller: 'SAMAssay', action: 'list' );
 		}
