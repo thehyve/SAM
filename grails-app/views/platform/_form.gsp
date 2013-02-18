@@ -7,7 +7,7 @@
 		<g:message code="platform.name.label" default="Name" />
 		<span class="required-indicator">*</span>
 	</label>
-	<g:textField name="name" required="" value="${platformInstance?.name}"/>
+	<g:textField size="50" name="name" required="" value="${platformInstance?.name}"/>
 </div>
 
 <div class="fieldcontain ${hasErrors(bean: platformInstance, field: 'platformtype', 'error')} ">
@@ -15,7 +15,7 @@
 		<g:message code="platform.platformtype.label" default="Platformtype" />
 		
 	</label>
-	<g:textField name="platformtype" value="${platformInstance?.platformtype}"/>
+	<g:textField size="50" name="platformtype" value="${platformInstance?.platformtype}"/>
 </div>
 
 <div class="fieldcontain ${hasErrors(bean: platformInstance, field: 'platformversion', 'error')} ">
@@ -23,7 +23,7 @@
 		<g:message code="platform.platformversion.label" default="Platformversion" />
 		
 	</label>
-	<g:textField name="platformversion" value="${platformInstance?.platformversion}"/>
+	<g:textField size="50" name="platformversion" value="${platformInstance?.platformversion}"/>
 </div>
 
 <div class="fieldcontain ${hasErrors(bean: platformInstance, field: 'comments', 'error')} ">
@@ -31,5 +31,5 @@
         <g:message code="platform.comments.label" default="Comments" />
 
     </label>
-    <g:textArea name="name" cols="60" rows="5" maxlength="255" required="" value="${platformInstance?.comments}"/>
+    <g:textArea name="name" cols="60" rows="5" maxlength="255" value="${platformInstance?.comments}"/>
 </div>

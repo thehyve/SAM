@@ -1,4 +1,3 @@
-
 <%@ page import="org.dbxp.sam.Platform" %>
 <!DOCTYPE html>
 <html>
@@ -8,54 +7,37 @@
 		<title><g:message code="default.show.label" args="[entityName]" /></title>
 	</head>
 	<body>
-		<a href="#show-platform" class="skip" tabindex="-1"><g:message code="default.link.skip.label" default="Skip to content&hellip;"/></a>
     <content tag="contextmenu">
         <g:render template="contextmenu" />
     </content>
-		<div id="show-platform" class="content scaffold-show" role="main">
+    <div class="data">
 			<h1><g:message code="default.show.label" args="[entityName]" /></h1>
 			<g:if test="${flash.message}">
 			<div class="message" role="status">${flash.message}</div>
 			</g:if>
-			<ol class="property-list platform">
-			
-				<g:if test="${platformInstance?.name}">
-				<li class="fieldcontain">
-					<span id="name-label" class="property-label"><g:message code="platform.name.label" default="Name" /></span>
-					
-						<span class="property-value" aria-labelledby="name-label"><g:fieldValue bean="${platformInstance}" field="name"/></span>
-					
-				</li>
-				</g:if>
-			
-				<g:if test="${platformInstance?.comments}">
-				<li class="fieldcontain">
-					<span id="comments-label" class="property-label"><g:message code="platform.comments.label" default="Comments" /></span>
-					
-						<span class="property-value" aria-labelledby="comments-label"><g:fieldValue bean="${platformInstance}" field="comments"/></span>
-					
-				</li>
-				</g:if>
-			
-				<g:if test="${platformInstance?.platformtype}">
-				<li class="fieldcontain">
-					<span id="platformtype-label" class="property-label"><g:message code="platform.platformtype.label" default="Platformtype" /></span>
-					
-						<span class="property-value" aria-labelledby="platformtype-label"><g:fieldValue bean="${platformInstance}" field="platformtype"/></span>
-					
-				</li>
-				</g:if>
-			
-				<g:if test="${platformInstance?.platformversion}">
-				<li class="fieldcontain">
-					<span id="platformversion-label" class="property-label"><g:message code="platform.platformversion.label" default="Platformversion" /></span>
-					
-						<span class="property-value" aria-labelledby="platformversion-label"><g:fieldValue bean="${platformInstance}" field="platformversion"/></span>
-					
-				</li>
-				</g:if>
-			
-			</ol>
+
+            <table>
+                <tbody>
+
+                <tr class="prop">
+                    <td valign="top" class="name"><g:message code="platform.name.label" default="Name"/></td>
+                    <td valign="top" class="value">${platformInstance.name}</td>
+                </tr>
+                <tr class="prop">
+                    <td valign="top" class="name"><g:message code="platform.platformtype.label" default="Platform Type"/></td>
+                    <td valign="top" class="value">${platformInstance.platformtype}</td>
+                </tr>
+                <tr class="prop">
+                    <td valign="top" class="name"><g:message code="platform.platformversion.label" default="Platform Version"/></td>
+                    <td valign="top" class="value">${platformInstance.platformversion}</td>
+                </tr>
+                <tr class="prop">
+                    <td valign="top" class="name"><g:message code="platform.comments.label" default="Comments"/></td>
+                    <td valign="top" class="value">${platformInstance.comments}</td>
+                </tr>
+
+                </tbody>
+            </table>
 			<g:form>
 				<fieldset class="buttons">
 					<g:hiddenField name="id" value="${platformInstance?.id}" />
