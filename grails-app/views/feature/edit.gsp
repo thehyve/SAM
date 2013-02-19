@@ -8,69 +8,11 @@
         <r:require module="templateFieldsMisc"/>
         <r:script type="text/javascript" disposition="head">
             $(document).ready(function() {
-            	insertSelectAddMore();
+                entityName = "feature";
+                formSection = "form#edit";
+                insertSelectAddMore(); // add add/modify select option
                 onStudyWizardPage(); // Add datepickers
             });
-
-            function insertSelectAddMore() {
-                new SelectAddMore().init({
-                    rel  : 'template',
-                    url  : baseUrl + '/templateEditor',
-                    vars        : 'entity,ontologies',
-                    label   : 'add / modify',
-                    style   : 'modify',
-                    onClose : function(scope) {
-                        handleTemplateChange();
-                    }
-                });
-            }
-
-            function handleTemplateChange( selectedOption ){
-                templateEditorHasBeenOpened = false
-
-                if( selectedOption == undefined ) {
-	                // If no selectedOptions is given, the template editor has been opened. In that case, we use
-	                // the template previously selected
-                	templateEditorHasBeenOpened = true;
-                } else if( $(selectedOption).hasClass( 'modify' ) ){
-                	// If the user has selected the add/modify option, the form shouldn't be updated yet.
-                	// That should only happen if the template editor is closed
-                	return;
-                }
-
-                // Collect all data to be sent to the controller
-                data = $( "form#edit" ).serialize() + "&templateEditorHasBeenOpened=" + ( templateEditorHasBeenOpened ? "true" : "false" );
-
-	            // Always update the template specific fields, when the template has changed but also
-	            // when the template editor is closed
-                $.ajax({
-					url: baseUrl + "/feature/returnUpdatedTemplateSpecificFields",              	
-					data: data,
-					type: "POST",
-					success: function( returnHTML, textStatus, jqXHR ) {
-						$( "#templateSpecific" ).html( returnHTML );
-                        onStudyWizardPage(); // Add datepickers
-
-		                // Update the template select only if the template has been closed
-		                // This can only happen after the previous call has succeeded, because
-		                // otherwise Hibernate will show up with a 'collection associated with
-		                // two open sessions' error.
-		                if( templateEditorHasBeenOpened ) {
-			                $.ajax({
-								url: baseUrl + "/feature/templateSelection",
-								data: data,
-								type: "POST",
-								success: function( returnHTML, textStatus, jqXHR ) {
-									$( "td#templateSelection" ).html( returnHTML );
-									insertSelectAddMore();
-								}          	
-			                });
-			            }
-
-					}          	
-                });
-
-            }
         </r:script>
     </head>
 
