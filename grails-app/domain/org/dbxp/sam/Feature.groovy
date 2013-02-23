@@ -13,7 +13,7 @@ class Feature extends TemplateEntity {
     static constraints = {
         // The unit name constraint is case-sensitive.
         // Features that have the same name with a different case can still exist - it is up to the user to resolve this; a custom validator places too much of a performance impact.
-        name(unique:true, blank:false)
+        name(nullable: false, blank:false, unique: ['platform'])
         unit(nullable:true, blank:true)
     }
 

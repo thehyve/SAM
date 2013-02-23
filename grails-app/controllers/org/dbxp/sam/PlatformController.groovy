@@ -164,11 +164,7 @@ class PlatformController {
         // Set the correct value of all domain fields and template fields (if template exists)
         try {
             if( template ) {
-                println "template ${template.dump()}"
-                println template.getFields()
-                println "template nu ${template.dump()}"
                 template.fields.each {
-                    println it
                     values[it.escapedName()] = params.get(it.escapedName()+"_"+it.escapedName());
                 }
             }

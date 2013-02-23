@@ -57,6 +57,9 @@ class Platform extends TemplateEntity {
 
     static constraints = {
         name(nullable:false, blank: false, unique:true, maxSize: 255)
+        platformversion(nullable:true, blank: true)
+        platformtype(nullable:true, blank: true)
+        comments(nullable:true, blank: true)
     }
 
     static mapping = {

@@ -294,11 +294,7 @@ class FeatureController {
 		// Set the correct value of all domain fields and template fields (if template exists) 
 		try {
 			if( template ) {
-                println "template ${template.dump()}"
-                println template.getFields()
-                println "template nu ${template.dump()}"
 				template.fields.each {
-                    println it
 					values[it.escapedName()] = params.get(it.escapedName()+"_"+it.escapedName());
 				}
 			}
@@ -342,14 +338,11 @@ class FeatureController {
         }
         try {
             if(params.template==""){
-                println "Removing template..."
                 session.featureInstance.template = null
             } else if(params?.template && session?.featureInstance.template?.name != params.get('template')) {
                 // set the template
-                println "params.template : "+params.template
                 session.featureInstance.template = Template.findByName(params.template)
             }
-            println "Updating template..."
             // does the study have a template set?
             if (session.featureInstance.template && session.featureInstance.template instanceof Template) {
                 // yes, iterate through template fields
