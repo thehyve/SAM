@@ -523,7 +523,7 @@ class FeatureController {
                 // If a template is selected, store the templatefields in the flow
                 if(flow.template!="") {
                     // Refresh the template because a user can have edited it
-                    Template objTempl = Template.findByName(params.template).refresh();
+                    Template objTempl = Template.findByEntityAndName(Feature, params.template).refresh();
 
                     flow.templateFields += objTempl.fields;
                 }

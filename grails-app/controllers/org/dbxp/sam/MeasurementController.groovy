@@ -18,7 +18,7 @@ class MeasurementController {
 
     def list = {
 		// Find all measurements this user has access to 
-		def measurements = Measurement.giveReadableMeasurements( session.user );
+		def measurements = Measurement.giveReadableMeasurements( session.gscfUser );
 		
         [measurementInstanceList: measurements, measurementInstanceTotal: measurements.size() ]
     }
@@ -69,7 +69,7 @@ class MeasurementController {
         if (!measurementInstance) {
             flash.message = "The requested measurement could not be found."
             redirect(action: "list")
-        } else if( !measurementInstance.sample.parentAssay.parent.canRead( session.user ) ) {
+        } else if( !measurementInstance.sample.parentAssay.parent.canRead( session.gscfUser ) ) {
 			flash.message = "You are not allowed to access the requested measurement."
 			redirect( action: "list" );
         } else {
