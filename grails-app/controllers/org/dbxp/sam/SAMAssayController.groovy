@@ -88,7 +88,7 @@ class SAMAssayController {
 		   
 		   def hqlConstraints = [];
 		   hqlConstraints << "LOWER(a.name) LIKE :search"
-		   hqlConstraints << "LOWER(a.parent.name) LIKE :search"
+		   hqlConstraints << "LOWER(a.parent.title) LIKE :search"
 		   
 		   whereHQL += " AND ( " + hqlConstraints.join( " OR " ) + ") "
 	   }

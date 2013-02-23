@@ -60,7 +60,7 @@ class SAMSample {
 	   if( !assays )
 		   return []
 		   
-	   return Sample.findAll( "FROM SAMSample s WHERE s.assay IN (:assays)", [ "assays": assays ] )
+	   return SAMSample.findAll( "FROM SAMSample s WHERE s.parentAssay IN (:assays)", [ "assays": assays ] )
    }
    
    
@@ -74,6 +74,6 @@ class SAMSample {
 	  if( !assays )
 		  return []
 		  
-	  return Sample.findAll( "FROM SAMSample s WHERE s.assay IN (:assays)", [ "assays": assays ] )
+	  return SAMSample.findAll( "FROM SAMSample s WHERE s.parentAssay IN (:assays)", [ "assays": assays ] )
   }
 }

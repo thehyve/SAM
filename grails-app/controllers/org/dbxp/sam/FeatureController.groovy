@@ -320,7 +320,7 @@ class FeatureController {
 		} else {
 			// Otherwise, we should use the template that the user selected.
 			if( params.template ) {
-				return Template.findByName(params.template)
+				return Template.findByEntityAndName(Feature,params.template)
 			}
 		}
 		
@@ -341,7 +341,7 @@ class FeatureController {
                 session.featureInstance.template = null
             } else if(params?.template && session?.featureInstance.template?.name != params.get('template')) {
                 // set the template
-                session.featureInstance.template = Template.findByName(params.template)
+                session.featureInstance.template = Template.findByEntityAndName(Feature,params.template)
             }
             // does the study have a template set?
             if (session.featureInstance.template && session.featureInstance.template instanceof Template) {
@@ -373,6 +373,9 @@ class FeatureController {
 
     def minimalCreate = {
         def featureInstance = new Feature()
+        def platform = params.long('platform')
+        if (platform) featureInstance.platform = Platform.get(platform)
+        params.remove('platform')
         featureInstance.properties = params
         return [featureInstance: featureInstance]
     }

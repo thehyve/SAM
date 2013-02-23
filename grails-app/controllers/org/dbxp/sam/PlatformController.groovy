@@ -190,7 +190,7 @@ class PlatformController {
         } else {
             // Otherwise, we should use the template that the user selected.
             if( params.template ) {
-                return Template.findByName(params.template)
+                return Template.findByEntityAndName(Platform,params.template)
             }
         }
 

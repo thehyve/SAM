@@ -26,7 +26,7 @@ class MeasurementController {
     def create = {
 		// If no samples are present, we can't add measurements
 	    def features = Feature.list();
-	    def samples = SAMSample.giveWritableSamples( session.user )
+	    def samples = SAMSample.giveWritableSamples( session.gscfUser )
 
 	    if( samples.size() == 0 ) {
 			redirect(action: 'noassays')
@@ -58,7 +58,7 @@ class MeasurementController {
         }
         else {
 			def features = Feature.list();
-			def samples = SAMSample.giveWritableSamples( session.user )
+			def samples = SAMSample.giveWritableSamples( session.gscfUser )
 	
             render(view: "create", model: [measurementInstance: measurementInstance, samples: samples, features: features])
         }

@@ -37,12 +37,12 @@ class Measurement {
 		if( !assays )
 			return []
 			
-		return Measurement.findAll( "FROM Measurement m WHERE m.sample.assay IN (:assays)", [ "assays": assays ] )
+		return Measurement.findAll( "FROM Measurement m WHERE m.sample.parentAssay IN (:assays)", [ "assays": assays ] )
 	}
 	
 	public static deleteByAssay( Assay a ) {
 		try {
-			Measurement.executeUpdate( "delete Measurement m WHERE m.sample IN( FROM Sample s where s.assay = :assay )", [ assay: a ] );
+			Measurement.executeUpdate( "delete Measurement m WHERE m.sample IN( FROM SAMSample s where s.parentAssay = :assay )", [ assay: a ] );
 			return true;
 		} catch( Exception e ) {
 			e.printStackTrace();

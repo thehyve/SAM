@@ -75,8 +75,6 @@ function insertSelectAddMore() {
 var entityName;
 var formSection;
 
-//var handleTemplateChange
-
 //var handleTemplateChange = function (entityName, formSection) {
     var handleTemplateChange = function (selectedOption) {
         var templateEditorHasBeenOpened = false
