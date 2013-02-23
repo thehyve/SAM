@@ -27,7 +27,8 @@
 						<g:sortableColumn property="platformtype" title="${message(code: 'platform.platformtype.label', default: 'Platformtype')}" />
 					
 						<g:sortableColumn property="platformversion" title="${message(code: 'platform.platformversion.label', default: 'Platformversion')}" />
-					
+
+                        <g:sortableColumn property="template" title="${message(code: 'platform.template.label', default: 'Template')}" />
 					</tr>
 				</thead>
 				<tbody>
@@ -41,7 +42,8 @@
 						<td>${fieldValue(bean: platformInstance, field: "platformtype")}</td>
 					
 						<td>${fieldValue(bean: platformInstance, field: "platformversion")}</td>
-					
+
+                        <td>${fieldValue(bean: platformInstance, field: "template")}</td>
 					</tr>
 				</g:each>
 				</tbody>

@@ -1,38 +1,107 @@
-<%@ page import="org.dbxp.sam.Platform" %>
-<!DOCTYPE html>
+<%@ page import="org.dbnp.gdt.TemplateField; org.dbxp.sam.Platform" %>
+<%@ page import="org.dbnp.gdt.GdtTagLib" %>
 <html>
-	<head>
-        <meta name="layout" content="sammain"/>
-		<g:set var="entityName" value="${message(code: 'platform.label', default: 'Platform')}" />
-		<title><g:message code="default.edit.label" args="[entityName]" /></title>
-	</head>
-	<body>
-    <content tag="contextmenu">
-        <g:render template="contextmenu" />
-    </content>
-		<div id="edit-platform" class="content scaffold-edit" role="main">
-			<h1><g:message code="default.edit.label" args="[entityName]" /></h1>
-			<g:if test="${flash.message}">
-			<div class="message" role="status">${flash.message}</div>
-			</g:if>
-			<g:hasErrors bean="${platformInstance}">
-			<ul class="errors" role="alert">
-				<g:eachError bean="${platformInstance}" var="error">
-				<li <g:if test="${error in org.springframework.validation.FieldError}">data-field-id="${error.field}"</g:if>><g:message error="${error}"/></li>
-				</g:eachError>
-			</ul>
-			</g:hasErrors>
-			<g:form method="post" >
-				<g:hiddenField name="id" value="${platformInstance?.id}" />
-				<g:hiddenField name="version" value="${platformInstance?.version}" />
-				<fieldset class="form">
-					<g:render template="form"/>
-				</fieldset>
-				<fieldset class="buttons">
-					<g:actionSubmit class="save" action="update" value="${message(code: 'default.button.update.label', default: 'Update')}" />
-					<g:actionSubmit class="delete" action="delete" value="${message(code: 'default.button.delete.label', default: 'Delete')}" formnovalidate="" onclick="return confirm('${message(code: 'default.button.delete.confirm.message', default: 'Are you sure?')}');" />
-				</fieldset>
-			</g:form>
-		</div>
-	</body>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <meta name="layout" content="sammain"/>
+    <title>Edit platform ${platformInstance.name}</title>
+    <r:require module="templateFieldsMisc"/>
+    <r:script type="text/javascript" disposition="head">
+        $(document).ready(function() {
+            entityName = "platform";
+            formSection = "form#edit";
+            insertSelectAddMore(); // add add/modify select option
+            onStudyWizardPage(); // Add datepickers
+        });
+    </r:script>
+</head>
+
+<body>
+<g:hasErrors bean="${platformInstance}">
+    <div class="errors">
+        <g:renderErrors bean="${platformInstance}" as="list"/>
+    </div>
+</g:hasErrors>
+<content tag="contextmenu">
+    <g:render template="contextmenu" />
+</content>
+<h1>Edit platform ${platformInstance.name}</h1>
+
+<div class="data">
+    <g:form class="Feature" action="update" name="edit" method="post" novalidate="novalidate">
+        <g:hiddenField name="id" value="${platformInstance?.id}"/>
+        <g:hiddenField name="version" value="${platformInstance?.version}"/>
+        <div class="dialog">
+            <table>
+                <tr class="prop">
+                    <td valign="top">
+                        Common fields:
+                    </td>
+                </tr>
+
+                <%--
+                 List common fields on the left, and all platform group items on the right
+                 Do this with two tables so that the length of the lists don't mess up the other list's layout.
+                 --%>
+                <tr>
+                    <td>
+                        <table>
+                            <g:each in="${platformInstance.giveDomainFields()}" var="field" status="i">
+                                <tr class="prop ${(i % 2) == 0 ? 'odd' : 'even'}">
+                                    <td valign="top" class='fieldName'>
+                                        ${field.name.capitalize()}
+                                        <g:if test="${field.required}">
+                                            <i>(required)</i>
+                                        </g:if>
+                                    </td>
+                                    <td valign="top" >
+                                        <g:textField name="${field.escapedName()}" value="${platformInstance.getFieldValue(field.toString())}"/>
+                                    </td>
+                                </tr>
+                            </g:each>
+                            <tr class="prop ${(platformInstance.giveDomainFields().size() % 2) == 0 ? 'odd' : 'even'}">
+                                <td>Template</td>
+                                <td id="templateSelection">
+                                    <g:render template="templateSelection" model="['template' : platformInstance.template]" />
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+
+                <%--
+                 End of 'common fields' tables
+                --%>
+
+                <tr class="prop">
+                    <td>
+                        <g:if test="${platformInstance.template!=null}">
+                            Template specific fields:
+                        </g:if>
+                    </td>
+                </tr>
+
+                <tr class="prop">
+                    <td id="templateSpecific">
+                        <%
+                            def values = [:];
+                            platformInstance.template?.fields.each {
+                                values[ it.escapedName() ] = platformInstance.getFieldValue( it.name )
+                            }
+                        %>
+                        <g:render template="templateSpecific" model="['template': platformInstance.template, values: values ]" />
+                    </td>
+                </tr>
+
+            </table>
+        </div>
+
+        <ul class="data_nav buttons">
+            <li><g:actionSubmit class="save" action="update" value="Update"/></li>
+            <li><g:actionSubmit class="delete" action="delete" value="Delete" onclick="return confirm('Are you sure?');"/></li>
+            <li><g:link controller="platform" action="list" class="cancel">Cancel</g:link></li>
+        </ul>
+    </g:form>
+</div>
+</body>
 </html>

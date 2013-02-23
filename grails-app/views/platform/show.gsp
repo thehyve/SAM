@@ -1,4 +1,4 @@
-<%@ page import="org.dbxp.sam.Platform" %>
+<%@ page import="org.dbxp.sam.Platform; org.dbnp.gdt.TemplateFieldType" %>
 <!DOCTYPE html>
 <html>
 	<head>
@@ -7,35 +7,36 @@
 		<title><g:message code="default.show.label" args="[entityName]" /></title>
 	</head>
 	<body>
+    <g:hasErrors bean="${platformInstance}">
+        <div class="errors">
+            <g:renderErrors bean="${platformInstance}" as="list"/>
+        </div>
+    </g:hasErrors>
     <content tag="contextmenu">
         <g:render template="contextmenu" />
     </content>
     <div class="data">
 			<h1><g:message code="default.show.label" args="[entityName]" /></h1>
-			<g:if test="${flash.message}">
-			<div class="message" role="status">${flash.message}</div>
-			</g:if>
-
             <table>
                 <tbody>
-
-                <tr class="prop">
-                    <td valign="top" class="name"><g:message code="platform.name.label" default="Name"/></td>
-                    <td valign="top" class="value">${platformInstance.name}</td>
-                </tr>
-                <tr class="prop">
-                    <td valign="top" class="name"><g:message code="platform.platformtype.label" default="Platform Type"/></td>
-                    <td valign="top" class="value">${platformInstance.platformtype}</td>
-                </tr>
-                <tr class="prop">
-                    <td valign="top" class="name"><g:message code="platform.platformversion.label" default="Platform Version"/></td>
-                    <td valign="top" class="value">${platformInstance.platformversion}</td>
-                </tr>
-                <tr class="prop">
-                    <td valign="top" class="name"><g:message code="platform.comments.label" default="Comments"/></td>
-                    <td valign="top" class="value">${platformInstance.comments}</td>
-                </tr>
-
+                <% def ii = 0%>
+                <g:each in="${platformInstance.giveFields()}" var="field" status="i">
+                    <tr class="prop ${(i % 2) == 0 ? 'odd' : 'even'}">
+                        <td valign="top">
+                            ${field.name.capitalize()}
+                        </td>
+                        <td valign="top" >
+                            <%-- Show false for booleans --%>
+                            <g:if test="${field.type==TemplateFieldType.BOOLEAN && platformInstance.getFieldValue(field.toString())==null}">
+                                false
+                            </g:if>
+                            <g:else>
+                                ${platformInstance.getFieldValue(field.toString())}
+                            </g:else>
+                        </td>
+                        <% ii = i + 1%>
+                    </tr>
+                </g:each>
                 </tbody>
             </table>
 			<g:form>
@@ -43,6 +44,7 @@
 					<g:hiddenField name="id" value="${platformInstance?.id}" />
 					<g:link class="edit" action="edit" id="${platformInstance?.id}"><g:message code="default.button.edit.label" default="Edit" /></g:link>
 					<g:actionSubmit class="delete" action="delete" value="${message(code: 'default.button.delete.label', default: 'Delete')}" onclick="return confirm('${message(code: 'default.button.delete.confirm.message', default: 'Are you sure?')}');" />
+                    <g:link action="list" class="cancel">Back to list</g:link>
 				</fieldset>
 			</g:form>
 		</div>

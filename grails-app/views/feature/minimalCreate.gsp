@@ -1,4 +1,4 @@
-<%@ page import="org.dbxp.sam.Feature" %>
+<%@ page import="org.dbxp.sam.Feature; org.dbxp.sam.Platform" %>
 <html>
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
@@ -31,6 +31,14 @@
                                 </td>
                                 <td valign="top" class="value ${hasErrors(bean: featureInstance, field: 'name', 'errors')}">
                                     <g:textField name="name" value="${featureInstance?.name}" size="maxlength"/>
+                                </td>
+                            </tr>
+                            <tr class="prop">
+                                <td valign="top" class="name">
+                                    <label for="platform">Platform</label>
+                                </td>
+                                <td valign="top" class="value">
+                                    <g:select name="platform" from="${Platform.list()}" optionKey="id"/>
                                 </td>
                             </tr>
                         </tbody>

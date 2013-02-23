@@ -44,6 +44,17 @@ class Platform extends TemplateEntity {
         name
     }
 
+    /**
+     * Changes the template for this platform. If no template with the given name
+     * exists, the template is set to null.
+     * @param templateName	Name of the new template
+     * @return	True if the change is successful, false otherwise
+     */
+    public boolean changeTemplate( String templateName ) {
+        this.template = Template.findAllByName( templateName ).find { it.entity == this.class }
+    }
+
+
     static constraints = {
         name(nullable:false, blank: false, unique:true, maxSize: 255)
     }

@@ -1,5 +1,7 @@
 package org.dbxp.sam
 
+import org.dbnp.gdt.Template
+import org.dbnp.gdt.TemplateFieldType
 import org.springframework.dao.DataIntegrityViolationException
 
 class PlatformController {
@@ -20,14 +22,44 @@ class PlatformController {
     }
 
     def save() {
-        def platformInstance = new Platform(params)
+        def platformInstance = new Platform()
 
+        // Was template set on the 'create page'?
+        if( params.template) {
+            // Yes, so add the template
+            platformInstance.changeTemplate( params.template );
+        }
+
+        // was a template set?
+        if (platformInstance.template) {
+            // yes, iterate through template fields
+            platformInstance.giveFields().each() {
+                // and set their values
+                if(it.type==TemplateFieldType.BOOLEAN){ // Set templatefields with type 'BOOLEAN'
+                    def value = params.get(it.escapedName()+"_"+it.escapedName())!=null // '' becomes true, and null becomes false, as intended.
+                    platformInstance.setFieldValue(it.name, value)
+                } else {
+                    platformInstance.setFieldValue(it.name, params.get(it.escapedName()+"_"+it.escapedName()))
+                }
+            }
+        }
+
+        // Remove the template parameter, since it is a string and that troubles the
+        // setting of properties.
+        def template = params.remove( 'template' )
+
+        platformInstance.properties = params
+
+        // Trim the whitespace from the name, to enable accurate validation
+        platformInstance.name = platformInstance.name?.trim()
+
+        // Attempt to save platform
         if (!platformInstance.save(flush: true)) {
             render(view: "create", model: [platformInstance: platformInstance])
             return
         }
 
-        flash.message = message(code: 'default.created.message', args: [message(code: 'platform.label', default: 'Platform'), platformInstance.id])
+        flash.message = message(code: 'default.created.message', args: [message(code: 'platform.label', default: 'Platform'), platformInstance.name])
         redirect(action: "show", id: platformInstance.id)
     }
 
@@ -71,6 +103,30 @@ class PlatformController {
             }
         }
 
+        // Did the template change?
+        if( params.template && params.template != platformInstance.template?.name) {
+            // Yes, so change the template
+            platformInstance.changeTemplate( params.template );
+        }
+
+        // was a template set?
+        if (platformInstance.template) {
+            // yes, iterate through template fields
+            platformInstance.giveFields().each() {
+                // and set their values
+                if(it.type==TemplateFieldType.BOOLEAN){ // Set templatefields with type 'BOOLEAN'
+                    def value = params.get(it.escapedName()+"_"+it.escapedName())!=null // '' becomes true, and null becomes false, as intended.
+                    platformInstance.setFieldValue(it.name, value)
+                } else {
+                    platformInstance.setFieldValue(it.name, params.get(it.escapedName()+"_"+it.escapedName()))
+                }
+            }
+        }
+
+        // Remove the template parameter, since it is a string and that troubles the
+        // setting of properties.
+        def template = params.remove( 'template' )
+
         platformInstance.properties = params
 
         if (!platformInstance.save(flush: true)) {
@@ -78,7 +134,7 @@ class PlatformController {
             return
         }
 
-        flash.message = message(code: 'default.updated.message', args: [message(code: 'platform.label', default: 'Platform'), platformInstance.id])
+        flash.message = message(code: 'default.updated.message', args: [message(code: 'platform.label', default: 'Platform'), platformInstance.name])
         redirect(action: "show", id: platformInstance.id)
     }
 
@@ -100,4 +156,53 @@ class PlatformController {
             redirect(action: "show", id: id)
         }
     }
+
+    def returnUpdatedTemplateSpecificFields = {
+        def template = _determineTemplate();
+        def values = [:];
+
+        // Set the correct value of all domain fields and template fields (if template exists)
+        try {
+            if( template ) {
+                println "template ${template.dump()}"
+                println template.getFields()
+                println "template nu ${template.dump()}"
+                template.fields.each {
+                    println it
+                    values[it.escapedName()] = params.get(it.escapedName()+"_"+it.escapedName());
+                }
+            }
+        } catch( Exception e ) {
+            log.error( e );
+        }
+
+        render(template: "templateSpecific", model: [template: template, values: values])
+    }
+
+    /**
+     * Returns the template that should be shown on the screen
+     */
+    private _determineTemplate()  {
+        def template = null;
+
+        if( params.templateEditorHasBeenOpened == 'true') {
+            // If the template editor has been opened (and closed), we should use
+            // the template that we stored previously
+            if( session.templateId ) {
+                template = Template.get( session.templateId );
+            }
+        } else {
+            // Otherwise, we should use the template that the user selected.
+            if( params.template ) {
+                return Template.findByName(params.template)
+            }
+        }
+
+        // Store the template id in session, so the system will know the previously
+        // selected template
+        session.templateId = template?.id
+
+        return template;
+    }
+
 }
