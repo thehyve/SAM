@@ -13,7 +13,7 @@
     <body>
         <div id="data" style="position: relative;">
             <div style="width: 65%; ">
-                <h1>Introduction</h1>
+                <h1>Introduction ${platform}</h1>
                 <p>The Simple Assay Module (SAM) is a module of the Generic Study Capture Framework that can store simple assay data. The Generic Study Capture Framework (GSCF) is an application that can store any biological study.</p>
             </div>
             <div id="faq" style="position: absolute; right: 0px; top: 0px; width: 30%;">
