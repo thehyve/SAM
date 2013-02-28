@@ -925,7 +925,7 @@ class MeasurementController {
             // every value is a list on its own of sample names belonging to that startTime
             def validCombinations = [:]
             assay.samples.each {
-                def startTime = new RelTime( it.eventStartTime ).toString();
+                def startTime = new RelTime( it.getSamplingTime() ).toString();
                 def subjectName = it.subjectName;
 
                 if( !validCombinations[ startTime ] )
