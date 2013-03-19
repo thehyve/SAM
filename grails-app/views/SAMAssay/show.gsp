@@ -90,7 +90,7 @@
 											<input type="checkbox" name="ids" value="${cellMeasurements[0].id}" />
 										
 											<g:if test="${cellMeasurements[0].operator}">${cellMeasurements[0].operator}</g:if>
-                                            <g:if test="${cellMeasurements[0].value}">
+                                            <g:if test="${cellMeasurements[0].value.toString().isNumber()}">
                                                 <!-- You can't put a tooltip in a tooltip, so check if we are in a tooltip -->
                                                 <g:if test="${comments}">
                                                     ${cellMeasurements[0].value}
