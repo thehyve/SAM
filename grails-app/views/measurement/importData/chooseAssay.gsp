@@ -48,6 +48,7 @@
                     <g:submitButton name="previous" value="« Previous" action="" disabled="true"/>
 
                     <g:hiddenField name="assay" value=""/>
+                    <g:hiddenField name="module" value=""/>
                     <g:submitButton name="next" value="Next »" action="next" onClick="
                         if( elementsSelected == undefined || elementsSelected[ 'fList_table' ] == undefined || elementsSelected[ 'fList_table' ].length == 0 ) {
                             return false;

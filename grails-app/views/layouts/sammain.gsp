@@ -2,7 +2,7 @@
 <g:applyLayout name="module">
 	<html>
 	    <head>
-	        <title><g:layoutTitle default="" /> | Simple Assay Module | dbXP</title>
+	        <title><g:layoutTitle default="" /> | Measurements ${module} Module | dbXP</title>
 
 	        <r:require modules="sam2"/>
 
@@ -11,21 +11,21 @@
 	    <body>
 			<content tag="topnav">
 				<% /* Insert only li tags for the top navigation, without surrounding ul */ %>
-				<li><g:link controller="SAMHome">Home</g:link></li>
+				<li><g:link controller="SAMHome" params="${[module: module]}">Home</g:link></li>
 				<li>
 					<a href="#">Browse</a>
 					<ul class="subnav">
-		    			<!-- <li><g:link controller="measurement">Measurements</g:link></li> -->
-						<li><g:link controller="feature">Features</g:link></li>
-						<li><g:link controller="SAMAssay">Assays</g:link></li>
-                        <li><g:link controller="platform">Platforms</g:link></li>
+		    			<!-- <li><g:link controller="measurement" params="${[module: module]}">Measurements</g:link></li> -->
+						<li><g:link controller="feature" params="${[module: module]}">Features</g:link></li>
+						<li><g:link controller="SAMAssay" params="${[module: module]}">Assays</g:link></li>
+                        <li><g:link controller="platform" params="${[module: module]}">Platforms</g:link></li>
 		    		</ul>
 		    	</li>
 				<li>
 					<a href="#">Import</a>
 					<ul class="subnav">
-						<li><g:link controller="feature" action="importData">Features</g:link></li>
-		    			<li><g:link controller="measurement" action="importData">Measurements</g:link></li>
+						<li><g:link controller="feature" action="importData" params="${[module: module]}">Features</g:link></li>
+		    			<li><g:link controller="measurement" action="importData" params="${[module: module]}">Measurements</g:link></li>
 		    		</ul>
 		    	</li>
                 <li>
@@ -34,8 +34,8 @@
                         <img src="${fam.icon(name:"page_white_acrobat")}" alt="(pdf)" style="vertical-align:text-bottom;"/>
                     </a>
                 </li>
-				<li><g:link url="${org.codehaus.groovy.grails.commons.ConfigurationHolder.config.gscf.baseURL}">Go to GSCF</g:link></li>
-                <g:if test="${org.codehaus.groovy.grails.commons.ConfigurationHolder.config.module.showVersionInfo}">
+				<li><g:link url="${grailsApplication.config.gscf.baseURL}">Go to GSCF</g:link></li>
+                <g:if test="${grailsApplication.config.module.showVersionInfo}">
                     <li style="font-size: 9px; color: #888;"><g:message code="meta.app.version" default="Version: {0}" args="[meta(name: 'app.version')]"/><br />Changeset: <g:render template="/version"/></li>
                 </g:if>
 			</content>

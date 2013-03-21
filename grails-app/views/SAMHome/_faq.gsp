@@ -14,6 +14,11 @@
     <p>A feature is a substance (or measurementtype / detector / ...) that is measured when a sample is taken. For example, glucose, leptin, CD40, bodyweight, urea</p>
 </div>
 
+<h3><a href="#">What is a platform?</a></h3>
+<div>
+    <p>A platform is a technique of a certain type of data, e.g. for Transcriptomics you will have platforms such as Affymetrix & Illumina.</p>
+</div>
+
 <h3><a href="#">What is a measurement?</a></h3>
 <div>
     <p>A measurement is a single value that belongs to a sample. For example, glucose level is measured for a group of samples.</p>

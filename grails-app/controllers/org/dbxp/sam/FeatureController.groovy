@@ -4,20 +4,25 @@ import grails.converters.JSON
 import org.dbnp.gdt.Template
 
 import org.dbxp.matriximporter.MatrixImporter
-import org.codehaus.groovy.grails.commons.ConfigurationHolder
 import org.dbnp.gdt.TemplateFieldType
 
 class FeatureController {
 
     static allowedMethods = [save: "POST", update: "POST", delete: "POST"]
     def fuzzySearchService
+    def moduleService
 
     def index = {
         redirect(action: "list", params: params)
     }
 	
     def list = {
-        [featureInstanceList: Feature.list(params), featureInstanceTotal: Feature.count()]
+        if (moduleService.validateModule(params?.module)) {
+            [featureInstanceList: Feature.list(params), featureInstanceTotal: Feature.count(), module: params.module]
+        }
+        else {
+            redirect(controller: 'error', action: 'notFound')
+        }
     }
 	
 	/**
@@ -103,9 +108,9 @@ class FeatureController {
 			sEcho: params.int( 'sEcho' ),
 			aaData: records.collect {
 				[ it[0].id, it[0].platform.name, it[0].name, it[0].unit, it[1]?.name,
-                    dt.buttonShow(id: it[0].id, controller: "feature", blnEnabled: true),
-                    dt.buttonEdit(id: it[0].id, controller: "feature", blnEnabled: true),
-                    dt.buttonDelete(id: it[0].id, controller: "feature", blnEnabled: true)]
+                    dt.buttonShow(id: it[0].id, controller: "feature", blnEnabled: true, params: [module: params.module]),
+                    dt.buttonEdit(id: it[0].id, controller: "feature", blnEnabled: true, params: [module: params.module]),
+                    dt.buttonDelete(id: it[0].id, controller: "feature", blnEnabled: true, params: [module: params.module])]
 			},
 			aIds: filteredRecords 
 		]
@@ -116,9 +121,14 @@ class FeatureController {
 	}
 
     def create = {
-        def featureInstance = new Feature()
-        featureInstance.properties = params
-        return [featureInstance: featureInstance]
+        if (moduleService.validateModule(params?.module)) {
+            def featureInstance = new Feature()
+            featureInstance.properties = params
+            return [featureInstance: featureInstance, module: params.module]
+        }
+        else {
+            redirect(controller: 'error', action: 'notFound')
+        }
     }
 
     def save = {
@@ -160,44 +170,55 @@ class FeatureController {
         if (featureInstance.save(flush: true)) {
             flash.message = "The feature ${featureInstance.name} has been created."
             if(params?.nextPage=="minimalCreate"){
-                redirect(action: "minimalCreate")
+                redirect(action: "minimalCreate", params: [module: params.module])
             } else {
-                redirect(action: "list")
+                redirect(action: "list", params: [module: params.module])
             }
         }
         else {
             if(params?.nextPage=="minimalCreate"){
-                render(view: "minimalCreate", model: [featureInstance: featureInstance])
+                render(view: "minimalCreate", model: [featureInstance: featureInstance], module: params.module)
             } else {
-                render(view: "create", model: [featureInstance: featureInstance])
+                render(view: "create", model: [featureInstance: featureInstance], module: params.module)
             }
         }
     }
 
     def show = {
-        def featureInstance = Feature.get(params.id)
-        if (!featureInstance) {
-            flash.message = "The requested feature could not be found."
-            redirect(action: "list")
+        if (moduleService.validateModule(params?.module)) {
+            def featureInstance = Feature.get(params.id)
+            if (!featureInstance) {
+                flash.message = "The requested feature could not be found."
+                redirect(action: "list", params: [module: params.module])
+            }
+            else {
+                [featureInstance: featureInstance, module: params.module]
+            }
         }
         else {
-            [featureInstance: featureInstance]
+            redirect(controller: 'error', action: 'notFound')
         }
     }
 
     def edit = {
-        def featureInstance = Feature.get(params.id)
-        session.featureInstance = featureInstance
-        if (!featureInstance) {
-            flash.message = "The requested feature could not be found."
-            redirect(action: "list")
+        if (moduleService.validateModule(params?.module)) {
+            def featureInstance = Feature.get(params.id)
+            session.featureInstance = featureInstance
+            if (!featureInstance) {
+                flash.message = "The requested feature could not be found."
+                redirect(action: "list", params: [module: params.module])
+            }
+            else {
+                // Store session template id, so it will show up correctly after
+                // opening the template editor. See also _determineTemplate
+                session.templateId = featureInstance.template?.id
+
+                return [featureInstance: featureInstance, module: params.module]
+            }
+
         }
         else {
-			// Store session template id, so it will show up correctly after
-			// opening the template editor. See also _determineTemplate
-			session.templateId = featureInstance.template?.id
-
-            return [featureInstance: featureInstance]
+            redirect(controller: 'error', action: 'notFound')
         }
     }
 
@@ -209,7 +230,7 @@ class FeatureController {
                 if (featureInstance.version > version) {
 
                     featureInstance.errors.rejectValue("", "Another user has updated this feature while you were editing. Because of this, your changes have not been saved to the database.")
-                    render(view: "edit", model: [featureInstance: featureInstance])
+                    render(view: "edit", model: [featureInstance: featureInstance], module: params.module)
                     return;
                 }
             }
@@ -249,10 +270,10 @@ class FeatureController {
             
             if (!featureInstance.hasErrors() && featureInstance.save(flush: true)) {
                 flash.message = "The feature has been updated."
-                redirect(action: "show", id: featureInstance.id)
+                redirect(action: "show", id: featureInstance.id, params: [module: params.module])
             }
             else {
-                render(view: "edit", model: [featureInstance: featureInstance])
+                render(view: "edit", model: [featureInstance: featureInstance], module: params.module)
             }
         }
         else {
@@ -276,19 +297,22 @@ class FeatureController {
         }
 
         if(return_map["action"]){
-            redirect(action: return_map["action"])
+            redirect(action: return_map["action"], params: [module: params.module])
         } else {
-            redirect(action:list)
+            redirect(action:list, params: [module: params.module])
         }
     }
 		
     // Get a list of template specific fields
     def templateSelection = {
-        render(template: "templateSelection", model: [template: _determineTemplate()])
+        render(template: "templateSelection", model: [template: _determineTemplate()], module: params.module)
     }
 	
 	def returnUpdatedTemplateSpecificFields = {
 		def template = _determineTemplate();
+
+        println template
+
 		def values = [:];
 		
 		// Set the correct value of all domain fields and template fields (if template exists) 
@@ -302,7 +326,7 @@ class FeatureController {
 			log.error( e );
 		}
 
-		render(template: "templateSpecific", model: [template: template, values: values])
+		render(template: "templateSpecific", model: [template: template, values: values], module: params.module)
     }
 	
 	/**
@@ -310,14 +334,18 @@ class FeatureController {
 	 */
 	private _determineTemplate()  {
 		def template = null;
+
+        println params
 		
 		if( params.templateEditorHasBeenOpened == 'true') {
+            println "geopend"
 			// If the template editor has been opened (and closed), we should use
 			// the template that we stored previously
 			if( session.templateId ) {
 				template = Template.get( session.templateId );
 			} 
 		} else {
+            println "niet geopend" + params
 			// Otherwise, we should use the template that the user selected.
 			if( params.template ) {
 				return Template.findByEntityAndName(Feature,params.template)
@@ -385,13 +413,15 @@ class FeatureController {
     }
 
     def importData = {
-		redirect( action: 'importDataFlow' )
+		redirect( action: 'importDataFlow', params: [module: params.module])
 	}
 
     def importDataFlow = {
-
         startUp {
             action{
+
+                flow.module = params.module
+
                 flow.pages = [
                     "uploadAndSelectTemplate": "Upload",
                     "matchColumns": "Match Columns",
@@ -399,6 +429,7 @@ class FeatureController {
                     "saveData": "Done"
                 ]
             }
+
             on("success").to "uploadAndSelectTemplate"
         }
 

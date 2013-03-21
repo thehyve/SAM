@@ -1,32 +1,17 @@
 package org.dbxp.sam
 
+import org.dbnp.gdt.AssayModule
+
 class SAMHomeController {
+    def moduleService
+
     def index = {
-
-        [platform: params?.platform]
-		 
+        if (moduleService.validateModule( params.module )) {
+            [module: params?.module]
+        }
+        else {
+            redirect(controller: 'error', action: 'notFound')
+        }
 	}
-
-
-    def transcriptomics = {
-
-        redirect(action: "index", params: [platform: "Transcriptomics"])
-    }
-
-    def metabolomics = {
-
-        redirect(action: "index", params: [platform: "Metabolomics"])
-    }
-
-    def proteomics = {
-
-        redirect(action: "index", params: [platform: "Proteomics"])
-    }
-
-    def questionnaire = {
-
-        redirect(action: "index", params: [platform: "Questionnaire"])
-    }
-
 
 }

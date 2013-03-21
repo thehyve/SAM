@@ -1,4 +1,5 @@
 <%@ page import="org.dbxp.sam.Platform" %>
+<%@ page import="org.dbnp.gdt.AssayModule" %>
 <html>
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
@@ -29,6 +30,7 @@
 <div class="data">
     <g:form action="save" name="create" novalidate="novalidate">
         <input type="hidden" name="nextPage" id="nextPage" value="list" />
+        <input type="hidden" name="module" id="module" value="${module}" />
         <div class="dialog">
             <table>
                 <tr class="prop">
@@ -53,7 +55,14 @@
                                         </g:if>
                                     </td>
                                     <td valign="top" >
-                                        <g:textField name="${field.escapedName()}" value="${platformInstance.getFieldValue(field.toString())}"/>
+                                        <g:if test="${field.escapedName() == "platformtype"}">
+                                            <g:select name="${field.escapedName()}" from="${AssayModule.findAll().name}" value="${module}"/>
+                                        </g:if>
+                                        <g:else>
+                                            <g:textField name="${field.escapedName()}" value="${platformInstance.getFieldValue(field.toString())}"/>
+                                        </g:else>
+
+
                                     </td>
                                 </tr>
                             </g:each>
@@ -96,7 +105,7 @@
         </div>
         <ul class="data_nav buttons">
             <li><g:submitButton name="create" class="save" value="Create"/></li>
-            <li><g:link controller="platform" action="list" class="cancel">Cancel</g:link></li>
+            <li><g:link controller="platform" action="list" params="${[module: module]}" class="cancel">Cancel</g:link></li>
         </ul>
     </g:form>
 </div>

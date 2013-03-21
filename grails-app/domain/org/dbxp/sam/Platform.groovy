@@ -30,7 +30,7 @@ class Platform extends TemplateEntity {
                     required: false),
             new TemplateField(
                     name: 'platformtype',
-                    type: TemplateFieldType.STRING,
+                    type: TemplateFieldType.EXTENDABLESTRINGLIST,
                     comment: 'Platform type',
                     required: false),
             new TemplateField(

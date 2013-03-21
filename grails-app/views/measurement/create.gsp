@@ -2,7 +2,7 @@
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
         <meta name="layout" content="sammain"/>
-        <title>Create a new measurement</title>
+        <title>Create a new measurement for ${module}</title>
     </head>
 
     <body>
@@ -19,6 +19,7 @@
         <div class="data">
             <g:form action="save">
                 <div class="dialog">
+                    <g:hiddenField name="module" value="${module}"/>
                     <table>
                         <tbody>
 
@@ -75,7 +76,7 @@
 
                 <ul class="data_nav buttons">
                     <li><g:submitButton name="create" class="save" value="Create"/></li>
-                    <li><g:link controller="measurement" action="list" class="cancel">Cancel</g:link></li>
+                    <li><g:link controller="measurement" action="list" class="cancel"  params="${[module: module]}">Cancel</g:link></li>
                 </ul>
 
             </g:form>

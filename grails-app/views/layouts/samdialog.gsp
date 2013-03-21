@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
     <head>
-	    <script type="text/javascript">var baseUrl = '${g.createLink(absolute: true, url: '/')}/'</script>
+        <script type="text/javascript">var baseUrl = '${resource(dir: '')}';</script>
 
         <g:javascript library="jquery" plugin="jquery"/>
 

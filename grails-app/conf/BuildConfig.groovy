@@ -15,7 +15,7 @@ grails.project.dependency.resolution = {
 	    mavenCentral()
 
 	    // other maven repo's
-	    mavenRepo "http://nexus.nmcdsp.org/content/repositories/releases"
+	    mavenRepo "http://nexus.dbnp.org/content/repositories/releases"
 //	    mavenRepo "http://repository.springsource.com/maven/bundles/release"
 //	    mavenRepo "http://repository.springsource.com/maven/bundles/external"
 //	    mavenRepo "http://repository.springsource.com/maven/libraries/release"
@@ -51,7 +51,7 @@ grails.project.dependency.resolution = {
         compile(
 	        ':matrix-importer:0.2.3.7',
             ':ajaxflow:latest.integration',
-            ':dbxp-module-base:0.6.1.2',
+            ':dbxp-module-base:0.6.1.3',
             ':resources:latest.integration',
             ':jquery:latest.integration',
             ':jquery-datatables:1.7.5',

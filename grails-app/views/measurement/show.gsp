@@ -14,12 +14,13 @@
         <content tag="contextmenu">
             <g:render template="contextmenu" />
         </content>
-        <h1>Measurement properties</h1>
+        <h1>Measurement propertie</h1>
 
         <div class="data">
             <g:form method="post">
                 <g:hiddenField name="ids" value="${measurementInstance?.id}"/>
                 <g:hiddenField name="version" value="${measurementInstance?.version}"/>
+                <g:hiddenField name="module" value="${module}"/>
                 <div class="dialog">
                     <table>
                         <tbody>
@@ -73,9 +74,9 @@
                 </div>
 
                 <ul class="data_nav buttons">
-                    <li><g:link controller="measurement" action="edit" id="${measurementInstance?.id}" class="edit">Edit</g:link></li>
+                    <li><g:link controller="measurement" action="edit" id="${measurementInstance?.id}" class="edit" params="${[module: module]}">Edit</g:link></li>
                     <li><g:actionSubmit class="delete" action="delete" value="Delete" onclick="return confirm('Are you sure?');"/></li>
-                    <li><g:link controller="measurement" action="list" class="cancel">Cancel</g:link></li>
+                    <li><g:link controller="measurement" action="list" class="cancel" params="${[module: module]}">Cancel</g:link></li>
                 </ul>
             </g:form>
         </div>

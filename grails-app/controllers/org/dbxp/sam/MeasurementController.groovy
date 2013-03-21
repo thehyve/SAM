@@ -1,13 +1,14 @@
 package org.dbxp.sam
 
+import org.dbnp.gdt.AssayModule
 import org.dbxp.matriximporter.MatrixImporter
 import dbnp.studycapturing.*
 import org.dbnp.gdt.RelTime
-import org.codehaus.groovy.grails.commons.ConfigurationHolder
 
 class MeasurementController {
     static allowedMethods = [save: "POST", update: "POST", delete: "POST"]
     def fuzzySearchService
+    def moduleService
 	
 	def sessionFactory
 	def propertyInstanceMap = org.codehaus.groovy.grails.plugins.DomainClassGrailsPlugin.PROPERTY_INSTANCE_MAP
@@ -19,23 +20,32 @@ class MeasurementController {
     def list = {
 		// Find all measurements this user has access to 
 		def measurements = Measurement.giveReadableMeasurements( session.gscfUser );
-		
-        [measurementInstanceList: measurements, measurementInstanceTotal: measurements.size() ]
+        if (moduleService.validateModule(params?.module)) {
+            [measurementInstanceList: measurements, measurementInstanceTotal: measurements.size(), module: params.module]
+        }
+        else {
+            redirect(controller: 'error', action: 'notFound')
+        }
     }
 
     def create = {
-		// If no samples are present, we can't add measurements
-	    def features = Feature.list();
-	    def samples = SAMSample.giveWritableSamples( session.gscfUser )
+        if (moduleService.validateModule(params?.module)) {
+            // If no samples are present, we can't add measurements
+            def features = Feature.list();
+            def samples = SAMSample.giveWritableSamples( session.gscfUser )
 
-	    if( samples.size() == 0 ) {
-			redirect(action: 'noassays')
-		}
-		
-        def measurementInstance = new Measurement()
-        measurementInstance.properties = params
+            if( samples.size() == 0 ) {
+                redirect(action: 'noassays')
+            }
 
-        return [measurementInstance: measurementInstance, samples: samples, features: features]
+            def measurementInstance = new Measurement()
+            measurementInstance.properties = params
+
+            return [measurementInstance: measurementInstance, samples: samples, features: features, module: params.module]
+        }
+        else {
+            redirect(controller: 'error', action: 'notFound')
+        }
     }
 
     def save = {
@@ -54,37 +64,47 @@ class MeasurementController {
 
         if (measurementInstance.save(flush: true)) {
             flash.message = "The measurement has been created."
-            redirect(action: "show", id: measurementInstance.id)
+            redirect(action: "show", id: measurementInstance.id, params: [module: params.module])
         }
         else {
 			def features = Feature.list();
 			def samples = SAMSample.giveWritableSamples( session.gscfUser )
 	
-            render(view: "create", model: [measurementInstance: measurementInstance, samples: samples, features: features])
+            render(view: "create", model: [measurementInstance: measurementInstance, samples: samples, features: features], module: params.module)
         }
     }
 
     def show = {
-        def measurementInstance = Measurement.get(params.id)
-        if (!measurementInstance) {
-            flash.message = "The requested measurement could not be found."
-            redirect(action: "list")
-        } else if( !measurementInstance.sample.parentAssay.parent.canRead( session.gscfUser ) ) {
-			flash.message = "You are not allowed to access the requested measurement."
-			redirect( action: "list" );
-        } else {
-            [measurementInstance: measurementInstance]
+        if (moduleService.validateModule(params?.module)) {
+            def measurementInstance = Measurement.get(params.id)
+            if (!measurementInstance) {
+                flash.message = "The requested measurement could not be found."
+                redirect(action: "list", params: [module: params.module])
+            } else if( !measurementInstance.sample.parentAssay.parent.canRead( session.gscfUser ) ) {
+                flash.message = "You are not allowed to access the requested measurement."
+                redirect( action: "list", params: [module: params.module]);
+            } else {
+                [measurementInstance: measurementInstance, module: params.module]
+            }
+        }
+        else {
+            redirect(controller: 'error', action: 'notFound')
         }
     }
 
     def edit = {
-        def measurementInstance = Measurement.get(params.id)
-        if (!measurementInstance) {
-            flash.message = "The requested measurement could not be found."
-            redirect(action: "list")
+        if (moduleService.validateModule(params?.module)) {
+            def measurementInstance = Measurement.get(params.id)
+            if (!measurementInstance) {
+                flash.message = "The requested measurement could not be found."
+                redirect(action: "list", params: [module: params.module])
+            }
+            else {
+                return [measurementInstance: measurementInstance, module: params.module]
+            }
         }
         else {
-            return [measurementInstance: measurementInstance]
+            redirect(controller: 'error', action: 'notFound')
         }
     }
 
@@ -96,7 +116,7 @@ class MeasurementController {
                 if (measurementInstance.version > version) {
 
                     measurementInstance.errors.rejectValue("Another user has updated this feature while you were editing. Because of this, your changes have not been saved to the database.")
-                    render(view: "edit", model: [measurementInstance: measurementInstance])
+                    render(view: "edit", model: [measurementInstance: measurementInstance], module: params.module)
                     return
                 }
             }
@@ -113,12 +133,12 @@ class MeasurementController {
                 redirect(action: "show", id: measurementInstance.id)
             }
             else {
-                render(view: "edit", model: [measurementInstance: measurementInstance])
+                render(view: "edit", model: [measurementInstance: measurementInstance], module: params.module)
             }
         }
         else {
             flash.message = "The requested measurement could not be found."
-            redirect(action: "list")
+            redirect(action: "list", params: [module: params.module])
         }
     }
 
@@ -169,9 +189,9 @@ class MeasurementController {
 		// Redirect to the assay list, because that is the only place where a 
 		// delete button exists.
 		if( params.assayId ) {
-			redirect( controller: "SAMAssay", action: "show", id: params.assayId )
+			redirect( controller: "SAMAssay", action: "show", id: params.assayId, params: [module: params.module] )
 		} else {
-			redirect(action: "list")
+			redirect(action: "list", params: [module: params.module])
 		}
     }
 
@@ -181,37 +201,37 @@ class MeasurementController {
 
     def nofeatures = {
 	    flash.message = "There are no features defined. Without features, you can't add measurements."
-	    redirect( controller: 'feature', action: 'list' );
+	    redirect( controller: 'feature', action: 'list', params: [module: params.module] );
     }
 
 	def noassays = {
 		flash.message = "You have no assays that you are allowed to edit. Without writable samples, you can't add measurements."
-		redirect( controller: 'SAMAssay', action: 'list' );
+		redirect( controller: 'SAMAssay', action: 'list', params: [module: params.module] );
 	}
     
 	def importData = {
 		// If no samples are present, we can't add measurements
 		if( Sample.count() == 0 ) { // NB: this is checking in GSCF, so using Sample instead of SAMSample
 			flash.message = "No samples have been created in GSCF yet. Without samples, you can't import measurements."
-			redirect( controller: 'SAMAssay', action: 'list' );
+			redirect( controller: 'SAMAssay', action: 'list', params: [module: params.module] );
 		}
 		
-		redirect( action: 'importDataFlow' )
+		redirect( action: 'importDataFlow', params: [module: params.module])
 	}
 
 	def importDataFlow = {
-
         startUp {
             action{
 
                 if(Feature.count() == 0){
-                    redirect(action: 'nofeatures')
+                    redirect(action: 'nofeatures', params: [module: params.module])
                 }
 
 	            flow.assayList = Assay.giveWritableAssays(session.gscfUser)
+                flow.module = params.module
 
 	            if( flow.assayList.isEmpty() ) {
-		            redirect(action: 'noassays')
+		            redirect(action: 'noassays', params: [module: params.module])
 	            }
 
 	            //flow.assayList = Assay.executeQuery( "SELECT DISTINCT a FROM Assay a WHERE  a.id in (:list)", [ "list": assayIdList ])
@@ -876,7 +896,7 @@ class MeasurementController {
 		
 		if( !assayId || !assayId.isLong() ) {
 			flash.error = "No assay selected"
-			redirect( controller: "SAMAssay", view: "list" );
+			redirect( controller: "SAMAssay", view: "list", params: [module: params.module] );
 			return;
 		}
 		
@@ -884,7 +904,7 @@ class MeasurementController {
 		
 		if( !assay ) {
 			flash.error = "Incorrect assay Id given"
-			redirect( controller: "SAMAssay", view: "list" );
+			redirect( controller: "SAMAssay", view: "list", params: [module: params.module]  );
 			return;
 		}
 		
@@ -894,7 +914,7 @@ class MeasurementController {
 			flash.error = "An error occurred while deleting measurements for this assay. Please try again or contact your system administrator."
 		}
 		
-		redirect( controller: "SAMAssay", view: "list" );
+		redirect( controller: "SAMAssay", view: "list", params: [module: params.module] );
 	}
 
     def checkForFeatureTimepointDuplicates(features, timepoints) {
@@ -909,7 +929,6 @@ class MeasurementController {
                 }
             }
         }
-        println "featureTimepointDuplicates"
         featureTimepointDuplicates.each {
             println it.key.toString()+", "+it.value.toString()
         }

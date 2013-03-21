@@ -7,6 +7,7 @@ import org.springframework.dao.DataIntegrityViolationException
 class PlatformController {
 
     static allowedMethods = [save: "POST", update: "POST", delete: "POST"]
+    def moduleService
 
     def index() {
         redirect(action: "list", params: params)
@@ -14,11 +15,21 @@ class PlatformController {
 
     def list(Integer max) {
         params.max = Math.min(max ?: 10, 100)
-        [platformInstanceList: Platform.list(params), platformInstanceTotal: Platform.count()]
+        if (moduleService.validateModule(params?.module)) {
+            [platformInstanceList: Platform.list(params), platformInstanceTotal: Platform.count(), module: params.module]
+        }
+        else {
+            redirect(controller: 'error', action: 'notFound')
+        }
     }
 
     def create() {
-        [platformInstance: new Platform(params)]
+        if (moduleService.validateModule(params?.module)) {
+            [platformInstance: new Platform(params), module: params.module]
+        }
+        else {
+            redirect(controller: 'error', action: 'notFound')
+        }
     }
 
     def save() {
@@ -55,41 +66,50 @@ class PlatformController {
 
         // Attempt to save platform
         if (!platformInstance.save(flush: true)) {
-            render(view: "create", model: [platformInstance: platformInstance])
+            render(view: "create", model: [platformInstance: platformInstance], module: params.module)
             return
         }
 
         flash.message = message(code: 'default.created.message', args: [message(code: 'platform.label', default: 'Platform'), platformInstance.name])
-        redirect(action: "show", id: platformInstance.id)
+        redirect(action: "show", id: platformInstance.id, params: [module: params.module])
     }
 
     def show(Long id) {
-        def platformInstance = Platform.get(id)
-        if (!platformInstance) {
-            flash.message = message(code: 'default.not.found.message', args: [message(code: 'platform.label', default: 'Platform'), id])
-            redirect(action: "list")
-            return
+        if (moduleService.validateModule(params?.module)) {
+            def platformInstance = Platform.get(id)
+            if (!platformInstance) {
+                flash.message = message(code: 'default.not.found.message', args: [message(code: 'platform.label', default: 'Platform'), id])
+                redirect(action: "list", params: [module: params.module])
+                return
+            }
+            [platformInstance: platformInstance, module: params.module]
         }
-
-        [platformInstance: platformInstance]
+        else {
+            redirect(controller: 'error', action: 'notFound')
+        }
     }
 
     def edit(Long id) {
-        def platformInstance = Platform.get(id)
-        if (!platformInstance) {
-            flash.message = message(code: 'default.not.found.message', args: [message(code: 'platform.label', default: 'Platform'), id])
-            redirect(action: "list")
-            return
-        }
+        if (moduleService.validateModule(params?.module)) {
+            def platformInstance = Platform.get(id)
+            if (!platformInstance) {
+                flash.message = message(code: 'default.not.found.message', args: [message(code: 'platform.label', default: 'Platform'), id])
+                redirect(action: "list", params: [module: params.module])
+                return
+            }
 
-        [platformInstance: platformInstance]
+            [platformInstance: platformInstance, module: params.module]
+        }
+        else {
+            redirect(controller: 'error', action: 'notFound')
+        }
     }
 
     def update(Long id, Long version) {
         def platformInstance = Platform.get(id)
         if (!platformInstance) {
             flash.message = message(code: 'default.not.found.message', args: [message(code: 'platform.label', default: 'Platform'), id])
-            redirect(action: "list")
+            redirect(action: "list", params: [module: params.module])
             return
         }
 
@@ -98,7 +118,7 @@ class PlatformController {
                 platformInstance.errors.rejectValue("version", "default.optimistic.locking.failure",
                           [message(code: 'platform.label', default: 'Platform')] as Object[],
                           "Another user has updated this Platform while you were editing")
-                render(view: "edit", model: [platformInstance: platformInstance])
+                render(view: "edit", model: [platformInstance: platformInstance], module: params.module)
                 return
             }
         }
@@ -130,30 +150,30 @@ class PlatformController {
         platformInstance.properties = params
 
         if (!platformInstance.save(flush: true)) {
-            render(view: "edit", model: [platformInstance: platformInstance])
+            render(view: "edit", model: [platformInstance: platformInstance], module: params.module)
             return
         }
 
         flash.message = message(code: 'default.updated.message', args: [message(code: 'platform.label', default: 'Platform'), platformInstance.name])
-        redirect(action: "show", id: platformInstance.id)
+        redirect(action: "show", id: platformInstance.id, params: [module: params.module])
     }
 
     def delete(Long id) {
         def platformInstance = Platform.get(id)
         if (!platformInstance) {
             flash.message = message(code: 'default.not.found.message', args: [message(code: 'platform.label', default: 'Platform'), id])
-            redirect(action: "list")
+            redirect(action: "list", params: [module: params.module])
             return
         }
 
         try {
             platformInstance.delete(flush: true)
             flash.message = message(code: 'default.deleted.message', args: [message(code: 'platform.label', default: 'Platform'), id])
-            redirect(action: "list")
+            redirect(action: "list", params: [module: params.module])
         }
         catch (DataIntegrityViolationException e) {
             flash.message = message(code: 'default.not.deleted.message', args: [message(code: 'platform.label', default: 'Platform'), id])
-            redirect(action: "show", id: id)
+            redirect(action: "show", id: id, params: [module: params.module])
         }
     }
 
@@ -172,7 +192,7 @@ class PlatformController {
             log.error( e );
         }
 
-        render(template: "templateSpecific", model: [template: template, values: values])
+        render(template: "templateSpecific", model: [template: template, values: values], module: params.module)
     }
 
     /**

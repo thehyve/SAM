@@ -28,7 +28,7 @@
             <p>The following features should now be available:<br />
                 <g:each in="${featureList}" var="featureInstance" status="j">
                     <g:if test="${j>0}">, </g:if>
-                    <g:link controller="feature" action="show" id="${featureInstance?.id}">${featureInstance?.name.encodeAsHTML()}</g:link>
+                    <g:link controller="feature" action="show" id="${featureInstance?.id}" params="${[module: module]}">${featureInstance?.name.encodeAsHTML()}</g:link>
                 </g:each>
             </p>
         </div>

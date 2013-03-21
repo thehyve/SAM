@@ -4,7 +4,7 @@
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
     <meta name="layout" content="sammain"/>
-    <title>Edit platform ${platformInstance.name}</title>
+    <title>Edit platform ${platformInstance.name} for ${module}</title>
     <r:require module="templateFieldsMisc"/>
     <r:script type="text/javascript" disposition="head">
         $(document).ready(function() {
@@ -31,6 +31,7 @@
     <g:form class="Feature" action="update" name="edit" method="post" novalidate="novalidate">
         <g:hiddenField name="id" value="${platformInstance?.id}"/>
         <g:hiddenField name="version" value="${platformInstance?.version}"/>
+        <g:hiddenField name="module" value="${module}"/>
         <div class="dialog">
             <table>
                 <tr class="prop">
@@ -99,7 +100,7 @@
         <ul class="data_nav buttons">
             <li><g:actionSubmit class="save" action="update" value="Update"/></li>
             <li><g:actionSubmit class="delete" action="delete" value="Delete" onclick="return confirm('Are you sure?');"/></li>
-            <li><g:link controller="platform" action="list" class="cancel">Cancel</g:link></li>
+            <li><g:link controller="platform" action="list" class="cancel" params="${[module: module]}">Cancel</g:link></li>
         </ul>
     </g:form>
 </div>

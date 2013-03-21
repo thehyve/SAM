@@ -7,12 +7,19 @@ import dbnp.studycapturing.*
 class SAMAssayController {
 
     static allowedMethods = [save: "POST", update: "POST", delete: "POST"]
-	
+    def moduleService
+
 	def index = {
         redirect(action: "list", params: params)
     }
 
     def list = {
+        if (moduleService.validateModule(params?.module)) {
+            [module: params.module]
+        }
+        else {
+            redirect(controller: 'error', action: 'notFound')
+        }
     }
 
 	/**
@@ -140,7 +147,7 @@ class SAMAssayController {
 		   aaData: extendedRecords.collect {
                [
                 it[1], it[2], it[3],
-			    dt.buttonShow( 'controller': "SAMAssay", 'id': it[ 0 ] ) ]
+			    dt.buttonShow( 'controller': "SAMAssay", 'id': it[ 0 ], 'params': [module: params.module] ) ]
 		   },
 		   aIds: filteredRecords
 	   ]
@@ -151,49 +158,53 @@ class SAMAssayController {
    }
 
     def show = {
-		def hideEmpty = params.hideEmpty ? Boolean.parseBoolean( params.hideEmpty ) : true
-        def assayInstance = Assay.get(params.id)
-		
-        if (!assayInstance) {
-            flash.message = "${message(code: 'default.not.found.message', args: [message(code: 'assay.label', default: 'Assay'), params.id])}"
-            redirect(action: "list")
-			return
+        if (moduleService.validateModule(params?.module)) {
+            def hideEmpty = params.hideEmpty ? Boolean.parseBoolean( params.hideEmpty ) : true
+            def assayInstance = Assay.get(params.id)
+
+            if (!assayInstance) {
+                flash.message = "${message(code: 'default.not.found.message', args: [message(code: 'assay.label', default: 'Assay'), params.id])}"
+                redirect(action: "list", params: [module: params.module])
+                return
+            }
+
+            if( !assayInstance.parent.canRead( session.gscfUser ) ) {
+                flash.message = "You are not allowed to access assay " + assayInstance
+                redirect(action: "list", params: [module: params.module])
+                return
+            }
+
+            // Lookup all samples for this assay
+            def numberOfSamples = assayInstance.samples.size();
+            def samples;
+
+            // If samples without measurements should be hidden, we don't retrieve them from the database at all
+            if( hideEmpty ) {
+                //samples = assayInstance.samples.sort { it.name}
+                samples = SAMSample.findAll( "from SAMSample s WHERE s.parentAssay = :assay AND s.measurements.size > 0 ORDER BY s.parentSample.name", [ assay: assayInstance ] );
+            } else {
+                samples = SAMSample.findAll( "from SAMSample s WHERE s.parentAssay = :assay ORDER BY s.name", [ assay: assayInstance ] );
+            }
+
+            // Compute the number of samples without measurements
+            def emptySamples = numberOfSamples - samples.size();
+
+            def measurements = [];
+            def features = [];
+
+            if( samples ) {
+                // If samples are found lookup all measurements. They are ordered by sample name and after that feature name.
+                // This order ensures that we can easily walk through the list when showing them on screen
+                measurements = Measurement.findAll( "from Measurement m WHERE m.sample IN (:samples) ORDER BY m.sample.parentSample.name, m.feature.name", [ samples: samples ] );
+                if( measurements ) {
+                    features = Feature.findAll( "from Feature f WHERE EXISTS( FROM Measurement m WHERE m IN (:measurements) AND m.feature = f ) ORDER BY f.name", [ measurements: measurements ] )
+                }
+            }
+            return [assayInstance: assayInstance, samples: samples, features: features, measurements: measurements, hideEmpty: hideEmpty, module: params.module]
         }
-		
-		if( !assayInstance.parent.canRead( session.gscfUser ) ) {
-			flash.message = "You are not allowed to access assay " + assayInstance
-			redirect(action: "list")
-			return
-		}
-		
-		// Lookup all samples for this assay
-		def numberOfSamples = assayInstance.samples.size();
-		def samples;
-		
-		// If samples without measurements should be hidden, we don't retrieve them from the database at all
-		if( hideEmpty ) {
-            //samples = assayInstance.samples.sort { it.name}
-			samples = SAMSample.findAll( "from SAMSample s WHERE s.parentAssay = :assay AND s.measurements.size > 0 ORDER BY s.parentSample.name", [ assay: assayInstance ] );
-		} else {
-			samples = SAMSample.findAll( "from SAMSample s WHERE s.parentAssay = :assay ORDER BY s.name", [ assay: assayInstance ] );
-		} 
-		
-		// Compute the number of samples without measurements
-		def emptySamples = numberOfSamples - samples.size();
-		
-		def measurements = [];
-		def features = [];
-		
-		if( samples ) {
-			// If samples are found lookup all measurements. They are ordered by sample name and after that feature name.
-			// This order ensures that we can easily walk through the list when showing them on screen
-			measurements = Measurement.findAll( "from Measurement m WHERE m.sample IN (:samples) ORDER BY m.sample.parentSample.name, m.feature.name", [ samples: samples ] );
-			if( measurements ) {
-				features = Feature.findAll( "from Feature f WHERE EXISTS( FROM Measurement m WHERE m IN (:measurements) AND m.feature = f ) ORDER BY f.name", [ measurements: measurements ] )
-			}
-		}
-		
-		return [assayInstance: assayInstance, samples: samples, features: features, measurements: measurements, hideEmpty: hideEmpty] 
+        else {
+            redirect(controller: 'error', action: 'notFound')
+        }
     }
 	
 	def showByToken = {
@@ -205,6 +216,6 @@ class SAMAssayController {
 			return
         }
         
-        redirect(action:"show", params:[id: assay.id])
+        redirect(action:"show", params:[id: assay.id, module: params.module])
     }
 }

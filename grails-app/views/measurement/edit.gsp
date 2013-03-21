@@ -2,7 +2,7 @@
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
         <meta name="layout" content="sammain"/>
-        <title>Edit measurement</title>
+        <title>Edit measurement for ${module}</title>
     </head>
 
     <body>
@@ -20,6 +20,7 @@
             <g:form method="post">
                 <g:hiddenField name="id" value="${measurementInstance?.id}"/>
                 <g:hiddenField name="version" value="${measurementInstance?.version}"/>
+                <g:hiddenField name="module" value="${module}"/>
                 <div class="dialog">
                     <table>
                         <tbody>
@@ -78,7 +79,7 @@
                 <ul class="data_nav buttons">
                     <li><g:actionSubmit class="save" action="update" value="Update"/></li>
                     <li><g:actionSubmit class="delete" action="delete" value="Delete" onclick="return confirm('Are you sure?');"/></li>
-                    <li><g:link controller="measurement" action="list" class="cancel">Cancel</g:link></li>
+                    <li><g:link controller="measurement" action="list" class="cancel" params="${[module: module]}">Cancel</g:link></li>
                 </ul>
 
             </g:form>

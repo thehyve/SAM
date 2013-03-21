@@ -52,9 +52,10 @@
                 <g:form>
                     <g:hiddenField name="id" value="${featureInstance?.id}"/>
                     <g:hiddenField name="ids" value="${featureInstance?.id}"/>
+                    <g:hiddenField name="module" value="${module}"/>
                     <li><g:actionSubmit class="edit" action="edit" value="Edit"/></li>
                     <li><g:actionSubmit class="delete" action="delete" value="Delete" onclick="return confirm('Are you sure?');"/></li>
-                    <li><g:link controller="feature" action="list" class="cancel">Back to list</g:link></li>
+                    <li><g:link controller="feature" action="list" class="cancel" params="${[module: module]}">Back to list</g:link></li>
                 </g:form>
             </ul>
         </div>

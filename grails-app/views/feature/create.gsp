@@ -4,7 +4,7 @@
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
         <meta name="layout" content="sammain"/>
-        <title>Create a new feature</title>
+        <title>Create a new feature for ${module}</title>
         <r:require module="templateFieldsMisc"/>
         <r:script type="text/javascript" disposition="head">
             $(document).ready(function() {
@@ -25,11 +25,12 @@
         <content tag="contextmenu">
       		<g:render template="contextmenu" />
         </content>
-        <h1>Create a new feature</h1>
+        <h1>Create a new feature for ${module}</h1>
 
         <div class="data">
             <g:form action="save" name="create" novalidate="novalidate">
                 <input type="hidden" name="nextPage" id="nextPage" value="list" />
+                <input type="hidden" name="module" id="module" value="${module}" />
                 <div class="dialog">
                     <table>
                         <tr class="prop">
@@ -105,7 +106,7 @@
                 </div>
                 <ul class="data_nav buttons">
                     <li><g:submitButton name="create" class="save" value="Create"/></li>
-                    <li><g:link controller="feature" action="list" class="cancel">Cancel</g:link></li>
+                    <li><g:link controller="feature" action="list" class="cancel" params="${[module: module]}">Cancel</g:link></li>
                 </ul>
             </g:form>
         </div>

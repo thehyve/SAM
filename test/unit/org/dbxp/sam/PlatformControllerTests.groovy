@@ -113,7 +113,7 @@ class PlatformControllerTests {
         populateValidParams(params)
         controller.update()
 
-        assert response.redirectedUrl == "/platform/show/$platform.id"
+        assert response.redirectedUrl == "/platform/show/$platform.id/"
         assert flash.message != null
 
         //test outdated version number

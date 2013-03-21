@@ -13,18 +13,19 @@
     </head>
     <body>
         <content tag="contextmenu">
-      		<li><g:link action="list" class="list">Back to list</g:link></li>
+      		<li><g:link action="list" class="list"  params="${[module: module]}">Back to list</g:link></li>
         </content>    
-		<h1>${assayInstance.name} / ${assayInstance.parent.title}</h1>
+		<h1>${module} ${assayInstance.name} / ${assayInstance.parent.title}</h1>
 		
 		<g:if test="${measurements.size() > 0}">
             <ul class="data_nav buttons ontop">
-           		<li><g:link class="delete" controller="measurement" action="deleteByAssay" id="${assayInstance.id}" onClick="return confirm('Are you sure?');">Delete all measurements</g:link></li>
+           		<li><g:link class="delete" controller="measurement" action="deleteByAssay" id="${assayInstance.id}" params="${[module: module]}" onClick="return confirm('Are you sure?');">Delete all measurements</g:link></li>
            		<li><g:link class="delete" controller="measurement" action="delete" onClick="if( \$( '#deleteform input:checked' ).length != 0 && confirm('Are you sure?') ) { \$( '#deleteform' ).submit(); } return false; ">Delete selected measurements</g:link></li>
             </ul>
             		
 			<form id="deleteform" action="<g:createLink controller="measurement" action="delete" />" method="post">
 				<input type="hidden" name="assayId" value="${assayInstance.id}" />
+                <input type="hidden" name="module" value="${module}" />
 				<table>
 					<thead>
 						<tr>
@@ -124,7 +125,7 @@
 			
             <br />
             <ul class="data_nav buttons">
-           		<li><g:link class="delete" controller="measurement" action="deleteByAssay" id="${assayInstance.id}" onClick="return confirm('Are you sure?');">Delete all measurements</g:link></li>
+           		<li><g:link class="delete" controller="measurement" action="deleteByAssay" id="${assayInstance.id}" params="${[module: module]}" onClick="return confirm('Are you sure?');">Delete all measurements</g:link></li>
            		<li><g:link class="delete" controller="measurement" action="delete" onClick="if( \$( '#deleteform input:checked' ).length != 0 && confirm('Are you sure?') ) { \$( '#deleteform' ).submit(); } return false; ">Delete selected measurements</g:link></li>
             </ul>
             			
@@ -132,20 +133,20 @@
 				<g:if test="${emptySamples > 0}">
 					<p>
 						${emptySamples} sample(s) are not shown because they have no measurements. 
-						Click <g:link action="show" params="['id': assayInstance.id, 'hideEmpty': false]">here</g:link> to show all.
+						Click <g:link action="show" params="['id': assayInstance.id, 'hideEmpty': false, module: module]">here</g:link> to show all.
 					</p>
 				</g:if>
 			</g:if>
 			<g:else>
 				<p>
-					Click <g:link action="show" params="['id': assayInstance.id, 'hideEmpty': true]">here</g:link> to hide samples without measurements.
+					Click <g:link action="show" params="['id': assayInstance.id, 'hideEmpty': true, module: module]">here</g:link> to hide samples without measurements.
 				</p>
 			</g:else>
 		</g:if>
 		<g:else>
 			<p>
-				No measurements were found for this assay. Use the <g:link controller="measurement" action="importData">importer</g:link> 
-				to import your data	or add your measurements <g:link controller="measurement" action="create">manually</g:link>.
+				No measurements were found f  for this assay. Use the <g:link controller="measurement" action="importData" params="${[module: module]}">importer</g:link>
+				to import your data	or add your measurements <g:link controller="measurement" action="create" params="${[module: module]}">manually</g:link>.
 			</p>
 		</g:else>
     </body>
