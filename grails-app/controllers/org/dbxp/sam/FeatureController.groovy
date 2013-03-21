@@ -310,9 +310,6 @@ class FeatureController {
 	
 	def returnUpdatedTemplateSpecificFields = {
 		def template = _determineTemplate();
-
-        println template
-
 		def values = [:];
 		
 		// Set the correct value of all domain fields and template fields (if template exists) 
@@ -334,21 +331,21 @@ class FeatureController {
 	 */
 	private _determineTemplate()  {
 		def template = null;
-
-        println params
-		
 		if( params.templateEditorHasBeenOpened == 'true') {
-            println "geopend"
 			// If the template editor has been opened (and closed), we should use
 			// the template that we stored previously
 			if( session.templateId ) {
 				template = Template.get( session.templateId );
 			} 
 		} else {
-            println "niet geopend" + params
 			// Otherwise, we should use the template that the user selected.
 			if( params.template ) {
-				return Template.findByEntityAndName(Feature,params.template)
+                Template.findAllByEntity(Feature).each {
+                    if(it.name == params.template) {
+                        template = it
+                        return template
+                    }
+                }
 			}
 		}
 		

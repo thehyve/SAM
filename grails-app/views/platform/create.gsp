@@ -4,7 +4,7 @@
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
     <meta name="layout" content="sammain"/>
-    <title>Create a new platform</title>
+    <title>Create a new platform for ${module}</title>
     <r:require module="templateFieldsMisc"/>
     <r:script type="text/javascript" disposition="head">
         $(document).ready(function() {
@@ -25,7 +25,7 @@
 <content tag="contextmenu">
     <g:render template="contextmenu" />
 </content>
-<h1>Create a new platform</h1>
+<h1>Create a new platform for ${module}</h1>
 
 <div class="data">
     <g:form action="save" name="create" novalidate="novalidate">

@@ -4,7 +4,7 @@
 	<head>
         <meta name="layout" content="sammain"/>
 		<g:set var="entityName" value="${message(code: 'platform.label', default: 'Platform')}" />
-		<title><g:message code="default.module.label" args="[entityName]" /></title>
+		<title><g:message code="default.module.label" args="[entityName, module]" /></title>
 	</head>
 	<body>
     <g:hasErrors bean="${platformInstance}">

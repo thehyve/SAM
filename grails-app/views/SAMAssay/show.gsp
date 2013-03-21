@@ -4,7 +4,7 @@
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
         <meta name="layout" content="sammain" />
         <g:set var="entityName" value="${message(code: 'study.label', default: 'Study')}" />
-        <title>Show assay ${assayInstance.name}</title>
+        <title>Show ${module} assay ${assayInstance.name}</title>
         
         <style type="text/css">
         	.delete_button { display: none; }

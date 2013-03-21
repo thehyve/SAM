@@ -51,7 +51,14 @@ class Platform extends TemplateEntity {
      * @return	True if the change is successful, false otherwise
      */
     public boolean changeTemplate( String templateName ) {
-        this.template = Template.findAllByEntityAndName( Platform, templateName ).find { it.entity == this.class }
+        def templateByEntityAndName
+        Template.findAllByEntity(Platform).each {
+            if(it.name == templateName) {
+                templateByEntityAndName = it
+            }
+        }
+        this.template = templateByEntityAndName
+        return this.class == templateByEntityAndName.entity
     }
 
 
