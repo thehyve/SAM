@@ -61,8 +61,6 @@
                                         <g:else>
                                             <g:textField name="${field.escapedName()}" value="${platformInstance.getFieldValue(field.toString())}"/>
                                         </g:else>
-
-
                                     </td>
                                 </tr>
                             </g:each>

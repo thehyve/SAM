@@ -27,7 +27,7 @@ class Platform extends TemplateEntity {
                     name: 'platformversion',
                     type: TemplateFieldType.STRING,
                     comment: 'The version of the platform',
-                    required: false),
+                    required: true),
             new TemplateField(
                     name: 'platformtype',
                     type: TemplateFieldType.EXTENDABLESTRINGLIST,
@@ -65,7 +65,7 @@ class Platform extends TemplateEntity {
     static constraints = {
         name(nullable:false, blank: false, unique:true, maxSize: 255)
         platformversion(nullable:true, blank: true)
-        platformtype(nullable:true, blank: true)
+        platformtype(nullable:false, blank: false)
         comments(nullable:true, blank: true)
     }
 

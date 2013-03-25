@@ -1,4 +1,4 @@
-<%@ page import="org.dbnp.gdt.TemplateField; org.dbxp.sam.Feature; org.dbxp.sam.Platform" %>
+<%@ page import="org.dbnp.gdt.TemplateField; org.dbnp.gdt.TemplateFieldType; org.dbxp.sam.Feature; org.dbxp.sam.Platform" %>
 <%@ page import="org.dbnp.gdt.GdtTagLib" %>
 <html>
     <head>
@@ -53,7 +53,7 @@
                                             Platform
                                         </td>
                                         <td valign="top">
-                                            <g:select name="platform" from="${Platform.list()}" optionKey="id"/>
+                                            <g:select name="platform" from="${Platform.list()}" optionKey="id" value="${featureInstance?.platform}"/>
                                         </td>
                                     </tr>
                                     <g:each in="${featureInstance.giveDomainFields()}" var="field" status="i">
@@ -65,7 +65,12 @@
                                                 </g:if>
                                             </td>
                                             <td valign="top" >
-                                                <g:textField name="${field.escapedName()}" value="${featureInstance.getFieldValue(field.toString())}"/>
+                                                <g:if test="${field.type == TemplateFieldType.STRINGLIST}">
+                                                    <g:select name="${field.escapedName()}" from="${field?.listEntries}"/>
+                                                </g:if>
+                                                <g:else>
+                                                    <g:textField name="${field.escapedName()}" value="${featureInstance.getFieldValue(field.toString())}"/>
+                                                </g:else>
                                             </td>
                                         </tr>
                                     </g:each>

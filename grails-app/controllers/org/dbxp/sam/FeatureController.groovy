@@ -278,7 +278,7 @@ class FeatureController {
         }
         else {
             flash.message = "The requested feature could not be found."
-            redirect(action: "list")
+            redirect(action: "list", params: [module: params.module])
         }
     }
 
