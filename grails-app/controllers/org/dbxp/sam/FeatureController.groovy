@@ -366,7 +366,11 @@ class FeatureController {
                 session.featureInstance.template = null
             } else if(params?.template && session?.featureInstance.template?.name != params.get('template')) {
                 // set the template
-                session.featureInstance.template = Template.findByEntityAndName(Feature,params.template)
+                Template.findAllByEntity(Feature).each {
+                    if (it.name == params.template) {
+                        session.featureInstance.template = it
+                    }
+                }
             }
             // does the study have a template set?
             if (session.featureInstance.template && session.featureInstance.template instanceof Template) {
@@ -551,9 +555,14 @@ class FeatureController {
                 // If a template is selected, store the templatefields in the flow
                 if(flow.template!="") {
                     // Refresh the template because a user can have edited it
-                    Template objTempl = Template.findByEntityAndName(Feature, params.template).refresh();
-
-                    flow.templateFields += objTempl.fields;
+                    def Template objTempl
+                    Template.findAllByEntity(Feature).each {
+                        if (it.name == params.template) {
+                            objTempl = it
+                        }
+                    }
+                    objTempl.refresh()
+                    flow.templateFields += objTempl?.fields;
                 }
 
                 // Compute fuzzy matching
@@ -601,7 +610,6 @@ class FeatureController {
                         Feature objFeature = new Feature();
                         if(flow.template!="")
                             objFeature.changeTemplate(flow.template);
-
                         for(int j=0; j<flow.text[0].size(); j++) {
                             // Trim the would-be field values
                             // This is necessary to be able to accurately search for and compare these values
