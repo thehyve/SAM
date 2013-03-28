@@ -24,6 +24,10 @@ class SAMSample {
         parentSample.name
     }
 
+    public String toString() {
+        return parentSample.name
+    }
+
 	/**
 	 * Sets the properties of this object, based on the JSON object given by GSCF
 	 * @param jsonObject	Object with sample data from GSCF

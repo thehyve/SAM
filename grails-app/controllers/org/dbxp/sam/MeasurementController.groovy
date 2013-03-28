@@ -274,6 +274,7 @@ class MeasurementController {
 			// Step 2: upload data and give the user a preview. The user then chooses which layout he wants
 			// to use.
 			on("next") {
+                flow.platform = params.platform
                 if(params.pasteField!=null && params.pasteField!="") {
                     flow.inputField = params.pasteField;
                 } else {

@@ -24,8 +24,10 @@
 
             <form method="post" enctype="multipart/form-data">
 
-	            <h2>Locate the file on your computer:</h2>
-	            <p class="fieldInfo">Make sure to add an <strong>excel</strong> or <strong>comma-separated file</strong> that has a structure that corresponds to one of the <a href="#" onClick="$( '#layouts' ).dialog( 'open' ); return false;">allowed layouts</a>. Alternatively, you can paste such data in the textfield, which you can find under the 'paste in textfield' option.</p>
+                <h2>Select the platform of the measurements you want to upload</h2>
+                <g:select name="platform" from="${org.dbxp.sam.Platform.list()}" />
+                <h2>Locate the file on your computer:</h2>
+                <p class="fieldInfo">Make sure to add an <strong>excel</strong> or <strong>comma-separated file</strong> that has a structure that corresponds to one of the <a href="#" onClick="$( '#layouts' ).dialog( 'open' ); return false;">allowed layouts</a>. Alternatively, you can paste such data in the textfield, which you can find under the 'paste in textfield' option.</p>
 
                 <g:if test="${message}">
                     <div class="errors">${message}</div>

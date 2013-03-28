@@ -41,7 +41,7 @@ class Platform extends TemplateEntity {
     ]
 
     public String toString() {
-        name
+        return name
     }
 
     /**

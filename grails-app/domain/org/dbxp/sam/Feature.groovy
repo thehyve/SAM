@@ -18,8 +18,8 @@ class Feature extends TemplateEntity {
     }
 
     public String toString() {
-		return platform.name + " - " + name + ( unit!=null ? " ("+unit+")" : "" )
-	}
+        return name
+    }
 
 	/**
 	 * Changes the template for this feature. If no template with the given name 

@@ -258,7 +258,13 @@
                     features from the database here. That way, if the user refreshes the page, all features
                     are read from the database (also the ones previously added).
                  --%>
-                 <% features = org.dbxp.sam.Feature.list( sort: "name" ); %>
+                <%  def features = []
+                    org.dbxp.sam.Feature.list().each {
+                        if(it.platform.name == platform) {
+                            features.add(it)
+                        }
+                    }
+                %>
 
 
                 <table style="width: auto">
