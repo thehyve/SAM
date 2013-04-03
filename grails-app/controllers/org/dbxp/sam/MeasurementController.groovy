@@ -420,7 +420,7 @@ class MeasurementController {
 				
 				// Save data of this step
                 flow.layout = params.layoutselector
-				flow.features = Feature.list( sort: "name" )
+                flow.features = Feature.findAllByPlatform(Platform.findByName(flow.platform))
 
                 if(params.layoutselector=="sample_layout"){
                     flow.samples = flow.assay.samples.sort {it.name}
@@ -663,7 +663,7 @@ class MeasurementController {
                     }
                 }
                 // Update feature list in case the user has created new features on 'selectColumns.gsp'
-                flow.features = Feature.list().sort(){it.name}
+                flow.features = Feature.findAllByPlatform(Platform.findByName(flow.platform))
 			}.to "selectLayout"
 			on("error").to "selectColumns"
 		}
@@ -677,7 +677,7 @@ class MeasurementController {
 				
                 def measurementList = []
 				// Update feature list in case the user has created new features on their previous visit to the selectColumns page
-				flow.features = Feature.list().sort(){it.name}
+                flow.features = Feature.findAllByPlatform(Platform.findByName(flow.platform))
 
 				if(flow.layout=="sample_layout"){
                     for(int i = 1; i < flow.edited_text.size(); i++){

@@ -351,7 +351,7 @@
                                                 <g:set var="featureValue" value="" />
                                             </g:elseif>
                                             <g:else>
-                                                <g:set var="featureValue" value="${feature_matches[column]==null ? 'null' : features[feature_matches[column]].id}" />
+                                                <g:set var="featureValue" value="${feature_matches[column]==null ? 'null' : features[feature_matches[column]]?.id}" />
                                             </g:else>
 
                                             <g:select rel="featureSelector" name="${i},${j}" from="${features}" value="${featureValue}" optionKey="id" noSelection="[null:'[Discard]']" class="importerSelect featureSelect" onChange="selectChange('featureSelect');"/>
