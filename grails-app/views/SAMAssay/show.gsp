@@ -145,7 +145,7 @@
 		</g:if>
 		<g:else>
 			<p>
-				No measurements were found f  for this assay. Use the <g:link controller="measurement" action="importData" params="${[module: module]}">importer</g:link>
+				No measurements were found for this assay. Use the <g:link controller="measurement" action="importData" params="${[module: module]}">importer</g:link>
 				to import your data	or add your measurements <g:link controller="measurement" action="create" params="${[module: module]}">manually</g:link>.
 			</p>
 		</g:else>
