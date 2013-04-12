@@ -16,7 +16,8 @@ class PlatformController {
     def list(Integer max) {
         params.max = Math.min(max ?: 10, 100)
         if (moduleService.validateModule(params?.module)) {
-            [platformInstanceList: Platform.list(params), platformInstanceTotal: Platform.count(), module: params.module]
+            def platformList = Platform.findAllByPlatformtype(params.module)
+            [platformInstanceList: platformList, platformInstanceTotal: platformList.size(), module: params.module]
         }
         else {
             redirect(controller: 'error', action: 'notFound')

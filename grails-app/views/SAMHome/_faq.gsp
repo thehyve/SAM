@@ -1,34 +1,3 @@
-<h3><a href="#">How do I start using this module?</a></h3>
-<div>
-    <p>
-    <ul style="list-style-type: decimal;">
-        <li>You can add features using the import function.</li>
-        <li>Then add measurements using the measurement importer.</li>
-    </ul>
-    </p>
-
-</div>
-
-<h3><a href="#">What is a feature?</a></h3>
-<div>
-    <p>A feature is a substance (or measurementtype / detector / ...) that is measured when a sample is taken. For example, glucose, leptin, CD40, bodyweight, urea</p>
-</div>
-
-<h3><a href="#">What is a platform?</a></h3>
-<div>
-    <p>A platform is a technique of a certain type of data, e.g. for Transcriptomics you will have platforms such as Affymetrix & Illumina.</p>
-</div>
-
-<h3><a href="#">What is a measurement?</a></h3>
-<div>
-    <p>A measurement is a single value that belongs to a sample. For example, glucose level is measured for a group of samples.</p>
-</div>
-
-<h3><a href="#">What is an assay?</a></h3>
-<div>
-    <p>An assay is a group of samples that are analyzed. For example to obtain, clinical chemistry -, metabolomics -, or transcriptomics data</p>
-</div>
-
 <h3><a href="#">I want to import features, give me an example.</a></h3>
 <div>
     <p>example:</p>

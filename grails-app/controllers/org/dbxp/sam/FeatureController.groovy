@@ -18,7 +18,7 @@ class FeatureController {
 	
     def list = {
         if (moduleService.validateModule(params?.module)) {
-            [featureInstanceList: Feature.list(params), featureInstanceTotal: Feature.count(), module: params.module]
+            [module: params.module]
         }
         else {
             redirect(controller: 'error', action: 'notFound')
@@ -87,10 +87,37 @@ class FeatureController {
 			orderHQL = "ORDER BY " + sortOn.collect { columns[it.column] + " " + it.direction }.join( " " );
 		}
 
+        // Filter by module
+        def filteredFeatureList = []
+        def String moduleFilter = ""
+
+        Platform.findAllByPlatformtype(params.module).each {
+            if (search) {
+                if (!moduleFilter) {
+                    moduleFilter = " AND (platform_id = $it.id "
+                }
+                else {
+                    moduleFilter += "OR platform_id = $it.id "
+                }
+            }
+            else {
+                if (!moduleFilter) {
+                    moduleFilter = " WHERE platform_id = $it.id "
+                }
+                else {
+                    moduleFilter += "OR platform_id = $it.id "
+                }
+            }
+            filteredFeatureList.addAll(Feature.findAllByPlatform(it))
+        }
+        if (search) {
+            moduleFilter += ")"
+        }
+
         // Display properties
-		def records = Feature.executeQuery( hql + orderHQL, hqlParams, [ max: displayLength, offset: displayStart ] );
-		def numTotalRecords = Feature.count();
-		def filteredRecords = Feature.executeQuery( "SELECT f.id " + hql, hqlParams );
+		def records = Feature.executeQuery( hql + moduleFilter + orderHQL, hqlParams, [ max: displayLength, offset: displayStart ] );
+		def numTotalRecords = filteredFeatureList.size();
+		def filteredRecords = Feature.executeQuery( "SELECT f.id " + hql + moduleFilter + orderHQL, hqlParams );
 		
 		/*
 		int 	iTotalRecords 			Total records, before filtering (i.e. the total number of records in the database)
@@ -112,7 +139,7 @@ class FeatureController {
                     dt.buttonEdit(id: it[0].id, controller: "feature", blnEnabled: true, params: [module: params.module]),
                     dt.buttonDelete(id: it[0].id, controller: "feature", blnEnabled: true, params: [module: params.module])]
 			},
-			aIds: filteredRecords 
+			aIds: filteredRecords
 		]
 		
 		response.setContentType( "application/json" );

@@ -3,6 +3,7 @@ package org.dbxp.sam
 import grails.converters.JSON
 import org.dbxp.matriximporter.*
 import dbnp.studycapturing.*
+import org.dbnp.gdt.AssayModule
 
 class SAMAssayController {
 
@@ -69,7 +70,7 @@ class SAMAssayController {
 	   
 	   def joinHQL  = " LEFT JOIN a.samples s "
 	   def groupByHQL = " GROUP BY a.id, a.parent.title, a.name "
-	   def whereHQL = "WHERE ";
+	   def whereHQL = "WHERE module_id = ${AssayModule.findByName(params.module).id} AND ";
 	   def orderHQL = "";
 	   
 	   // Add authorization
@@ -208,14 +209,15 @@ class SAMAssayController {
     }
 	
 	def showByToken = {
-        def assay = Assay.findByAssayToken(params.id)
+
+        def assay = Assay.findWhere(UUID: params.id)
 
         if (!assay) {
             flash.message = "The assay you requested could not be found. PLease use your browser back button."
             redirect(action: "list")
 			return
         }
-        
-        redirect(action:"show", params:[id: assay.id, module: params.module])
+
+        redirect(action:"show", params:[id: assay.id, module: assay.module.name])
     }
 }
