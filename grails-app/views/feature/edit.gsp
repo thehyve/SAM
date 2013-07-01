@@ -53,7 +53,8 @@
                                             Platform
                                         </td>
                                         <td valign="top">
-                                            <g:select name="platform" from="${Platform.list()}" optionKey="id" value="${featureInstance?.platform}"/>
+                                            <g:set var="platformList" value="${Platform.list()}"/>
+                                            <g:select name="platform" from="${platformList}" value="${platformList[platformList.name.indexOf(featureInstance?.platform.name)]}"/>
                                         </td>
                                     </tr>
                                     <g:each in="${featureInstance.giveDomainFields()}" var="field" status="i">

@@ -49,7 +49,7 @@ class SAMAssayController {
 	   int displayStart = params.int( 'iDisplayStart' ) ?: 0;
 	   int displayLength = params.int( 'iDisplayLength' ) ?: 10;
 	   int numColumns = params.int( 'iColumns' );
-	   
+
 	   // Search parameters; searchable columns are determined serverside
 	   String search = params.sSearch;
 
@@ -59,7 +59,7 @@ class SAMAssayController {
 	   for( int i = 0; i < sortingCols; i++ ) {
 		   sortOn[ i ] = [ 'column': params.int( 'iSortCol_' + i ), 'direction': params[ 'sSortDir_' + i ] ];
 	   }
-	   
+
 	   // What columns to return?
 	   def columns = [ 'name', 'unit' ]
 
@@ -67,12 +67,12 @@ class SAMAssayController {
 	   def hqlParams = [:];
 	   def columnsHQL = "SELECT a.id, a.parent.title AS name, a.name, COUNT( s ) "
 	   def hql = "FROM Assay a ";
-	   
+
 	   def joinHQL  = " LEFT JOIN a.samples s "
 	   def groupByHQL = " GROUP BY a.id, a.parent.title, a.name "
 	   def whereHQL = "WHERE module_id = ${AssayModule.findByName(params.module).id} AND ";
 	   def orderHQL = "";
-	   
+
 	   // Add authorization
 	   if( session.gscfUser ) {
 		   if( !session.gscfUser.hasAdminRights() ) {
@@ -83,24 +83,24 @@ class SAMAssayController {
 		   	   hqlParams[ "user" ] = session.gscfUser
 		   } else {
 		   		// Administrators are allowed to see all assays, but we have to add some HQL here,
-		   		// since otherwise the HQL on line 117 can't be added with a " AND " 
+		   		// since otherwise the HQL on line 117 can't be added with a " AND "
 		   		whereHQL += " 1 = 1 "
 		   }
 	   } else {
 	   		whereHQL += " a.parent.publicstudy = true ";
 	   }
-	   
+
 	   // Search properties
 	   if( search ) {
 		   hqlParams[ "search" ] = "%" + search.toLowerCase() + "%"
-		   
+
 		   def hqlConstraints = [];
 		   hqlConstraints << "LOWER(a.name) LIKE :search"
 		   hqlConstraints << "LOWER(a.parent.title) LIKE :search"
-		   
+
 		   whereHQL += " AND ( " + hqlConstraints.join( " OR " ) + ") "
 	   }
-		   
+
 	   // Sort properties
 	   if( sortOn ) {
 		   // column number must be increased by 2, because the database column number start with 1, but
@@ -114,25 +114,23 @@ class SAMAssayController {
 
 	   // Calculate the total records as the number of assays that are readable for the user
 	   def numTotalRecords = records.size()
-	   
+
 	   // Calculate filtered records
 	   def filteredRecords = Assay.executeQuery( "SELECT id " + hql + whereHQL, hqlParams );
 
 	   // Retrieve the number of samples with measurements for each assay
-	   // This is not the most efficient way of performing this query, but still 
+	   // This is not the most efficient way of performing this query, but still
 	   def extendedRecords = []
 	   if( records.size() > 0 ) {
 		   records.each { record ->
-               def retrieveFilledSampleCountHQL = "SELECT COUNT(s) FROM SAMSample s WHERE s.parentAssay.id = :assayId AND s.measurements.size > 0"
-			   def numFilledSamples = Assay.executeQuery( retrieveFilledSampleCountHQL, [ "assayId": record[ 0 ] ] )
-			   
+               def numFilledSamples = SAMSample.executeQuery( "SELECT COUNT(*) FROM SAMSample s WHERE s.parentAssay.id = :assay", [ assay: record[ 0 ] ] )
 			   def extendedRecord = record as List;
 			   extendedRecord[ 3 ] = numFilledSamples[0] + " / " + extendedRecord[ 3 ]
-			   
-			   extendedRecords << extendedRecord 
+
+			   extendedRecords << extendedRecord
 		   }
-	   } 
-	   
+	   }
+
 	   /*
 	   int 	iTotalRecords 			Total records, before filtering (i.e. the total number of records in the database)
 	   int 	iTotalDisplayRecords 	Total records, after filtering (i.e. the total number of records after filtering has been applied - not just the number of records being returned in this result set)
@@ -152,10 +150,10 @@ class SAMAssayController {
 		   },
 		   aIds: filteredRecords
 	   ]
-	   
+
 	   response.setContentType( "application/json" );
 	   render returnValues as JSON
-	   
+
    }
 
     def show = {
@@ -172,6 +170,13 @@ class SAMAssayController {
             if( !assayInstance.parent.canRead( session.gscfUser ) ) {
                 flash.message = "You are not allowed to access assay " + assayInstance
                 redirect(action: "list", params: [module: params.module])
+                return
+            }
+
+            def ssamples = SAMSample.findAllByParentAssay(assayInstance)
+            //If number of measurements in assay is higher then 10000; switch to summery view
+            if (ssamples && Measurement.executeQuery("SELECT COUNT(*) FROM Measurement m WHERE m.sample IN (:samples)", [ samples: ssamples ])[0]  > 10000) {
+                redirect(controller: 'SAMAssay', action: 'summary', params: [id: assayInstance.id, module: params.module])
                 return
             }
 
@@ -207,7 +212,7 @@ class SAMAssayController {
             redirect(controller: 'error', action: 'notFound')
         }
     }
-	
+
 	def showByToken = {
 
         def assay = Assay.findWhere(UUID: params.id)
@@ -219,5 +224,20 @@ class SAMAssayController {
         }
 
         redirect(action:"show", params:[id: assay.id, module: assay.module.name])
+    }
+
+    def summary = {
+
+        def assayInstance = Assay.findById(params.id)
+
+        def totalSamples = assayInstance.samples.size()
+        def samples = SAMSample.findAll( "from SAMSample s WHERE s.parentAssay = :assay ORDER BY s.parentSample.name", [ assay: assayInstance ] )
+
+        def measurementCounts = []
+        samples.each() {
+            measurementCounts << Measurement.executeQuery("SELECT COUNT(*) FROM Measurement m WHERE m.sample = :sample", [ sample: it ])[0]
+        }
+
+        [ module: params.module, assayInstance: assayInstance, totalSamples: totalSamples, samples: samples, measurementCounts: measurementCounts ]
     }
 }

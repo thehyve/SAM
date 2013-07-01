@@ -79,7 +79,7 @@ class FeatureController {
 				hqlConstraints << "LOWER(" + columns[ i ] + ") LIKE :search"
 			}
 			
-			hql += "WHERE " + hqlConstraints.join( " OR " ) + " "
+			hql += "WHERE (" + hqlConstraints.join( " OR " ) + ") "
 		}
 			
 		// Sort properties
@@ -88,7 +88,7 @@ class FeatureController {
 		}
 
         // Filter by module
-        def filteredFeatureList = []
+        def totalFilteredFeatures = 0
         def String moduleFilter = ""
 
         Platform.findAllByPlatformtype(params.module).each {
@@ -108,7 +108,7 @@ class FeatureController {
                     moduleFilter += "OR platform_id = $it.id "
                 }
             }
-            filteredFeatureList.addAll(Feature.findAllByPlatform(it))
+            totalFilteredFeatures += Feature.executeQuery("SELECT COUNT(*) FROM Feature WHERE platform.id = :platform", [ platform: it.id ])[0]
         }
         if (search) {
             moduleFilter += ")"
@@ -116,7 +116,7 @@ class FeatureController {
 
         // Display properties
 		def records = Feature.executeQuery( hql + moduleFilter + orderHQL, hqlParams, [ max: displayLength, offset: displayStart ] );
-		def numTotalRecords = filteredFeatureList.size();
+		def numTotalRecords = totalFilteredFeatures
 		def filteredRecords = Feature.executeQuery( "SELECT f.id " + hql + moduleFilter + orderHQL, hqlParams );
 		
 		/*

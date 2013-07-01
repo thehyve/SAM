@@ -4,21 +4,23 @@ import org.dbnp.gdt.AssayModule
 import org.dbxp.matriximporter.MatrixImporter
 import dbnp.studycapturing.*
 import org.dbnp.gdt.RelTime
+import groovy.sql.Sql
 
 class MeasurementController {
     static allowedMethods = [save: "POST", update: "POST", delete: "POST"]
     def fuzzySearchService
     def moduleService
-	
-	def sessionFactory
-	def propertyInstanceMap = org.codehaus.groovy.grails.plugins.DomainClassGrailsPlugin.PROPERTY_INSTANCE_MAP
-	
+    def dataSource
+
+    def sessionFactory
+    def propertyInstanceMap = org.codehaus.groovy.grails.plugins.DomainClassGrailsPlugin.PROPERTY_INSTANCE_MAP
+
     def index = {
         redirect(action: "list", params: params)
     }
 
     def list = {
-		// Find all measurements this user has access to 
+		// Find all measurements this user has access to
 		def measurements = Measurement.giveReadableMeasurements( session.gscfUser );
         if (moduleService.validateModule(params?.module)) {
             [measurementInstanceList: measurements, measurementInstanceTotal: measurements.size(), module: params.module]
@@ -55,7 +57,7 @@ class MeasurementController {
         } else {
             measurementInstance = new Measurement( params )
         }
-		
+
 		// Unfortunately, grails is unable to handle double values correctly. If
 		// one enters 10.20, the value of 1020.0 is stored in the database. For that
 		// reason, we convert the value ourselves
@@ -69,7 +71,7 @@ class MeasurementController {
         else {
 			def features = Feature.list();
 			def samples = SAMSample.giveWritableSamples( session.gscfUser )
-	
+
             render(view: "create", model: [measurementInstance: measurementInstance, samples: samples, features: features], module: params.module)
         }
     }
@@ -121,13 +123,13 @@ class MeasurementController {
                 }
             }
             measurementInstance.properties = params
-			
+
 			// Unfortunately, grails is unable to handle double values correctly. If
 			// one enters 10.20, the value of 1020.0 is stored in the database. For that
 			// reason, we convert the value ourselves
 			if( params.value?.isDouble() )
 				measurementInstance.value = params.value as Double
-			
+
             if (!measurementInstance.hasErrors() && measurementInstance.save(flush: true)) {
                 flash.message = "The measurement has been updated."
                 redirect(action: "show", id: measurementInstance.id)
@@ -144,16 +146,16 @@ class MeasurementController {
 
     def delete = {
         def ids = params.list( 'ids' ).findAll { it.isLong() }.collect { it.toDouble() };
-		
+
 		if( !ids ) {
 			response.sendError( 404 );
 			return;
 		}
-		
+
 		def numDeleted = 0;
 		def numErrors = 0;
 		def numNotFound = 0;
-		
+
 		ids.each { id ->
 			def measurementInstance = Measurement.get(id)
 	        if (measurementInstance) {
@@ -169,24 +171,24 @@ class MeasurementController {
 				numNotFound++;
 	        }
 		}
-		
+
 		if( numDeleted == 1  )
 			flash.message = "1 measurement has been deleted from the database"
 		if( numDeleted > 1 )
 			flash.message = numDeleted + " measurements have been deleted from the database"
-		
+
 		flash.error = ""
 		if( numNotFound == 1 )
-			flash.error += "1 measurement has been deleted before." 
+			flash.error += "1 measurement has been deleted before."
 		if( numNotFound > 1 )
-			flash.error += numNotFound+ " measurements have been deleted before." 
+			flash.error += numNotFound+ " measurements have been deleted before."
 
 		if( numErrors == 1 )
-			flash.error += "1 measurement could not be deleted. Please try again" 
+			flash.error += "1 measurement could not be deleted. Please try again"
 		if( numErrors > 1 )
-			flash.error += numErrors + " measurements could not be deleted. Please try again" 
-		
-		// Redirect to the assay list, because that is the only place where a 
+			flash.error += numErrors + " measurements could not be deleted. Please try again"
+
+		// Redirect to the assay list, because that is the only place where a
 		// delete button exists.
 		if( params.assayId ) {
 			redirect( controller: "SAMAssay", action: "show", id: params.assayId, params: [module: params.module] )
@@ -195,9 +197,118 @@ class MeasurementController {
 		}
     }
 
-	void checkForFeatures() {
+    def exactImportSelect = {
+        if(Feature.count() == 0){
+            redirect(action: 'nofeatures', params: [module: params.module])
+        }
+        def assayList = Assay.giveWritableAssays(session.gscfUser).findAll { it.module.name == params.module }
 
-	}
+        if(assayList.isEmpty()) {
+            redirect(action: 'noassays', params: [module: params.module])
+        }
+
+        render(view: "exactImport/chooseAssay", model: [assayList: assayList, module: params.module])
+    }
+
+    def exactImport = {
+        def abort = false
+        def sql = new Sql(dataSource)
+        def a = Assay.findById(params.assay)
+        def assaySamples = a.samples
+        def line = 0
+        def featureList
+        def timepointList
+        def sampleList = []
+        def subjectList = []
+        def errorList = []
+
+        def allFeatures = [:]
+        Feature.findAllByPlatform(Platform.findByName(params.platform)).each {
+            allFeatures[it.name] = it
+        }
+
+        def InputStream input = params.contents.getInputStream()
+        BufferedReader bufferReader = new BufferedReader(new InputStreamReader(input, "ISO-8859-1"));
+        bufferReader.eachLine() {
+            if(line == 0) {
+                featureList = it.split('\t')[1..-1]
+                if(!allFeatures.keySet().containsAll(featureList)) {
+                    def featureMismatches = []
+                    featureList.each() {
+                        if (!allFeatures.keySet().contains(it)) {
+                            featureMismatches << it
+                        }
+                    }
+                    abort = true
+                    flash.error = "Feature mismatch(es) ${featureMismatches}"
+                }
+            }
+            else if(line == 1 ) {
+                timepointList = it.split('\t')[1..-1]
+            }
+
+            else if (!abort) {
+                def error = false
+                def sampleTimepoint
+                def splitedRow = it.split('\t')
+                def subjectName = splitedRow[0]
+                def Sample s
+                def SAMSample ss
+                def i = 0
+                if (!subjectList.contains(subjectName)) {
+                    subjectList << subjectName
+                    sql.withBatch(100, "insert into measurement (id, version, feature_id, sample_id, value) values (nextval('hibernate_sequence'), :version, :feature_id, :sample_id, :value)", { preparedStatement ->
+                        splitedRow[1..-1].each { m ->
+                            if(!timepointList[i].equals(sampleTimepoint) && !error) {
+                                sampleTimepoint = new RelTime(timepointList[i]).getValue()
+                                s = assaySamples.find { it.samplingTime == sampleTimepoint && it.subjectName == subjectName }
+                                if (s && !sampleList.contains(s)) {
+                                    sampleList << s
+                                    ss = SAMSample.findByParentSampleAndParentAssay(s,a)
+                                    if (!ss) {
+                                        ss = new SAMSample(parentSample: s, parentAssay: a).save(flush: true)
+                                    }
+                                    else {
+                                        sql.execute("DELETE FROM measurement WHERE sample_id=${ss.id}")
+                                    }
+                                }
+                                else if(!s) {
+                                    errorList << "No sample existing for ${subjectName} with timepoint ${sampleTimepoint}"
+                                    error = true
+                                }
+                            }
+                            if (s) {
+                                def value
+                                if (m) {
+                                    try {
+                                        value = Double?.valueOf(m)
+                                    }
+                                    catch( NumberFormatException e ) {
+                                        value = null
+                                    }
+                                }
+                                else {
+                                    value = null
+                                }
+                                preparedStatement.addBatch(version:1,feature_id:allFeatures.get(featureList[i]).id, sample_id:ss.id, value:value)
+                            }
+                            i++
+                        }
+                    })
+                }
+                else {
+                    errorList << "Duplicate subject in file ${subjectName}"
+                }
+            }
+            line += 1
+        }
+        bufferReader.close()
+        if (abort) {
+            redirect(action: 'exactImportSelect', params: [module: params.module])
+            return
+        }
+        render(view: "exactImport/result", model: [module: params.module, errorList: errorList, assayInstance: a])
+    }
 
     def nofeatures = {
 	    flash.message = "There are no features defined. Without features, you can't add measurements."
@@ -208,14 +319,14 @@ class MeasurementController {
 		flash.message = "You have no assays that you are allowed to edit. Without writable samples, you can't add measurements."
 		redirect( controller: 'SAMAssay', action: 'list', params: [module: params.module] );
 	}
-    
+
 	def importData = {
 		// If no samples are present, we can't add measurements
 		if( Sample.count() == 0 ) { // NB: this is checking in GSCF, so using Sample instead of SAMSample
 			flash.message = "No samples have been created in GSCF yet. Without samples, you can't import measurements."
 			redirect( controller: 'SAMAssay', action: 'list', params: [module: params.module] );
 		}
-		
+
 		redirect( action: 'importDataFlow', params: [module: params.module])
 	}
 
@@ -296,9 +407,9 @@ class MeasurementController {
                 def f = flow.remove( 'inputfile' );
                 def filename = ""
                 def text = ""
-				
-				// Reset all data that might have been entered by the user before, in other 
-				// steps of the wizard. This data might interfere with the new file the user entered 
+
+				// Reset all data that might have been entered by the user before, in other
+				// steps of the wizard. This data might interfere with the new file the user entered
 				flow.edited_text = null
 				flow.operator = null
 				flow.comments = null
@@ -409,15 +520,15 @@ class MeasurementController {
             // Step x: Choose layout, preview data
 			on("next") {
 
-				// We first check whether the user has selected a layout before. If he has, he might also have 
-				// matched columns etc. If he selects the same layout, we keep his changes. Otherwise, these changes 
+				// We first check whether the user has selected a layout before. If he has, he might also have
+				// matched columns etc. If he selects the same layout, we keep his changes. Otherwise, these changes
 				// are removed again
 				if( flow.layout && flow.layout != params.layoutselector ) {
 					flow.edited_text = null
 					flow.operator = null
 					flow.comments = null
 				}
-				
+
 				// Save data of this step
                 flow.layout = params.layoutselector
                 flow.features = Feature.findAllByPlatform(Platform.findByName(flow.platform))
@@ -427,9 +538,9 @@ class MeasurementController {
 
                     // Try to match first row to features
                     flow.feature_matches = [:]
-					
+
 					def results = fuzzySearchService.mostSimilarUnique( flow.text[0]*.toString()*.trim(), flow.features*.toString(), ['controller': 'measurementImporter', 'item': 'feature'] )
-					
+
                     for(int i = 1; i < flow.text[0].size(); i++){
 						def index = results.find { it.pattern == flow.text[0][i].toString().trim() }?.index
                         flow.feature_matches[flow.text[0][i]] = index
@@ -448,12 +559,12 @@ class MeasurementController {
                     }
                 } else {
                     def samples = flow.assay.samples
-                    
+
 					// Retrieve timepoints and convert them to RelTime strings
 					flow.timepoints = samples*.samplingTime.unique()
 					flow.timepoints.sort();
 					flow.timepoints = flow.timepoints.collect { new RelTime( it ).toString() }
-                    
+
 					// TODO: retrieve the sorted subjects directly from the database for performance reasons
 					flow.subjects = samples*.subjectName.unique().sort()
 
@@ -520,7 +631,7 @@ class MeasurementController {
                 if(!flow.comments){
                     flow.comments = [:]
                 }
-				
+
                 for(int i = 0; i < flow.text.size(); i++){
                     for(int j = 0; j < flow.text[i].size(); j++){
                         if(flow.text[i][j]!=null) flow.text[i][j] = flow.text[i][j].trim() // Taking this opportunity to trim cells. This way extraneous whitespace will not show up as comments.
@@ -560,8 +671,8 @@ class MeasurementController {
                                 flow.comments = flowObjects['comments']
                             }
                         }
-						
-                    } 
+
+                    }
                 }
 
                 // Check if the user is even importing any data at all. If not, return error message.
@@ -590,7 +701,7 @@ class MeasurementController {
                         }
                     }
                 }
-				
+
                 // Not a single row or not a single column that isn't set on discard?
                 // That is probably a user error.
                 if(countRows<1 || countColumns<1){
@@ -611,7 +722,7 @@ class MeasurementController {
                         return error();
                     }
                 }
-                
+
                 // Did we have subject/timepoint conflicts?
                 if(subjectTimepointConflicts!=null && subjectTimepointConflicts.size()>0){
                     flash.subjectTimepointConflictsMessage="Unfortunately, according to the study the following subject names and timepoints cannot be combined: "
@@ -631,7 +742,7 @@ class MeasurementController {
                 if(!flow.edited_text){
                     flow.edited_text = new Object[flow.text.size()][flow.text[0].size()]
                 }
-                
+
                 // Fold the user's selections into our flow.feature_matches and flow.sample_matches
                 for(int i = 0; i < flow.text.size(); i++){
                     for(int j = 0; j < flow.text[i].size(); j++){
@@ -674,7 +785,7 @@ class MeasurementController {
                 flash.message = ""
 
 				def t = System.currentTimeMillis();
-				
+
                 def measurementList = []
 				// Update feature list in case the user has created new features on their previous visit to the selectColumns page
                 flow.features = Feature.findAllByPlatform(Platform.findByName(flow.platform))
@@ -698,16 +809,16 @@ class MeasurementController {
                     }
                 } else {
 					def assaySamples = flow.assay.samples;
-				
+
                     for(int i = 1; i < flow.edited_text.size(); i++){
                         if(flow.edited_text[i][0]!=null && flow.edited_text[i][0]!="null"){
                             for(int j = 1; j < flow.edited_text[0].size(); j++){
                                 if(i>1 && flow.edited_text[0][j]!=null && flow.edited_text[0][j]!="null" && flow.edited_text[1][j]!=null && flow.edited_text[1][j]!="null"){
                                     // For a particular subject and a particular timepoint and thus a particular sample
-									
+
 									// In order for that to work, reconvert the timepoint into seconds
 									def timepoint = new RelTime( flow.edited_text[1][j] ).getValue();
-									
+
                                     Sample s = assaySamples.find { it.samplingTime == timepoint && it.subjectName == flow.edited_text[i][0] }
 
                                     if(s==null){
@@ -716,7 +827,7 @@ class MeasurementController {
                                     }
                                     // ... and a particular feature
                                     Feature f = flow.edited_text[0][j]
-									
+
                                     // ... a measurement will be created
 	                                if (flow.edited_text[i][j] != null) {
 		                                measurementList.add(importerCreateMeasurement(s, flow.assay, f, flow.edited_text[i][j], null, null))
@@ -726,16 +837,16 @@ class MeasurementController {
                         }
                     }
                 }
-				
+
 				log.trace "Creating list of samples (looking up samples): " + ( System.currentTimeMillis() - t )
 				t = System.currentTimeMillis();
-				
+
 				// Check whether the assay is still writable
 				if( !flow.assay.parent.canWrite( session.gscfUser ) ) {
 					flash.message = "The authorization of your study has changed while you were adding measurements. Please choose another assay."
 					return error();
 				}
-				
+
 				// First create a list of measurements to save. This is done to avoid
 				// database lookups within the transaction to speed it up
 				def measurementsToSave = [];
@@ -743,22 +854,22 @@ class MeasurementController {
 					m ->
 					if( m ) {
 						def measurementInstance = Measurement.findByFeatureAndSample( m.feature, m.sample );
-						
+
 						if(measurementInstance!=null){
 							measurementInstance.value = m.value
 							measurementInstance.operator = m.operator
 							measurementInstance.comments = m.comments
-							
+
 							measurementsToSave << measurementInstance
 						} else {
 							measurementsToSave << m
 						}
 					}
 				}
-				
+
 				log.trace "Looking up existing measurements: " + ( System.currentTimeMillis() - t )
 				t = System.currentTimeMillis();
-				
+
                 Measurement.withTransaction {
                     status ->
 					def i = 0;
@@ -776,16 +887,16 @@ class MeasurementController {
 								e.printStackTrace();
 								status.setRollbackOnly();
 							}
-							
+
 							// Clear hibernate session, in order to handle large amounts of
 							// samples
 							if (i++ % 20 == 0) cleanUpGorm( m )
 						}
                     }
                 }
-				
+
 				log.trace "Time it took for saving: " + ( System.currentTimeMillis() - t );
-				
+
                 if(flash.message!=""){
                     flash.message = "There were errors while saving your measurements: "+flash.message
                     return error()
@@ -813,13 +924,13 @@ class MeasurementController {
 	def cleanUpGorm( Measurement m ) {
 		//log.trace( "Cleaning measurement from hibernate cache" );
 		//sessionFactory.evict(Measurement.class, m.id); //
-		
+
 		log.trace( "Cleaning hibernate session while saving" );
 		def session = sessionFactory.currentSession
 		session.flush()
 		session.clear()
 		propertyInstanceMap.get().clear()
-	}		
+	}
 
     Measurement importerCreateMeasurement(Sample s, Assay a, Feature f, def txt, def comm, def op) {
         def operator
@@ -883,38 +994,38 @@ class MeasurementController {
         }
 
 		// A measurement needs a value or a comments field
-		if( val != null || comments ) 
+		if( val != null || comments )
         	return new Measurement(sample:ss,feature:f,value:val,operator:operator,comments:comments)
 		else
 			return null
     }
-	
+
 	/**
 	 * Deletes all measurements from the given assay
 	 */
 	def deleteByAssay = {
 		def assayId = params.id
-		
+
 		if( !assayId || !assayId.isLong() ) {
 			flash.error = "No assay selected"
 			redirect( controller: "SAMAssay", view: "list", params: [module: params.module] );
 			return;
 		}
-		
+
 		def assay = Assay.get( assayId.toLong() );
-		
+
 		if( !assay ) {
 			flash.error = "Incorrect assay Id given"
 			redirect( controller: "SAMAssay", view: "list", params: [module: params.module]  );
 			return;
 		}
-		
+
 		if( Measurement.deleteByAssay( assay ) ) {
 			flash.message = "Your measurements for assay " + assay + " have been deleted."
 		} else {
 			flash.error = "An error occurred while deleting measurements for this assay. Please try again or contact your system administrator."
 		}
-		
+
 		redirect( controller: "SAMAssay", view: "list", params: [module: params.module] );
 	}
 
