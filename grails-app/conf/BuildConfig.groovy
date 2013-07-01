@@ -31,7 +31,7 @@ grails.project.dependency.resolution = {
     plugins {
 
         build(  ":tomcat:$grailsVersion",
-                ":release:latest.integration",
+                ":release:2.2.1",
                 ":rest-client-builder:latest.integration"
         ) {
             // plugin only plugin, should not be transitive to the application
@@ -39,7 +39,7 @@ grails.project.dependency.resolution = {
         }
 
         compile(
-            ":dbxp-base:0.1.2.4",
+            ":dbxp-base:0.1.2.5",
             ":hibernate:$grailsVersion",
             ":tomcat:$grailsVersion",
             ":grom:latest.integration",
