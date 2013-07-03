@@ -211,6 +211,7 @@ class MeasurementController {
     }
 
     def exactImport = {
+        def t = System.currentTimeMillis()
         def abort = false
         def sql = new Sql(dataSource)
         def a = Assay.findById(params.assay)
@@ -273,7 +274,7 @@ class MeasurementController {
                                     }
                                 }
                                 else if(!s) {
-                                    errorList << "No sample existing for ${subjectName} with timepoint ${sampleTimepoint}"
+                                    errorList << "No sample existing for ${subjectName} with timepoint ${new RelTime(sampleTimepoint).getValue()}"
                                     error = true
                                 }
                             }
@@ -281,7 +282,7 @@ class MeasurementController {
                                 def value
                                 if (m) {
                                     try {
-                                        value = Double?.valueOf(m)
+                                        value = Double?.valueOf(m.replace("\"", ""))
                                     }
                                     catch( NumberFormatException e ) {
                                         value = null
@@ -290,7 +291,7 @@ class MeasurementController {
                                 else {
                                     value = null
                                 }
-                                preparedStatement.addBatch(version:1,feature_id:allFeatures.get(featureList[i]).id, sample_id:ss.id, value:value)
+                                preparedStatement.addBatch(version:0,feature_id:allFeatures.get(featureList[i]).id, sample_id:ss.id, value:value)
                             }
                             i++
                         }
@@ -303,10 +304,12 @@ class MeasurementController {
             line += 1
         }
         bufferReader.close()
+        sql.close()
         if (abort) {
             redirect(action: 'exactImportSelect', params: [module: params.module])
             return
         }
+        println "ExactImport for measurements took ${ (System.currentTimeMillis() - t ) / 60000} minutes"
         render(view: "exactImport/result", model: [module: params.module, errorList: errorList, assayInstance: a])
     }
 
@@ -338,7 +341,7 @@ class MeasurementController {
                     redirect(action: 'nofeatures', params: [module: params.module])
                 }
 
-	            flow.assayList = Assay.giveWritableAssays(session.gscfUser)
+	            flow.assayList = Assay.giveWritableAssays(session.gscfUser).findAll { it.module.name == params.module }
                 flow.module = params.module
 
 	            if( flow.assayList.isEmpty() ) {
