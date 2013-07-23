@@ -63,12 +63,22 @@ function disableKeys() {
 // insert add / modify option in template menu
 function insertSelectAddMore() {
     new SelectAddMore().init({
-        rel  : 'template',
-        url  : baseUrl + '/templateEditor',
-        vars        : 'entity,ontologies',
+        rel     : 'template',
+        url     : baseUrl + '/templateEditor',
+        vars    : 'entity,ontologies',
         label   : 'add / modify',
         style   : 'modify',
         onClose : handleTemplateChange
+    });
+}
+
+function insertSelectAddMoreForTemplateFields() {
+    new SelectAddMore().init({
+        rel	    : 'term',
+        url	    : baseUrl + '/termEditor',
+        vars	: 'ontologies',
+        label   : 'add more...',
+        style   : 'modify'
     });
 }
 
@@ -101,6 +111,7 @@ var formSection;
             success: function( returnHTML, textStatus, jqXHR ) {
                 $( "#templateSpecific" ).html( returnHTML );
                 onStudyWizardPage(); // Add datepickers
+                insertSelectAddMoreForTemplateFields();
 
                 // Update the template select only if the template has been closed
                 // This can only happen after the previous call has succeeded, because
