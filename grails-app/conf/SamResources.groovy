@@ -22,5 +22,7 @@ modules = {
 
     templateFieldsMisc {
         resource url: 'js/templateFields.js'
+        resource url: 'js/fileupload.js'
+        resource url: 'js/ajaxupload.3.6.js'
     }
 }
