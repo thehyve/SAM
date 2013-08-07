@@ -68,7 +68,7 @@ function insertSelectAddMore() {
         vars    : 'entity,ontologies',
         label   : 'add / modify',
         style   : 'modify',
-        onClose : handleTemplateChange
+        onClose : updateTemplateDropdown
     });
 }
 
@@ -84,51 +84,42 @@ function insertSelectAddMoreForTemplateFields() {
 
 var entityName;
 var formSection;
+var lastSelectedOption = $("#template option:selected").val();
 
 //var handleTemplateChange = function (entityName, formSection) {
     var handleTemplateChange = function (selectedOption) {
-        var templateEditorHasBeenOpened = false
-
-        if( selectedOption == undefined ) {
-            // If no selectedOptions is given, the template editor has been opened. In that case, we use
-            // the template previously selected
-            templateEditorHasBeenOpened = true;
-        } else if( $(selectedOption).hasClass( 'modify' ) ){
+        if( $(selectedOption).hasClass( 'modify' ) ){
             // If the user has selected the add/modify option, the form shouldn't be updated yet.
             // That should only happen if the template editor is closed
             return;
         }
 
-        // Collect all data to be sent to the controller
-        data = $( formSection ).serialize() + "&templateEditorHasBeenOpened=" + ( templateEditorHasBeenOpened ? "true" : "false" );
+        lastSelectedOption = $(selectedOption).val();
 
-        // Always update the template specific fields, when the template has changed but also
-        // when the template editor is closed
         $.ajax({
             url: baseUrl + "/" + entityName + "/returnUpdatedTemplateSpecificFields",
-            data: data,
+            data: $( formSection ).serialize(),
             type: "POST",
             success: function( returnHTML, textStatus, jqXHR ) {
                 $( "#templateSpecific" ).html( returnHTML );
                 onStudyWizardPage(); // Add datepickers
                 insertSelectAddMoreForTemplateFields();
+            }
+        });
+    };
 
-                // Update the template select only if the template has been closed
-                // This can only happen after the previous call has succeeded, because
-                // otherwise Hibernate will show up with a 'collection associated with
-                // two open sessions' error.
-                if( templateEditorHasBeenOpened ) {
-                    $.ajax({
-                        url: baseUrl + "/" + entityName + "/templateSelection",
-                        data: data,
-                        type: "POST",
-                        success: function( returnHTML, textStatus, jqXHR ) {
-                            $( "td#templateSelection" ).html( returnHTML );
-                            insertSelectAddMore();
-                        }
-                    });
+    var updateTemplateDropdown = function () {
+        $.ajax({
+            url: baseUrl + "/" + entityName + "/templateSelection",
+            data: $( formSection ).serialize() ,
+            type: "POST",
+            success: function( returnHTML, textStatus, jqXHR ) {
+                $( "td#templateSelection" ).html( returnHTML );
+                insertSelectAddMore();
+
+                if(lastSelectedOption != undefined) {
+                    $("select[rel*='template']").val(lastSelectedOption).change();
                 }
-
             }
         });
     };
