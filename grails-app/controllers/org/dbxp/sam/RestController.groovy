@@ -247,7 +247,7 @@ class RestController {
 			// Convert the measurements into the desired format
 			results = measurements.collect { [
 				"sampleToken": 		it[ 2 ].parentSample.UUID,
-				"measurementName": it[ 1 ].name,
+				"measurementToken": it[ 1 ].name,
 				"value":			it[ 0 ].value
 			] }
 			
