@@ -1,9 +1,13 @@
+<%@ page import="org.dbnp.gdt.TemplateFieldType; org.dbxp.sam.Feature; org.dbxp.sam.Platform" %>
 <g:if test="${template!=null}">
     <table>
         <g:each in="${template.fields}" var="field" status="i">
             <tr class="prop ${(i % 2) == 0 ? 'odd' : 'even'}">
                 <td valign="top" class="fieldName">
                     ${field.name.capitalize()}
+                    <g:if test="${field.type==TemplateFieldType.DOUBLE}">
+                        [${field.unit}]
+                    </g:if>
                     <g:if test="${field.required}">
                         <i>(required)</i>
                     </g:if>
