@@ -117,7 +117,7 @@ var lastSelectedOption = $("#template option:selected").val();
                 $( "td#templateSelection" ).html( returnHTML );
                 insertSelectAddMore();
 
-                if(lastSelectedOption != undefined) {
+                if(lastSelectedOption != "") {
                     $("select[rel*='template']").val(lastSelectedOption).change();
                 }
             }
