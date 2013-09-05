@@ -14,15 +14,29 @@ modules = {
     tableEditor {
         resource url:[plugin: 'gdt', dir:'css', file: 'table-editor.css', disposition: 'head']
     }
-	
+
 	importer { 
 		resource url: 'js/samimporter.js'
         resource url: 'css/samimporter.css'
 	}
 
-    templateFieldsMisc {
-        resource url: 'js/templateFields.js'
+    fileUploadCss {
+        resource url: 'css/studywizard.css'
+    }
+
+    fileUpload {
         resource url: 'js/fileupload.js'
+    }
+
+    ajaxUpload {
         resource url: 'js/ajaxupload.3.6.js'
+    }
+
+    templateFieldsMisc {
+        dependsOn 'fileUploadCss'
+        dependsOn 'fileUpload'
+        dependsOn 'ajaxUpload'
+
+        resource url: 'js/templateFields.js'
     }
 }

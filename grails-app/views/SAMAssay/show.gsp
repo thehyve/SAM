@@ -95,13 +95,15 @@
                                                 <!-- You can't put a tooltip in a tooltip, so check if we are in a tooltip -->
                                                 <g:if test="${comments}">
                                                     ${cellMeasurements[0].value}
+                                                    [${cellMeasurements[0].feature.unit}]
                                                 </g:if>
                                                 <g:else>
                                                     <g:if test="${cellMeasurements[0].value==cellMeasurements[0].value.round(3)}">
                                                         ${cellMeasurements[0].value}
+                                                        [${cellMeasurements[0].feature.unit}]
                                                     </g:if>
                                                     <g:else>
-                                                        <span class='tooltip'> ${cellMeasurements[0].value.round(3).toString()}<span>${cellMeasurements[0].value}</span></span>
+                                                        <span class='tooltip'> ${cellMeasurements[0].value.round(3).toString()}<span>${cellMeasurements[0].value}</span>[${cellMeasurements[0].feature.unit}]</span>
                                                     </g:else>
                                                 </g:else>
                                             </g:if>
