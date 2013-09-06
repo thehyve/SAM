@@ -20,23 +20,10 @@ modules = {
         resource url: 'css/samimporter.css'
 	}
 
-    fileUploadCss {
-        resource url: 'css/studywizard.css'
-    }
-
-    fileUpload {
-        resource url: 'js/fileupload.js'
-    }
-
-    ajaxUpload {
-        resource url: 'js/ajaxupload.3.6.js'
-    }
-
     templateFieldsMisc {
-        dependsOn 'fileUploadCss'
-        dependsOn 'fileUpload'
-        dependsOn 'ajaxUpload'
-
+        resource url: 'css/studywizard.css'
+        resource url: 'js/fileupload.js'
+        resource url: 'js/ajaxupload.3.6.js'
         resource url: 'js/templateFields.js'
     }
 }
