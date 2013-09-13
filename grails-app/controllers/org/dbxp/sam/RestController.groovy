@@ -2,8 +2,12 @@ package org.dbxp.sam
 
 import grails.converters.JSON
 import dbnp.studycapturing.*
+import org.dbnp.gdt.RelTime
+import org.dbnp.gdt.TemplateEntity
+import groovy.sql.Sql
 
 class RestController {
+    def dataSource
 
 	/****************************************************************/
 	/* REST resources for providing basic data to the GSCF          */
@@ -30,12 +34,44 @@ class RestController {
 			response.sendError(404)
 			return false
 		}
-		
+
 		// Return all features for the given assay
 		def features = Feature.executeQuery( "SELECT DISTINCT f FROM Feature f, Measurement m, SAMSample s WHERE m.feature = f AND m.sample = s AND s.parentAssay = :assay", [ "assay": assay ] )
-		
+
 		render features.collect { it.name } as JSON
 	}
+
+    def getQueryableFieldData = {
+
+        println "wel hier3332!!!!!!!!!!!!!!!!!!!!!!!!!"
+
+        def entityClass = TemplateEntity.parseEntity( 'dbnp.studycapturing.' + params.entity)
+
+        def idMap = [:]
+        entityClass.list().each() {
+            idMap[it.UUID] = it
+        }
+
+        println idMap
+
+
+
+        println params
+
+        render features.collect { it.name } as JSON
+
+//        def assayToken = params.assayToken;
+//        def assay = getAssay( assayToken );
+//        if( !assay ) {
+//            response.sendError(404)
+//            return false
+//        }
+//
+//        // Return all features for the given assay
+//        def features = Feature.executeQuery( "SELECT DISTINCT f FROM Feature f, Measurement m, SAMSample s WHERE m.feature = f AND m.sample = s AND s.parentAssay = :assay", [ "assay": assay ] )
+//
+//        render features.collect { it.name } as JSON
+    }
 
 	/**
 	 * Return measurement metadata for measurement
@@ -250,14 +286,100 @@ class RestController {
 				"measurementToken": it[ 1 ].name + ( it[ 1 ].unit ? " (" + it[1].unit + ")" : "" ),
 				"value":			it[ 0 ].value
 			] }
-			
+
 			if(!verbose) {
 				results = compactTable( results )
 			}
-		}		
+		}
 		render results as JSON
+    }
+
+    def getFeaturesForAssay = {
+        def assayToken = params.assayToken;
+        def assay = getAssay( assayToken );
+        if( !assay ) {
+            response.sendError(404)
+            return false
+        }
+
+        def sql = new Sql(dataSource)
+
+        def features = sql.rows("SELECT f.name, f.unit, fs.template_string_fields_idx, fs.template_string_fields_elt, ft.template_text_fields_idx, ft.template_text_fields_elt, p.name AS platform, p.platformtype, p.platformversion FROM feature AS f JOIN feature_template_string_fields fs ON (f.id = fs.feature_id) LEFT JOIN feature_template_text_fields ft ON (f.id = ft.feature_id) INNER JOIN platform p ON (f.platform_id = p.id) WHERE f.id IN (SELECT DISTINCT feature_id FROM measurement WHERE sample_id IN (SELECT id FROM samsample WHERE parent_assay_id = ${assay.id}));")
+
+        def fMap = [:]
+        def propertyMap = [:]
+        def i = 0
+        features.each() { f ->
+            i++
+            if (!f.name.equals(features[i]?.name)) {
+                propertyMap.put("unit", f.unit)
+                propertyMap.put("platform", f.platform)
+                propertyMap.put("platformtype", f.platformtype)
+                propertyMap.put("platformversion", f.platformversion)
+                fMap.put(f.name, propertyMap)
+                propertyMap = [:]
+            }
+            else {
+
+                if (f.template_string_fields_idx) {
+                    propertyMap.put(f.template_string_fields_idx, f.template_string_fields_elt)
+                }
+
+                if (f.template_text_fields_idx) {
+                    propertyMap.put(f.template_text_fields_idx, f.template_text_fields_elt)
+                }
+            }
+        }
+
+        features.clear()
+
+        render fMap as JSON
+    }
+
+    /**
+     * Retrieves an assay from the database, based on a given assay token.
+     * @param assayToken	Assaytoken for the assay to retrieve
+     * @return				Assay or null if assayToken doesn't exist
+     */
+    def getPlainMeasurementData = {
+        def assayToken = params.assayToken;
+        def assay = getAssay( assayToken );
+        if( !assay ) {
+            response.sendError(404)
+            return false
+        }
+
+        def sql = new Sql(dataSource)
+        def pMeasurements = sql.rows("SELECT s.subjectname, z.start_time, f.name, m.value FROM sample x, subject s, sampling_event z, measurement m JOIN samsample y ON m.sample_id = y.id JOIN feature f ON f.id = m.feature_id WHERE x.parent_event_id = z.id AND x.parent_subject_id = s.id AND y.parent_sample_id = x.id AND y.parent_assay_id = ${assay.id} ORDER BY s.subjectname ASC, z.start_time DESC")
+
+        // map for all measurements
+        def allMap = [:]
+        // map for subject + startTime measurements (goes in allMap)
+        def groupMap = [:]
+        // map for subject measurements (goes in groupMap)
+        def mMap = [:]
+        def i = 0
+        pMeasurements.each() { m ->
+            i++
+            mMap.put(m.name, m.value)
+
+            if (!m.subjectname.equals(pMeasurements[i]?.subjectname)) {
+                groupMap.put(new RelTime(m.start_time), mMap)
+                allMap.put(m.subjectname, groupMap)
+                groupMap = [:]
+
+            }
+
+            else if (m.start_time != pMeasurements[i]?.start_time) {
+                groupMap.put(new RelTime(m.start_time), mMap)
+                mMap = [:]
+            }
+        }
+        pMeasurements.clear()
+
+        render allMap as JSON
 	}
-	
+
 	/**
 	 * Retrieves an assay from the database, based on a given assay token.
 	 * @param assayToken	Assaytoken for the assay to retrieve

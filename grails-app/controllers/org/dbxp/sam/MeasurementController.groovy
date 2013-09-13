@@ -256,12 +256,13 @@ class MeasurementController {
                 def Sample s
                 def SAMSample ss
                 def i = 0
-                if (!subjectList.contains(subjectName)) {
+                if (subjectName && !subjectList.contains(subjectName)) {
                     subjectList << subjectName
                     sql.withBatch(100, "insert into measurement (id, version, feature_id, sample_id, value) values (nextval('hibernate_sequence'), :version, :feature_id, :sample_id, :value)", { preparedStatement ->
                         splitedRow[1..-1].each { m ->
-                            if(!timepointList[i].equals(sampleTimepoint) && !error) {
+                            if(!error) {
                                 sampleTimepoint = new RelTime(timepointList[i]).getValue()
+
                                 s = assaySamples.find { it.samplingTime == sampleTimepoint && it.subjectName == subjectName }
                                 if (s && !sampleList.contains(s)) {
                                     sampleList << s
@@ -274,11 +275,11 @@ class MeasurementController {
                                     }
                                 }
                                 else if(!s) {
-                                    errorList << "No sample existing for ${subjectName} with timepoint ${new RelTime(sampleTimepoint).getValue()}"
+                                    errorList << "No sample existing for ${subjectName} with timepoint ${timepointList[i]}"
                                     error = true
                                 }
                             }
-                            if (s) {
+                            if (ss) {
                                 def value
                                 if (m) {
                                     try {
@@ -297,7 +298,7 @@ class MeasurementController {
                         }
                     })
                 }
-                else {
+                else if(subjectList.contains(subjectName)) {
                     errorList << "Duplicate subject in file ${subjectName}"
                 }
             }
@@ -339,6 +340,7 @@ class MeasurementController {
 
                 if(Feature.count() == 0){
                     redirect(action: 'nofeatures', params: [module: params.module])
+                    return
                 }
 
 	            flow.assayList = Assay.giveWritableAssays(session.gscfUser).findAll { it.module.name == params.module }
@@ -346,6 +348,7 @@ class MeasurementController {
 
 	            if( flow.assayList.isEmpty() ) {
 		            redirect(action: 'noassays', params: [module: params.module])
+                    return
 	            }
 
 	            //flow.assayList = Assay.executeQuery( "SELECT DISTINCT a FROM Assay a WHERE  a.id in (:list)", [ "list": assayIdList ])
