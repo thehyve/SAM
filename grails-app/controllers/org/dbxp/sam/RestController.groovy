@@ -304,7 +304,7 @@ class RestController {
 
         def sql = new Sql(dataSource)
 
-        def features = sql.rows("SELECT f.name, f.unit, fs.template_string_fields_idx, fs.template_string_fields_elt, ft.template_text_fields_idx, ft.template_text_fields_elt, p.name AS platform, p.platformtype, p.platformversion FROM feature AS f JOIN feature_template_string_fields fs ON (f.id = fs.feature_id) LEFT JOIN feature_template_text_fields ft ON (f.id = ft.feature_id) INNER JOIN platform p ON (f.platform_id = p.id) WHERE f.id IN (SELECT DISTINCT feature_id FROM measurement WHERE sample_id IN (SELECT id FROM samsample WHERE parent_assay_id = ${assay.id}));")
+        def features = sql.rows("SELECT f.name, f.unit, fs.template_string_fields_idx, fs.template_string_fields_elt, ft.template_text_fields_idx, ft.template_text_fields_elt, p.name AS platform, p.platformtype, p.platformversion FROM feature AS f LEFT JOIN feature_template_string_fields fs ON (f.id = fs.feature_id) LEFT JOIN feature_template_text_fields ft ON (f.id = ft.feature_id) LEFT JOIN platform p ON (f.platform_id = p.id) WHERE f.id IN (SELECT DISTINCT feature_id FROM measurement WHERE sample_id IN (SELECT id FROM samsample WHERE parent_assay_id = ${assay.id}));")
 
         def fMap = [:]
         def propertyMap = [:]
@@ -320,11 +320,9 @@ class RestController {
                 propertyMap = [:]
             }
             else {
-
                 if (f.template_string_fields_idx) {
                     propertyMap.put(f.template_string_fields_idx, f.template_string_fields_elt)
                 }
-
                 if (f.template_text_fields_idx) {
                     propertyMap.put(f.template_text_fields_idx, f.template_text_fields_elt)
                 }
@@ -350,7 +348,18 @@ class RestController {
         }
 
         def sql = new Sql(dataSource)
-        def pMeasurements = sql.rows("SELECT s.subjectname, z.start_time, f.name, m.value FROM sample x, subject s, sampling_event z, measurement m JOIN samsample y ON m.sample_id = y.id JOIN feature f ON f.id = m.feature_id WHERE x.parent_event_id = z.id AND x.parent_subject_id = s.id AND y.parent_sample_id = x.id AND y.parent_assay_id = ${assay.id} ORDER BY s.subjectname ASC, z.start_time DESC")
+
+        def pMeasurements = sql.rows("SELECT s.parent_subject_id AS subject, e.start_time AS startTime, m.feature_id AS feature, m.value AS value FROM measurement m, sample s, sampling_event e, samsample y WHERE m.sample_id = y.id AND s.parent_event_id = e.id AND y.parent_sample_id = s.id AND y.parent_assay_id = ${assay.id} ORDER BY s.parent_subject_id ASC, e.start_time DESC")
+
+        def subjectMap = [:]
+        assay.parent.subjects.each() { subject ->
+            subjectMap.put(subject.id, subject.name)
+        }
+
+        def featureMap = [:]
+        sql.rows("SELECT DISTINCT m.feature_id, f.name FROM measurement m JOIN feature f ON m.feature_id = f.id WHERE m.sample_id IN (SELECT id FROM samsample s WHERE s.parent_assay_id = ${assay.id});").each() {
+            featureMap.put(it.feature_id, it.name)
+        }
 
         // map for all measurements
         def allMap = [:]
@@ -361,17 +370,15 @@ class RestController {
         def i = 0
         pMeasurements.each() { m ->
             i++
-            mMap.put(m.name, m.value)
-
-            if (!m.subjectname.equals(pMeasurements[i]?.subjectname)) {
-                groupMap.put(new RelTime(m.start_time), mMap)
-                allMap.put(m.subjectname, groupMap)
+            mMap.put(featureMap.get(m.feature), m.value)
+            if (!m.subject.equals(pMeasurements[i]?.subject)) {
+                groupMap.put(new RelTime(m.starttime), mMap)
+                allMap.put(subjectMap.get(m.subject), groupMap)
                 groupMap = [:]
 
             }
-
-            else if (m.start_time != pMeasurements[i]?.start_time) {
-                groupMap.put(new RelTime(m.start_time), mMap)
+            else if (m.starttime != pMeasurements[i]?.starttime) {
+                groupMap.put(new RelTime(m.startTime), mMap)
                 mMap = [:]
             }
         }
