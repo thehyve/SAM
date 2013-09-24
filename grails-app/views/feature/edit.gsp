@@ -12,7 +12,7 @@
                 formSection = "form#edit";
                 insertSelectAddMore(); // add add/modify select option
                 insertSelectAddMoreForTemplateFields();
-                onStudyWizardPage(); // Add datepickers
+                onTemplateFieldPage(); // Add datepickers
             });
         </r:script>
     </head>

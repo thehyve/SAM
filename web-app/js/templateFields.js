@@ -1,6 +1,6 @@
 // This JS contains templateField time/date related functionality, taken from GSCF's studyWizard.js.
 
-function onStudyWizardPage() {
+function onTemplateFieldPage() {
 	// GENERAL
 	attachDatePickers();
 	attachDateTimePickers();
@@ -102,7 +102,7 @@ var lastSelectedOption = $("#template option:selected").val();
             type: "POST",
             success: function( returnHTML, textStatus, jqXHR ) {
                 $( "#templateSpecific" ).html( returnHTML );
-                onStudyWizardPage(); // Add datepickers
+                onTemplateFieldPage(); // Add datepickers
                 insertSelectAddMoreForTemplateFields();
             }
         });

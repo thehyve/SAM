@@ -11,7 +11,7 @@
             entityName = "platform";
             formSection = "form#edit";
             insertSelectAddMore(); // add add/modify select option
-            onStudyWizardPage(); // Add datepickers
+            onTemplateFieldPage(); // Add datepickers
         });
     </r:script>
 </head>
