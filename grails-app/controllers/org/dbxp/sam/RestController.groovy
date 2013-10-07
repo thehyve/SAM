@@ -281,11 +281,13 @@ class RestController {
             def measurements = Measurement.executeQuery("SELECT m, m.feature, m.sample FROM Measurement m WHERE m.feature IN (:features) AND m.sample IN (SELECT s FROM SAMSample s WHERE s.parentAssay = :assay)", ["assay": assay, "features": features])
 
 			// Convert the measurements into the desired format
-			results = measurements.collect { [
-				"sampleToken": 		it[ 2 ].parentSample.UUID,
-				"measurementToken": it[ 1 ].name + ( it[ 1 ].unit ? " (" + it[1].unit + ")" : "" ),
-				"value":			it[ 0 ].value
-			] }
+			results = measurements.collect {
+                [
+				    "sampleToken": 		it[ 2 ].parentSample.UUID,
+				    "measurementToken": it[ 1 ].name + ( it[ 1 ].unit ? " (" + it[1].unit + ")" : "" ),
+				    "value":			it[ 0 ].value
+			    ]
+            }
 
 			if(!verbose) {
 				results = compactTable( results )

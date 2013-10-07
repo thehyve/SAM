@@ -264,8 +264,8 @@ class MeasurementController {
                                 sampleTimepoint = new RelTime(timepointList[i]).getValue()
 
                                 s = assaySamples.find { it.samplingTime == sampleTimepoint && it.subjectName == subjectName }
-                                if (s && !sampleList.contains(s)) {
-                                    sampleList << s
+                                if (s && !sampleList.contains(s.id)) {
+                                    sampleList << s.id
                                     ss = SAMSample.findByParentSampleAndParentAssay(s,a)
                                     if (!ss) {
                                         ss = new SAMSample(parentSample: s, parentAssay: a).save(flush: true)
