@@ -83,7 +83,7 @@ class SAMAssayController {
 		   	   hqlParams[ "user" ] = session.gscfUser
 		   } else {
 		   		// Administrators are allowed to see all assays, but we have to add some HQL here,
-		   		// since otherwise the HQL on line 117 can't be added with a " AND "
+		   		// since otherwise the HQL on line 101 can't be added with a " AND "
 		   		whereHQL += " 1 = 1 "
 		   }
 	   } else {
@@ -123,9 +123,16 @@ class SAMAssayController {
 	   def extendedRecords = []
 	   if( records.size() > 0 ) {
 		   records.each { record ->
-               def numFilledSamples = SAMSample.executeQuery( "SELECT COUNT(*) FROM SAMSample s WHERE s.parentAssay.id = :assay", [ assay: record[ 0 ] ] )
+               def SAMSamples = SAMSample.executeQuery( "SELECT s FROM SAMSample s WHERE s.parentAssay.id = :assay", [ assay: record[ 0 ] ] )
+               def SamplesWithMeasurementsCount = 0;
+               SAMSamples.each { SAMSample ->
+                   def MeasurementCountForSample = Measurement.executeQuery("SELECT COUNT(*) FROM Measurement m WHERE" +
+                           " m.sample.id = :SAMSample ", [ SAMSample: SAMSample.id])
+                   if(MeasurementCountForSample[0] > 0)
+                       SamplesWithMeasurementsCount++;
+               }
 			   def extendedRecord = record as List;
-			   extendedRecord[ 3 ] = numFilledSamples[0] + " / " + extendedRecord[ 3 ]
+			   extendedRecord[ 3 ] = SamplesWithMeasurementsCount + " / " + extendedRecord[ 3 ]
 
 			   extendedRecords << extendedRecord
 		   }

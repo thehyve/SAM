@@ -659,7 +659,7 @@ class MeasurementController {
                                 if(j==0){
                                     flow.edited_text[i][j] = Sample.findById(params[i+','+j])
                                     continue;
-                                }
+                            }
                             } else {
                                 if(i==1 || j==0){
                                     flow.edited_text[i][j] = params[i+','+j]
@@ -806,9 +806,11 @@ class MeasurementController {
                                 if(flow.edited_text[0][j]!=null && flow.edited_text[0][j]!="null"){
                                     Feature f = flow.edited_text[0][j]
                                     // ... a measurement will be created
-	                                if (flow.edited_text[i][j] != null) {
-		  	                                measurementList.add(importerCreateMeasurement(s, flow.assay, f, flow.edited_text[i][j], null, null))
-	                                }
+	                                if (flow.edited_text[i][j] != null && flow.comments["$i,$j"] != null) {
+		  	                            measurementList.add(importerCreateMeasurement(s, flow.assay, f, flow.edited_text[i][j], flow.comments["$i,$j"], null))
+	                                } else if(flow.edited_text[i][j] != null) {
+                                        measurementList.add(importerCreateMeasurement(s, flow.assay, f, flow.edited_text[i][j], null, null))
+                                    }
                                 }
                             }
                         }
@@ -945,7 +947,7 @@ class MeasurementController {
 
 	    // If there is no value, don't save the measurement
 	    // TODO: check if there is a case where comments can be entered on an empty measurement
-	    if (txt == null) {
+        if (txt == null) {
 		    return null
 	    }
 
@@ -1136,7 +1138,7 @@ class MeasurementController {
                     // Apparently it is not.
                     // We'll use the comments field instead.
                     comments.put(i+","+j,edited_text[i][j])
-                    edited_text[i][j] = ""
+                    edited_text[i][j] = " "
                 }
             } else {
                 // This is a simple double value
