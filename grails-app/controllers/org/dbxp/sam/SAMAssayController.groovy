@@ -121,18 +121,15 @@ class SAMAssayController {
 	   // Retrieve the number of samples with measurements for each assay
 	   // This is not the most efficient way of performing this query, but still
 	   def extendedRecords = []
+
 	   if( records.size() > 0 ) {
 		   records.each { record ->
-               def SAMSamples = SAMSample.executeQuery( "SELECT s FROM SAMSample s WHERE s.parentAssay.id = :assay", [ assay: record[ 0 ] ] )
-               def SamplesWithMeasurementsCount = 0;
-               SAMSamples.each { SAMSample ->
-                   def MeasurementCountForSample = Measurement.executeQuery("SELECT COUNT(*) FROM Measurement m WHERE" +
-                           " m.sample.id = :SAMSample ", [ SAMSample: SAMSample.id])
-                   if(MeasurementCountForSample[0] > 0)
-                       SamplesWithMeasurementsCount++;
-               }
+               //Should display number of filled samples but this gives performance issues with a large amount of assays. Something like:
+               //def measurementList = Measurment.executeQuery("SELECT sample.id FROM Measurment")
+               //def numFilledSamples = SAMSample.executeQuery("SELECT COUNT(*) FROM SAMSample s WHERE s.parentAssay.id = :assay AND s.id IN :mList", [ assay: record[ 0 ], mList: measurementList ] )
+               def numSAMSamples = SAMSample.executeQuery("SELECT COUNT(*) FROM SAMSample s WHERE s.parentAssay.id = :assay", [ assay: record[ 0 ] ] )
 			   def extendedRecord = record as List;
-			   extendedRecord[ 3 ] = SamplesWithMeasurementsCount + " / " + extendedRecord[ 3 ]
+			   extendedRecord[ 3 ] = numSAMSamples[0] + " / " + extendedRecord[ 3 ]
 
 			   extendedRecords << extendedRecord
 		   }
