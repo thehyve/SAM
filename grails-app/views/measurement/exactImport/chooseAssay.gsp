@@ -6,7 +6,7 @@
         
     </head>
     <body>
-    <p><h2>Please note: Samples (Subject x StartTime) that are already uploaded for this assay will be replaced if entered again.</h2></p>
+    <p><h2>Attention: All previous imported measurements for this assay will be lost!</h2></p>
         <div class="data">
             <p></p>
             <p></p>

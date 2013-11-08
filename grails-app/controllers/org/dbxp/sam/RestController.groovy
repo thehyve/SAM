@@ -377,6 +377,7 @@ class RestController {
                 groupMap.put(new RelTime(m.starttime), mMap)
                 allMap.put(subjectMap.get(m.subject), groupMap)
                 groupMap = [:]
+                mMap = [:]
 
             }
             else if (m.starttime != pMeasurements[i]?.starttime) {

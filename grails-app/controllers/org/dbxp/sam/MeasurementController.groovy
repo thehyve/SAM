@@ -216,12 +216,17 @@ class MeasurementController {
         def sql = new Sql(dataSource)
         def a = Assay.findById(params.assay)
         def assaySamples = a.samples
+        def assaySAMSamples = SAMSample.findAllByParentAssay(a)
         def line = 0
         def featureList
         def timepointList
-        def sampleList = []
         def subjectList = []
         def errorList = []
+
+        //A much nicer solution would be to check whether measurements already exist and update them if necessary but this is very time consuming.
+        if(assaySAMSamples) {
+            sql.execute("DELETE FROM measurement WHERE sample_id IN (SELECT id FROM samsample WHERE parent_assay_id = ${a.id});")
+        }
 
         def allFeatures = [:]
         Feature.findAllByPlatform(Platform.findByName(params.platform)).each {
@@ -249,38 +254,34 @@ class MeasurementController {
             }
 
             else if (!abort) {
-                def error = false
                 def sampleTimepoint
                 def splitedRow = it.split('\t')
                 def subjectName = splitedRow[0]
                 def Sample s
-                def SAMSample ss
                 def i = 0
                 if (subjectName && !subjectList.contains(subjectName)) {
                     subjectList << subjectName
-                    sql.withBatch(100, "insert into measurement (id, version, feature_id, sample_id, value) values (nextval('hibernate_sequence'), :version, :feature_id, :sample_id, :value)", { preparedStatement ->
+                    sql.withBatch { preparedStatement ->
                         splitedRow[1..-1].each { m ->
-                            if(!error) {
-                                sampleTimepoint = new RelTime(timepointList[i]).getValue()
+                            sampleTimepoint = new RelTime(timepointList[i]).getValue()
+                            s = assaySamples.find { it.samplingTime == sampleTimepoint && it.subjectName == subjectName }
+                            if (s) {
+                                def ss
+                                def f = allFeatures.get(featureList[i])
 
-                                s = assaySamples.find { it.samplingTime == sampleTimepoint && it.subjectName == subjectName }
-                                if (s && !sampleList.contains(s.id)) {
-                                    sampleList << s.id
-                                    ss = SAMSample.findByParentSampleAndParentAssay(s,a)
-                                    if (!ss) {
-                                        ss = new SAMSample(parentSample: s, parentAssay: a).save(flush: true)
-                                    }
-                                    else {
-                                        sql.execute("DELETE FROM measurement WHERE sample_id=${ss.id}")
-                                    }
+                                if (assaySAMSamples) {
+                                    //searches for SAMSample in existing SAMSamples for this assay (previous imports)
+                                    ss = assaySAMSamples.find { it.parentSample == s }
                                 }
-                                else if(!s) {
-                                    errorList << "No sample existing for ${subjectName} with timepoint ${timepointList[i]}"
-                                    error = true
+                                else {
+                                    ss = SAMSample.findByParentSampleAndParentAssay(s, a)
                                 }
-                            }
-                            if (ss) {
+                                if (!ss) {
+                                    ss = new SAMSample(parentSample: s, parentAssay: a).save(flush: true)
+                                }
+
                                 def value
+
                                 if (m) {
                                     try {
                                         value = Double?.valueOf(m.replace("\"", ""))
@@ -292,11 +293,15 @@ class MeasurementController {
                                 else {
                                     value = null
                                 }
-                                preparedStatement.addBatch(version:0,feature_id:allFeatures.get(featureList[i]).id, sample_id:ss.id, value:value)
+                                preparedStatement.addBatch("INSERT INTO measurement (id, version, feature_id, sample_id, value) VALUES (nextval('hibernate_sequence'), ${0}, ${f.id}, ${ss.id}, ${value})")
+                            }
+                            else {
+                                errorList << "No sample existing for ${subjectName} with timepoint ${timepointList[i]}"
+                                return
                             }
                             i++
                         }
-                    })
+                    }
                 }
                 else if(subjectList.contains(subjectName)) {
                     errorList << "Duplicate subject in file ${subjectName}"
