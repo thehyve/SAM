@@ -237,7 +237,9 @@ class MeasurementController {
         BufferedReader bufferReader = new BufferedReader(new InputStreamReader(input, "ISO-8859-1"));
         bufferReader.eachLine() {
             if(line == 0) {
-                featureList = it.split('\t')[1..-1]
+                it.split('\t')[1..-1].each() { feature ->
+                    featureList.add(feature.trim())
+                }
                 if(!allFeatures.keySet().containsAll(featureList)) {
                     def featureMismatches = []
                     featureList.each() {
