@@ -218,7 +218,7 @@ class MeasurementController {
         def assaySamples = a.samples
         def assaySAMSamples = SAMSample.findAllByParentAssay(a)
         def line = 0
-        def featureList
+        def featureList = []
         def timepointList
         def subjectList = []
         def errorList = []
