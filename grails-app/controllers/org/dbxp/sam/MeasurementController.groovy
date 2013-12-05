@@ -219,7 +219,7 @@ class MeasurementController {
         def assaySAMSamples = SAMSample.findAllByParentAssay(a)
         def line = 0
         def featureList = []
-        def timepointList
+        def timepointList = []
         def subjectList = []
         def errorList = []
 
@@ -230,19 +230,17 @@ class MeasurementController {
 
         def allFeatures = [:]
         Feature.findAllByPlatform(Platform.findByName(params.platform)).each {
-            allFeatures[it.name] = it
+            allFeatures[it.name] = it.id
         }
 
         def InputStream input = params.contents.getInputStream()
         BufferedReader bufferReader = new BufferedReader(new InputStreamReader(input, "ISO-8859-1"));
         bufferReader.eachLine() {
             if(line == 0) {
-                it.split('\t')[1..-1].each() { feature ->
-                    featureList.add(feature.trim())
-                }
-                if(!allFeatures.keySet().containsAll(featureList)) {
+                featureList = it.split('\t')[1..-1].collect() { it.trim() }
+                if(!allFeatures.keySet().containsAll(featureList.unique())) {
                     def featureMismatches = []
-                    featureList.each() {
+                    featureList.unique().each() {
                         if (!allFeatures.keySet().contains(it)) {
                             featureMismatches << it
                         }
@@ -295,7 +293,7 @@ class MeasurementController {
                                 else {
                                     value = null
                                 }
-                                preparedStatement.addBatch("INSERT INTO measurement (id, version, feature_id, sample_id, value) VALUES (nextval('hibernate_sequence'), ${0}, ${f.id}, ${ss.id}, ${value})")
+                                preparedStatement.addBatch("INSERT INTO measurement (id, version, feature_id, sample_id, value) VALUES (nextval('hibernate_sequence'), ${0}, ${f}, ${ss.id}, ${value})")
                             }
                             else {
                                 errorList << "No sample existing for ${subjectName} with timepoint ${timepointList[i]}"

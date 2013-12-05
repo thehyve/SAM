@@ -313,6 +313,12 @@ class RestController {
         def i = 0
         features.each() { f ->
             i++
+            if (f.template_string_fields_idx) {
+                propertyMap.put(f.template_string_fields_idx, f.template_string_fields_elt)
+            }
+            if (f.template_text_fields_idx) {
+                propertyMap.put(f.template_text_fields_idx, f.template_text_fields_elt)
+            }
             if (!f.name.equals(features[i]?.name)) {
                 propertyMap.put("unit", f.unit)
                 propertyMap.put("platform", f.platform)
@@ -321,17 +327,10 @@ class RestController {
                 fMap.put(f.name, propertyMap)
                 propertyMap = [:]
             }
-            else {
-                if (f.template_string_fields_idx) {
-                    propertyMap.put(f.template_string_fields_idx, f.template_string_fields_elt)
-                }
-                if (f.template_text_fields_idx) {
-                    propertyMap.put(f.template_text_fields_idx, f.template_text_fields_elt)
-                }
-            }
         }
 
         features.clear()
+        propertyMap.clear()
 
         render fMap as JSON
     }
@@ -386,6 +385,10 @@ class RestController {
             }
         }
         pMeasurements.clear()
+        subjectMap.clear()
+        featureMap.clear()
+        groupMap.clear()
+        mMap.clear()
 
         render allMap as JSON
 	}
