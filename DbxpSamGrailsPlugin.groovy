@@ -1,6 +1,6 @@
 class DbxpSamGrailsPlugin {
     // the plugin version
-    def version = "0.9.6.3.rc7"
+    def version = "0.9.6.3.rc8"
     // the version or versions of Grails the plugin is designed for
     def grailsVersion = "2.1 > *"
     // the other plugins this plugin depends on

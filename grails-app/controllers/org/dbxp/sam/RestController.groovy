@@ -352,15 +352,9 @@ class RestController {
 
         def pMeasurements = sql.rows("SELECT s.parent_subject_id AS subject, e.start_time AS startTime, m.feature_id AS feature, m.value AS value FROM measurement m, sample s, sampling_event e, samsample y WHERE m.sample_id = y.id AND s.parent_event_id = e.id AND y.parent_sample_id = s.id AND y.parent_assay_id = ${assay.id} ORDER BY s.parent_subject_id ASC, e.start_time DESC")
 
-        def subjectMap = [:]
-        assay.parent.subjects.each() { subject ->
-            subjectMap.put(subject.id, subject.name)
-        }
+        def subjectMap = assay.parent.subjects.collectEntries{ [it.id, it.name] }
 
-        def featureMap = [:]
-        sql.rows("SELECT DISTINCT m.feature_id, f.name FROM measurement m JOIN feature f ON m.feature_id = f.id WHERE m.sample_id IN (SELECT id FROM samsample s WHERE s.parent_assay_id = ${assay.id});").each() {
-            featureMap.put(it.feature_id, it.name)
-        }
+        def featureMap = sql.rows("SELECT DISTINCT m.feature_id, f.name FROM measurement m JOIN feature f ON m.feature_id = f.id WHERE m.sample_id IN (SELECT id FROM samsample s WHERE s.parent_assay_id = ${assay.id});").collectEntries{ [it.feature_id, it.name] }
 
         // map for all measurements
         def allMap = [:]

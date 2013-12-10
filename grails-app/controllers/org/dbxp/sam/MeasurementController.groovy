@@ -222,15 +222,11 @@ class MeasurementController {
         def timepointList = []
         def subjectList = []
         def errorList = []
+        def allFeatures = [:]
 
         //A much nicer solution would be to check whether measurements already exist and update them if necessary but this is very time consuming.
         if(assaySAMSamples) {
             sql.execute("DELETE FROM measurement WHERE sample_id IN (SELECT id FROM samsample WHERE parent_assay_id = ${a.id});")
-        }
-
-        def allFeatures = [:]
-        Feature.findAllByPlatform(Platform.findByName(params.platform)).each {
-            allFeatures[it.name] = it.id
         }
 
         def InputStream input = params.contents.getInputStream()
@@ -238,7 +234,8 @@ class MeasurementController {
         bufferReader.eachLine() {
             if(line == 0) {
                 featureList = it.split('\t')[1..-1].collect() { it.trim() }
-                if(!allFeatures.keySet().containsAll(featureList.unique())) {
+                allFeatures = sql.rows("SELECT f.id, f.name FROM feature f WHERE platform_id = ${Platform.findByName(params.platform).id}").collectEntries{ [it.name, it.id] }
+                if(!allFeatures.keySet().containsAll(featureList)) {
                     def featureMismatches = []
                     featureList.unique().each() {
                         if (!allFeatures.keySet().contains(it)) {
@@ -254,50 +251,50 @@ class MeasurementController {
             }
 
             else if (!abort) {
-                def sampleTimepoint
-                def splitedRow = it.split('\t')
-                def subjectName = splitedRow[0]
-                def Sample s
                 def i = 0
+                def Sample s
+                def SAMSample ss
+                def splittedRow = it.split('\t')
+                def subjectName = splittedRow[0]
                 if (subjectName && !subjectList.contains(subjectName)) {
                     subjectList << subjectName
                     sql.withBatch { preparedStatement ->
-                        splitedRow[1..-1].each { m ->
-                            sampleTimepoint = new RelTime(timepointList[i]).getValue()
-                            s = assaySamples.find { it.samplingTime == sampleTimepoint && it.subjectName == subjectName }
-                            if (s) {
-                                def ss
+                        splittedRow[1..-1].each { m ->
+                            def sampleTimepoint = new RelTime(timepointList[i]).getValue()
+                            if (!s || s.samplingTime != sampleTimepoint) {
+                                s = assaySamples.find { it.samplingTime == sampleTimepoint && it.subjectName == subjectName }
+                                if (s) {
+                                    if (assaySAMSamples) {
+                                        //searches for SAMSample in existing SAMSamples for this assay (previous imports)
+                                        ss = assaySAMSamples.find { it.parentSample == s }
+                                    }
+                                    else {
+                                        ss = SAMSample.findByParentSampleAndParentAssay(s, a)
+                                    }
+                                    if (!ss) {
+                                        ss = new SAMSample(parentSample: s, parentAssay: a).save(flush: true)
+                                    }
+                                }
+                            }
+                            if (m && s) {
                                 def f = allFeatures.get(featureList[i])
-
-                                if (assaySAMSamples) {
-                                    //searches for SAMSample in existing SAMSamples for this assay (previous imports)
-                                    ss = assaySAMSamples.find { it.parentSample == s }
-                                }
-                                else {
-                                    ss = SAMSample.findByParentSampleAndParentAssay(s, a)
-                                }
-                                if (!ss) {
-                                    ss = new SAMSample(parentSample: s, parentAssay: a).save(flush: true)
-                                }
-
                                 def value
 
-                                if (m) {
-                                    try {
-                                        value = Double?.valueOf(m.replace("\"", ""))
-                                    }
-                                    catch( NumberFormatException e ) {
-                                        value = null
-                                    }
+                                try {
+                                    value = Double?.valueOf(m.replace("\"", ""))
                                 }
-                                else {
+                                catch( NumberFormatException e ) {
                                     value = null
                                 }
-                                preparedStatement.addBatch("INSERT INTO measurement (id, version, feature_id, sample_id, value) VALUES (nextval('hibernate_sequence'), ${0}, ${f}, ${ss.id}, ${value})")
+                                if (value) {
+                                    preparedStatement.addBatch("INSERT INTO measurement (id, version, feature_id, sample_id, value) VALUES (nextval('hibernate_sequence'), ${0}, ${f}, ${ss.id}, ${value})")
+                                }
                             }
-                            else {
-                                errorList << "No sample existing for ${subjectName} with timepoint ${timepointList[i]}"
-                                return
+                            else if(m) {
+                                def error = "No sample existing for ${subjectName} with timepoint ${timepointList[i]}"
+                                if (!errorList.contains(error)) {
+                                    errorList << error
+                                }
                             }
                             i++
                         }
