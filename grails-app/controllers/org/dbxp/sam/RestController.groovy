@@ -387,6 +387,39 @@ class RestController {
         render allMap as JSON
 	}
 
+    /**
+     * Retrieves an assay from the database, based on a given assay token.
+     * @param assayToken	Assaytoken for the assay to retrieve
+     * @return				Assay or null if assayToken doesn't exist
+     */
+    def getPlainMeasurementDataTemp = {
+        def assayToken = params.assayToken;
+        def assay = getAssay( assayToken );
+        if( !assay ) {
+            response.sendError(404)
+            return false
+        }
+
+        def sql = new Sql(dataSource)
+
+        def pMeasurements = sql.rows("SELECT m.feature_id AS feature, m.value AS value, y.parent_sample_id as sample FROM measurement m, samsample y WHERE m.sample_id = y.id AND y.parent_assay_id = ${assay.id}")
+
+        def featureMap = sql.rows("SELECT DISTINCT m.feature_id, f.name FROM measurement m JOIN feature f ON m.feature_id = f.id WHERE m.sample_id IN (SELECT id FROM samsample s WHERE s.parent_assay_id = ${assay.id});").collectEntries{ [it.feature_id, it.name] }
+
+        Map result = [:]
+        pMeasurements.each {
+            def key = featureMap.get(it.feature)
+            if (!result.containsKey(key)) {
+                result.put(key, [:])
+            }
+            Map temp = result.get(key)
+            temp[it.sample] = it.value
+            result.put(key, temp)
+        }
+
+        render result as JSON
+    }
+
 	/**
 	 * Retrieves an assay from the database, based on a given assay token.
 	 * @param assayToken	Assaytoken for the assay to retrieve
