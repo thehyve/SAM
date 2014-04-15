@@ -42,6 +42,9 @@
                 <h2>Select the platform of the measurements you want to upload</h2>
                 <g:select name="platform" from="${org.dbxp.sam.Platform.list()}" />
 
+                <h2>Select the import file layout)</h2>
+                <g:select name="layout" from="[ 'Sample layout', 'Subject layout']" />
+
                 <h2>Please select a tab delimited text file (decimal: ".")</h2>
 
                 <g:hiddenField name="id" value="${module}"/>

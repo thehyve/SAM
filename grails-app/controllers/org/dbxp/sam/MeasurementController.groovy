@@ -7,6 +7,9 @@ import org.dbnp.gdt.RelTime
 import groovy.sql.Sql
 
 class MeasurementController {
+	public static final SAMPLE_LAYOUT = "Sample layout"
+	public static final SUBJECT_LAYOUT = "Subject layout"
+	
     static allowedMethods = [save: "POST", update: "POST", delete: "POST"]
     def fuzzySearchService
     def moduleService
@@ -211,110 +214,194 @@ class MeasurementController {
     }
 
     def exactImport = {
-        def t = System.currentTimeMillis()
+        def startTime = System.currentTimeMillis()
         def abort = false
         def sql = new Sql(dataSource)
-        def a = Assay.findById(params.assay)
-        def assaySamples = a.samples
-        def assaySAMSamples = SAMSample.findAllByParentAssay(a)
+        def assay = Assay.findById(params.assay)
+        def assaySamples = assay.samples
+        def assaySAMSamples = SAMSample.findAllByParentAssay(assay)
+		def layout = params.layout
         def line = 0
         def featureList = []
         def timepointList = []
-        def subjectList = []
+        def rowList = []
         def errorList = []
         def allFeatures = [:]
 
         //A much nicer solution would be to check whether measurements already exist and update them if necessary but this is very time consuming.
         if(assaySAMSamples) {
-            sql.execute("DELETE FROM measurement WHERE sample_id IN (SELECT id FROM samsample WHERE parent_assay_id = ${a.id});")
+            sql.execute("DELETE FROM measurement WHERE sample_id IN (SELECT id FROM samsample WHERE parent_assay_id = ${assay.id});")
         }
 
         def InputStream input = params.contents.getInputStream()
         BufferedReader bufferReader = new BufferedReader(new InputStreamReader(input, "ISO-8859-1"));
-        bufferReader.eachLine() {
-            if(line == 0) {
-                featureList = it.split('\t')[1..-1].collect() { it.trim() }
-                allFeatures = sql.rows("SELECT f.id, f.name FROM feature f WHERE platform_id = ${Platform.findByName(params.platform).id}").collectEntries{ [it.name, it.id] }
-                if(!allFeatures.keySet().containsAll(featureList)) {
-                    def featureMismatches = []
-                    featureList.unique().each() {
-                        if (!allFeatures.keySet().contains(it)) {
-                            featureMismatches << it
-                        }
-                    }
-                    abort = true
-                    flash.error = "Feature mismatch(es) ${featureMismatches}"
-                }
-            }
-            else if(line == 1 ) {
-                timepointList = it.split('\t')[1..-1]
-            }
-
-            else if (!abort) {
-                def i = 0
-                def Sample s
-                def SAMSample ss
-                def splittedRow = it.split('\t')
-                def subjectName = splittedRow[0]
-                if (subjectName && !subjectList.contains(subjectName)) {
-                    subjectList << subjectName
-                    sql.withBatch { preparedStatement ->
-                        splittedRow[1..-1].each { m ->
-                            def sampleTimepoint = new RelTime(timepointList[i]).getValue()
-                            if (!s || s.samplingTime != sampleTimepoint) {
-                                s = assaySamples.find { it.samplingTime == sampleTimepoint && it.subjectName == subjectName }
-                                if (s) {
-                                    if (assaySAMSamples) {
-                                        //searches for SAMSample in existing SAMSamples for this assay (previous imports)
-                                        ss = assaySAMSamples.find { it.parentSample == s }
-                                    }
-                                    else {
-                                        ss = SAMSample.findByParentSampleAndParentAssay(s, a)
-                                    }
-                                    if (!ss) {
-                                        ss = new SAMSample(parentSample: s, parentAssay: a).save(flush: true)
-                                    }
-                                }
-                            }
-                            if (m && s) {
-                                def f = allFeatures.get(featureList[i])
-                                def value
-
-                                try {
-                                    value = Double?.valueOf(m.replace("\"", ""))
-                                }
-                                catch( NumberFormatException e ) {
-                                    value = null
-                                }
-                                if (value) {
-                                    preparedStatement.addBatch("INSERT INTO measurement (id, version, feature_id, sample_id, value) VALUES (nextval('hibernate_sequence'), ${0}, ${f}, ${ss.id}, ${value})")
-                                }
-                            }
-                            else if(m) {
-                                def error = "No sample existing for ${subjectName} with timepoint ${timepointList[i]}"
-                                if (!errorList.contains(error)) {
-                                    errorList << error
-                                }
-                            }
-                            i++
-                        }
-                    }
-                }
-                else if(subjectList.contains(subjectName)) {
-                    errorList << "Duplicate subject in file ${subjectName}"
-                }
-            }
-            line += 1
-        }
-        bufferReader.close()
-        sql.close()
-        if (abort) {
+		
+		try {
+			// Start a SQL batch statement
+			sql.withBatch( 250,	"INSERT INTO measurement (id, version, feature_id, sample_id, value) VALUES (nextval('hibernate_sequence'), 0, :featureId, :sampleId, :value)" ) { preparedStatement ->
+		        bufferReader.eachLine() {
+					log.debug "Importing ine ${line}: " + ( ( System.currentTimeMillis() - startTime ) / 1000 ) + " seconds"
+					
+		            // First line always contains the feature names
+					if(line == 0) {
+						// Discard the first row/first column
+		                featureList = it.split('\t')[1..-1].collect() { it.trim() }
+						
+		                allFeatures = sql.rows("SELECT f.id, f.name FROM feature f WHERE platform_id = ${Platform.findByName(params.platform).id}").collectEntries{ [it.name, it.id] }
+		                if(!allFeatures.keySet().containsAll(featureList)) {
+		                    def featureMismatches = []
+		                    featureList.unique().each() {
+		                        if (!allFeatures.keySet().contains(it)) {
+		                            featureMismatches << it
+		                        }
+		                    }
+							log.warn "Feature mismatches: ${featureMismatches}"
+							throw new Exception( "Feature mismaatch(es): ${featureMismatches}" )	// Break out of loop
+		                }
+		            }
+					
+					// Second line may contain timepoints (in the subject layout)
+		            else if( layout == SUBJECT_LAYOUT && line == 1 ) {
+						try {
+							timepointList = it.split('\t')[1..-1].collect { new RelTime( it ) }
+						} catch( Exception e ) {
+							log.warn "Exception occurred while parsing relative times: ${e.message}"
+							throw new Exception( "Can't parse all relative times:  ${e.message}" )	// Break out of loop
+						}
+		            }
+		
+					// We now arrived at a normal line with measurements
+		            else {
+		                def i = 0
+		                def Sample sample
+		                def SAMSample samSample
+		                
+						def splittedRow = it.split('\t') as List
+						
+						// First column contains the sample or subject name (depending on layout)
+		                def name = splittedRow.first()
+						
+						if( !name ) {
+							log.warn( "No name specified on line ${line}")
+							return	// continue to the next line
+						}
+						
+						if (rowList.contains(name)) {
+							log.warn "Duplicate item name in file: ${name}"
+		                    errorList << "Duplicate item name in file: ${name}"
+						}
+						
+		                rowList << name
+		
+						// If we have the sample layout, all measurements on the same row
+						// should be associated with the same sample
+						if( layout == SAMPLE_LAYOUT ) {
+							sample = assaySamples.find { it.name == name }
+							if( sample ) {
+								samSample = getSAMSample( sample, assay, assaySAMSamples )
+							} 
+						}
+						
+						// We need a sample and samSample to store our measurement. If not, continue to the next line
+						if( !sample || !samSample ) {
+							log.warn "No sample or SAMSample found for input name ${name}. Discarding this line"
+							
+							def error = "No sample or SAMSample found for input name ${name}"
+							if (!errorList.contains(error)) {
+								errorList << error
+							}
+		
+							return	// from eachLine
+						}
+						
+						// Loop through all the columns, and add all items
+	                    splittedRow[1..-1].each { measurement ->
+							// Discard empty values
+							if (!measurement) {
+								i++
+								return
+							}
+							
+							// If we have a subject layout, each value may be associated with a different sample. For that reason
+							// we have to retrieve the sample for every measurement
+							if( layout == SUBJECT_LAYOUT ) {
+	                            def sampleTimepoint = timepointList[i].getValue()
+	                            if (!sample || sample.samplingTime != sampleTimepoint) {
+	                                sample = assaySamples.find { it.samplingTime == sampleTimepoint && it.subjectName == subjectName }
+	                                if (sample) {
+										samSample = getSAMSample( sample, assay, assaySAMSamples )
+	                                }
+	                            }
+							}
+							
+							// If we don't have a sample to store the measurement, discard this one
+							if( !sample || !samSample ) {
+								log.warn "No sample exists for Subject ${name} and timepoint ${timepointList[i]}"
+								
+								def error = "No sample exists for ${name} with timepoint ${timepointList[i]}"
+								if (!errorList.contains(error)) {
+									errorList << error
+								}
+								i++
+								return // each 
+							}
+							
+							// Retrieve the feature for this column
+	                        def featureId = allFeatures.get(featureList[i])
+	                        def value
+	
+							// Remove quotation marks and convert to a double. If no double value, don't import it
+	                        try {
+	                            value = Double?.valueOf(measurement.replace("\"", ""))
+	                        }
+	                        catch( NumberFormatException e ) {
+	                            value = null
+	                        }
+							
+	                        if (value) {
+	                            preparedStatement.addBatch( [featureId: featureId, sampleId: samSample.id, value: value ] )
+	                        }
+							
+	                        i++
+	                    }
+		            }
+		            line += 1
+		        } // eachLine
+			} // withBatch
+		} catch( Exception e ) {
+			flash.error = e.message
             redirect(action: 'exactImportSelect', params: [module: params.module])
             return
-        }
-        println "ExactImport for measurements took ${ (System.currentTimeMillis() - t ) / 60000} minutes"
-        render(view: "exactImport/result", model: [module: params.module, errorList: errorList, assayInstance: a])
+		} finally {
+	        if( bufferReader )
+				bufferReader.close()
+				
+	        if( sql )
+				sql.close()
+		}
+		
+        log.info "ExactImport for measurements took ${ (System.currentTimeMillis() - startTime ) / 1000} seconds"
+        render(view: "exactImport/result", model: [module: params.module, errorList: errorList, assayInstance: assay])
     }
+	
+	protected SAMSample getSAMSample( Sample sample, Assay assay, Collection assaySAMSamples ) {
+		SAMSample samSample
+		
+		if (assaySAMSamples) {
+			//searches for SAMSample in existing SAMSamples for this assay (previous imports)
+			samSample = assaySAMSamples.find { it.parentSample == sample }
+		}
+		else {
+			samSample = SAMSample.findByParentSampleAndParentAssay(sample, assay)
+		}
+		if (!samSample) {
+			samSample = new SAMSample(parentSample: sample, parentAssay: assay)
+			samSample.save(flush: true)
+		}
+
+		samSample
+	}
+	
 
     def nofeatures = {
 	    flash.message = "There are no features defined. Without features, you can't add measurements."
