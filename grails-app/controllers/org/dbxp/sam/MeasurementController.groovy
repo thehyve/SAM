@@ -288,7 +288,7 @@ class MeasurementController {
 						
 						if (rowList.contains(name)) {
 							log.warn "Duplicate item name in file: ${name}"
-		                    errorList << "Duplicate item name in file: ${name}"
+		                    errorList << "Duplicate item name in file: ${name}. All values are imported"
 						}
 						
 		                rowList << name
@@ -299,19 +299,19 @@ class MeasurementController {
 							sample = assaySamples.find { it.name == name }
 							if( sample ) {
 								samSample = getSAMSample( sample, assay, assaySAMSamples )
-							} 
-						}
-						
-						// We need a sample and samSample to store our measurement. If not, continue to the next line
-						if( !sample || !samSample ) {
-							log.warn "No sample or SAMSample found for input name ${name}. Discarding this line"
-							
-							def error = "No sample or SAMSample found for input name ${name}"
-							if (!errorList.contains(error)) {
-								errorList << error
 							}
-		
-							return	// from eachLine
+							
+							// We need a sample and samSample to store our measurement. If not, continue to the next line
+							if( !sample || !samSample ) {
+								log.warn "No sample or SAMSample found for input name ${name}. Discarding this line"
+								
+								def error = "No sample or SAMSample found for input name ${name}"
+								if (!errorList.contains(error)) {
+									errorList << error
+								}
+			
+								return	// from eachLine
+							}
 						}
 						
 						// Loop through all the columns, and add all items
@@ -327,23 +327,23 @@ class MeasurementController {
 							if( layout == SUBJECT_LAYOUT ) {
 	                            def sampleTimepoint = timepointList[i].getValue()
 	                            if (!sample || sample.samplingTime != sampleTimepoint) {
-	                                sample = assaySamples.find { it.samplingTime == sampleTimepoint && it.subjectName == subjectName }
+	                                sample = assaySamples.find { it.samplingTime == sampleTimepoint && it.subjectName == name }
 	                                if (sample) {
 										samSample = getSAMSample( sample, assay, assaySAMSamples )
 	                                }
 	                            }
-							}
 							
-							// If we don't have a sample to store the measurement, discard this one
-							if( !sample || !samSample ) {
-								log.warn "No sample exists for Subject ${name} and timepoint ${timepointList[i]}"
-								
-								def error = "No sample exists for ${name} with timepoint ${timepointList[i]}"
-								if (!errorList.contains(error)) {
-									errorList << error
+								// If we don't have a sample to store the measurement, discard this one
+								if( !sample || !samSample ) {
+									log.warn "No sample exists for Subject ${name} and timepoint ${timepointList[i]}"
+									
+									def error = "No sample exists for ${name} with timepoint ${timepointList[i]}"
+									if (!errorList.contains(error)) {
+										errorList << error
+									}
+									i++
+									return // each 
 								}
-								i++
-								return // each 
 							}
 							
 							// Retrieve the feature for this column
