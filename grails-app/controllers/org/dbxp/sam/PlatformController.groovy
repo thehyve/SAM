@@ -177,6 +177,11 @@ class PlatformController {
             redirect(action: "show", id: id, params: [module: params.module])
         }
     }
+	
+	// Get a list of template specific fields
+	def templateSelection = {
+		render(template: "templateSelection", model: [template: _determineTemplate()], module: params.module)
+	}
 
     def returnUpdatedTemplateSpecificFields = {
         def template = _determineTemplate();
