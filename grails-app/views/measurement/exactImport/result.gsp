@@ -16,6 +16,12 @@
 </head>
 <body>
 <div class="data">
+	<script type="text/javascript">
+	    // disable redirect warning
+	    $(function() {
+	    	warnOnRedirect = false;
+	    });
+	</script>
     <content tag="contextmenu">
         <li><g:link action="list" class="list"  params="${[module: module]}">Back to list</g:link></li>
     </content>
