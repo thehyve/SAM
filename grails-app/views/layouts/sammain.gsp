@@ -26,6 +26,7 @@
 					<ul class="subnav">
 						<li><g:link controller="feature" action="importData" params="${[module: module]}">Features</g:link></li>
 		    			<li><g:link controller="measurement" action="importData" params="${[module: module]}">Measurements</g:link></li>
+		    			<li><g:link controller="measurement" action="exactImportSelect" params="${[module: module]}">Large amounts of measurements</g:link></li>
 		    		</ul>
 		    	</li>
                 <li>
