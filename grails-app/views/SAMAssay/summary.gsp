@@ -11,8 +11,6 @@
 <head>
     <meta name="layout" content="sammain"/>
     <title>Assay summary view</title>
-    <r:require module="importer" />
-
 </head>
 <body>
 <div class="data">
